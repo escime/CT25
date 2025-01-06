@@ -2,10 +2,11 @@
 The constants module is a convenience place for teams to hold robot-wide
 numerical or boolean constants. Don't use this for any other purpose!
 """
-from wpimath.units import inchesToMeters
+from wpimath.units import inchesToMeters, lbsToKilograms
 from phoenix6 import units
 from wpimath.geometry import Translation2d
 from wpimath.kinematics import SwerveDrive4Kinematics
+from math import pi
 
 
 class OIConstants:
@@ -44,3 +45,39 @@ class AutoConstants:
     x_pid = [5, 0, 0]
     y_pid = [5, 0, 0]
 
+
+class ElevatorConstants:
+    can_ids = [30, 31]  # The main motor should be listed first. The rest may be listed in any order.
+
+    carriage_weight = lbsToKilograms(10)
+    min_height_in = 0
+    max_height_in = 40
+    min_height_m = inchesToMeters(min_height_in)
+    max_height_m = inchesToMeters(max_height_in)
+
+    drum_diameter_in = 1.685  # 14T sprocket
+    drum_diameter_m = inchesToMeters(drum_diameter_in)
+    state_values = {"stow": 0, "max": max_height_in / (drum_diameter_in * pi)}
+
+    supply_current_limit = 80
+    use_supply_current_limit = True
+
+    gearbox_ratio = 4
+
+    mm_cruise_velocity = 24  # rot/s
+    mm_acceleration = 650  # rot/s^2
+    mm_jerk = 1000  # rot/s^3
+
+    kg = 0.09
+    ks = 0.1
+    kv = 3.11
+    ka = 0
+    kp = 60
+    ki = 0
+    kd = 0
+
+    elevator_angle_degrees = 90
+
+    elevator_at_target_threshold = 0.05
+    elevator_upper_limit = max_height_in / (drum_diameter_in * pi)
+    elevator_lower_limit = 0 / (drum_diameter_in * pi)

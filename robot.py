@@ -4,6 +4,7 @@ from wpilib import run, RobotBase
 from phoenix6 import SignalLogger, utils
 from ntcore import NetworkTableInstance
 from wpimath.geometry import Pose2d, Translation2d, Rotation2d
+from helpers import elasticlib
 
 
 class Robot(TimedCommandRobot):
@@ -12,6 +13,12 @@ class Robot(TimedCommandRobot):
     m_robotcontainer: RobotContainer  # Type-check for robotcontainer class
     ll1 = NetworkTableInstance.getDefault().getTable("limelight")
     CommandScheduler.getInstance().setPeriod(0.04)
+    teleop_notification = elasticlib.Notification(level="INFO", title="Teleop activated!",
+                                                  description="The robot is now in teleop mode.", display_time=3000)
+    auto_notification = elasticlib.Notification(level="INFO", title="Auto activated!",
+                                                description="The robot is now in auto mode.", display_time=3000)
+    test_notification = elasticlib.Notification(level="INFO", title="Test activated!",
+                                                description="The robot is now in test mode.", display_time=3000)
 
     def robotInit(self) -> None:
         """Initialize the robot through the RobotContainer object and prep the default autonomous command (None)"""
@@ -50,6 +57,8 @@ class Robot(TimedCommandRobot):
     def autonomousInit(self) -> None:
         """Run the auto scheduler if the command was actually input. For the most part, this is a safety call."""
         self.m_autonomous_command = self.m_robotcontainer.get_autonomous_command()
+        elasticlib.select_tab("Autonomous")
+        elasticlib.send_notification(self.auto_notification)
 
         if self.m_autonomous_command is not None:
             self.m_autonomous_command.schedule()
@@ -62,6 +71,8 @@ class Robot(TimedCommandRobot):
         teleop mode."""
         if self.m_autonomous_command:
             self.m_autonomous_command.cancel()
+        elasticlib.select_tab("Teleoperated")
+        elasticlib.send_notification(self.teleop_notification)
         self.m_robotcontainer.leds.set_state("default")
 
     def teleopPeriodic(self) -> None:
@@ -71,6 +82,8 @@ class Robot(TimedCommandRobot):
         """Reset the scheduler automatically when entering test mode."""
         CommandScheduler.getInstance().cancelAll()
         self.m_robotcontainer.enable_test_bindings(True)
+        elasticlib.select_tab("Test")
+        elasticlib.send_notification(self.test_notification)
         if RobotBase.isReal():
             SignalLogger.set_path("/media/sda1/")
             SignalLogger.start()

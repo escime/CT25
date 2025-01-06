@@ -3,15 +3,24 @@ from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
 from phoenix6 import swerve
 from generated.tuner_constants import TunerConstants
 from wpimath.units import rotationsToRadians
-from wpilib import Timer, SmartDashboard
+from wpilib import Timer, SmartDashboard, Alert
 
 
 class CheckDrivetrain(Command):
 
     def __init__(self, drive: CommandSwerveDrivetrain, timer: Timer):
         super().__init__()
-        self.normal_drive_currents = [50, 50, 50, 50]
-        self.normal_steer_currents = [40, 40, 40, 40]
+        self.normal_drive_currents = [100, 100, 100, 100]
+        self.normal_steer_currents = [50, 50, 50, 50]
+        
+        self.fl_drive_warning = Alert("FRONT LEFT DRIVE ABNORMAL CURRENT DRAW", Alert.AlertType.kWarning)
+        self.fl_steer_warning = Alert("FRONT LEFT STEER ABNORMAL CURRENT DRAW", Alert.AlertType.kWarning)
+        self.fr_drive_warning = Alert("FRONT RIGHT DRIVE ABNORMAL CURRENT DRAW", Alert.AlertType.kWarning)
+        self.fr_steer_warning = Alert("FRONT RIGHT STEER ABNORMAL CURRENT DRAW", Alert.AlertType.kWarning)
+        self.bl_drive_warning = Alert("BACK LEFT DRIVE ABNORMAL CURRENT DRAW", Alert.AlertType.kWarning)
+        self.bl_steer_warning = Alert("BACK LEFT STEER ABNORMAL CURRENT DRAW", Alert.AlertType.kWarning)
+        self.br_drive_warning = Alert("BACK RIGHT DRIVE ABNORMAL CURRENT DRAW", Alert.AlertType.kWarning)
+        self.br_steer_warning = Alert("BACK RIGHT STEER ABNORMAL CURRENT DRAW", Alert.AlertType.kWarning)
 
         self.drive = drive
         # self.addRequirements(drive)
@@ -81,22 +90,40 @@ class CheckDrivetrain(Command):
 
     def end(self, interrupted: bool):
         self.drive.apply_request(lambda: swerve.requests.SwerveDriveBrake()).schedule()
-        SmartDashboard.putBoolean("Front Left Drive Warning",
-                                  max(self.drive_currents[0]) > self.normal_drive_currents[0])
-        SmartDashboard.putBoolean("Front Left Steer Warning",
-                                  max(self.steer_currents[0]) > self.normal_steer_currents[0])
-        SmartDashboard.putBoolean("Front Right Drive Warning",
-                                  max(self.drive_currents[1]) > self.normal_drive_currents[1])
-        SmartDashboard.putBoolean("Front Left Steer Warning",
-                                  max(self.steer_currents[1]) > self.normal_steer_currents[1])
-        SmartDashboard.putBoolean("Back Left Drive Warning",
-                                  max(self.drive_currents[2]) > self.normal_drive_currents[2])
-        SmartDashboard.putBoolean("Back Left Steer Warning",
-                                  max(self.steer_currents[2]) > self.normal_steer_currents[2])
-        SmartDashboard.putBoolean("Back Right Drive Warning",
-                                  max(self.drive_currents[3]) > self.normal_drive_currents[3])
-        SmartDashboard.putBoolean("Back Right Steer Warning",
-                                  max(self.steer_currents[3]) > self.normal_steer_currents[3])
+
+        print("Front Left Drive Max Current Draw: " + str(max(self.drive_currents[0])))
+        print("Front Left Steer Max Current Draw: " + str(max(self.steer_currents[0])))
+        print("Front Right Drive Max Current Draw: " + str(max(self.drive_currents[1])))
+        print("Front Right Steer Max Current Draw: " + str(max(self.steer_currents[1])))
+        print("Back Left Drive Max Current Draw: " + str(max(self.drive_currents[2])))
+        print("Back Left Steer Max Current Draw: " + str(max(self.steer_currents[2])))
+        print("Back Right Drive Max Current Draw: " + str(max(self.drive_currents[3])))
+        print("Back Right Steer Max Current Draw: " + str(max(self.steer_currents[3])))
+        SmartDashboard.putNumber("FL Drive Max Current Draw", max(self.drive_currents[0]))
+        SmartDashboard.putNumber("FL Steer Max Current Draw", max(self.steer_currents[0]))
+        SmartDashboard.putNumber("FR Drive Max Current Draw", max(self.drive_currents[1]))
+        SmartDashboard.putNumber("FR Steer Max Current Draw", max(self.steer_currents[1]))
+        SmartDashboard.putNumber("BL Drive Max Current Draw", max(self.drive_currents[2]))
+        SmartDashboard.putNumber("BL Steer Max Current Draw", max(self.steer_currents[2]))
+        SmartDashboard.putNumber("BR Drive Max Current Draw", max(self.drive_currents[3]))
+        SmartDashboard.putNumber("BR Steer Max Current Draw", max(self.steer_currents[3]))
+        
+        if max(self.drive_currents[0]) > self.normal_drive_currents[0]:
+            self.fl_drive_warning.set(True)
+        if max(self.steer_currents[0]) > self.normal_steer_currents[0]:
+            self.fl_steer_warning.set(True)
+        if max(self.drive_currents[1]) > self.normal_drive_currents[1]:
+            self.fr_drive_warning.set(True)
+        if max(self.steer_currents[1]) > self.normal_steer_currents[1]:
+            self.fr_steer_warning.set(True)
+        if max(self.drive_currents[2]) > self.normal_drive_currents[2]:
+            self.bl_drive_warning.set(True)
+        if max(self.steer_currents[2]) > self.normal_steer_currents[2]:
+            self.bl_steer_warning.set(True)
+        if max(self.drive_currents[3]) > self.normal_drive_currents[3]:
+            self.br_drive_warning.set(True)
+        if max(self.steer_currents[3]) > self.normal_steer_currents[3]:
+            self.br_steer_warning.set(True)
 
     def check_time(self, time: float) -> bool:
         if self.timer.get() - time > self.start_time:

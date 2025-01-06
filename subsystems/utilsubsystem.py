@@ -22,7 +22,7 @@ class UtilSubsystem(Subsystem):
         ]
 
         self.scoring_setpoint = 0
-        self.scoring_setpoints = ["stow"]
+        self.scoring_setpoints = ["stow", "max"]
 
     def toggle_channel(self, on: bool) -> None:
         self.pdh.setSwitchableChannel(on)

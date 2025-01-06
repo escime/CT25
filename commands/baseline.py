@@ -3,7 +3,7 @@ from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
 from phoenix6 import swerve
 from generated.tuner_constants import TunerConstants
 from wpimath.units import rotationsToRadians
-from wpilib import Timer
+from wpilib import Timer, SmartDashboard
 
 
 class Baseline(Command):
@@ -86,6 +86,14 @@ class Baseline(Command):
         print("Back Left Steer Max Current Draw: " + str(max(self.steer_currents[2])))
         print("Back Right Drive Max Current Draw: " + str(max(self.drive_currents[3])))
         print("Back Right Steer Max Current Draw: " + str(max(self.steer_currents[3])))
+        SmartDashboard.putNumber("FL Drive Max Current Draw", max(self.drive_currents[0]))
+        SmartDashboard.putNumber("FL Steer Max Current Draw", max(self.steer_currents[0]))
+        SmartDashboard.putNumber("FR Drive Max Current Draw", max(self.drive_currents[1]))
+        SmartDashboard.putNumber("FR Steer Max Current Draw", max(self.steer_currents[1]))
+        SmartDashboard.putNumber("BL Drive Max Current Draw", max(self.drive_currents[2]))
+        SmartDashboard.putNumber("BL Steer Max Current Draw", max(self.steer_currents[2]))
+        SmartDashboard.putNumber("BR Drive Max Current Draw", max(self.drive_currents[3]))
+        SmartDashboard.putNumber("BR Steer Max Current Draw", max(self.steer_currents[3]))
 
     def check_time(self, time: float) -> bool:
         if self.timer.get() - time > self.start_time:
