@@ -11,9 +11,9 @@ class UtilSubsystem(Subsystem):
         self.scoring_location = 0
         # FORMAT: X, Y, ANGLE, LOCATION NAME, APRILTAG FOR SERVOING
         self.scoring_locations_red = [
-            [13.259, 4.111, 180.001, "Red Podium", 1],
-            [10.929, 5.364, 120, "Red Amp", 2],
-            [10.929, 2.8, 60, "Red Source", 3]
+            [13.714, 3.539, 180.001, "Red A", -10],
+            [13.714, 3.887, 120, "Red B", -10],
+            [10.929, 2.8, 60, "Red Source", -10]
         ]
         self.scoring_locations_blue = [
             [16.5 - self.scoring_locations_red[0][0], 4.111, 0.001, "Blue Podium", 4],
