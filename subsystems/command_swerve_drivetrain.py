@@ -459,10 +459,10 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
     def reset_odometry(self):
         """Reset robot odometry at the Subwoofer."""
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-            self.reset_pose(Pose2d(15.19, 5.55, Rotation2d.fromDegrees(180)))
+            self.reset_pose(Pose2d(14.337, 4.020, Rotation2d.fromDegrees(180)))
             self.set_operator_perspective_forward(Rotation2d.fromDegrees(180))
         else:
-            self.reset_pose(Pose2d(1.5, 5.55, Rotation2d.fromDegrees(0)))
+            self.reset_pose(Pose2d(3.273, 4.020, Rotation2d.fromDegrees(0)))
             self.set_operator_perspective_forward(Rotation2d.fromDegrees(0))
 
     def reset_clt(self) -> None:

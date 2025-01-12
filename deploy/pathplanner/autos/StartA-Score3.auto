@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "StartA-I"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "I-CS4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CS4-L"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L-CS4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CS4-L"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

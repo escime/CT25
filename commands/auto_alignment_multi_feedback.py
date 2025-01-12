@@ -2,6 +2,7 @@ from commands2 import Command, button
 
 from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
 from subsystems.utilsubsystem import UtilSubsystem
+from subsystems.elevatorandarm import ElevatorAndArmSubsystem
 from phoenix6 import swerve
 from wpimath.controller import PIDController
 from generated.tuner_constants import TunerConstants
@@ -15,6 +16,7 @@ class AutoAlignmentMultiFeedback(Command):
                  joystick: button.CommandXboxController):
         super().__init__()
         self.drive = drive
+        # self.elevator = elevator
         self.joystick = joystick
         self.util = util
         self.flipped = flipped
@@ -29,6 +31,7 @@ class AutoAlignmentMultiFeedback(Command):
         self.closing_controller = PIDController(0.1, 0, 0, 0.02)
         self.target = [0, 0]
 
+        # self.addRequirements(self.elevator)
         # self.addRequirements(self.arm)
 
     def initialize(self):
@@ -58,8 +61,15 @@ class AutoAlignmentMultiFeedback(Command):
         rotate_output = self.rotate_controller.calculate(current_heading, theta)
         y_output = self.y_controller.calculate(self.get_vector_to_line(current_pose, self.target[2]), 0)
 
-        if self.drive.target_lateral_offset != -1 and self.drive.visible_tag == self.target[4]:
-            y_output = self.closing_controller.calculate(self.drive.target_lateral_offset, 0)
+        # if self.drive.target_lateral_offset != -1 and self.drive.visible_tag == self.target[4]:
+        #     y_output = self.closing_controller.calculate(self.drive.target_lateral_offset, 0)
+
+        # if self.elevator.left_sensor and not self.elevator.right_sensor:
+        #     y_output = -0.1
+        # elif not self.elevator.left_sensor and self.elevator.right_sensor:
+        #     y_output = 0.1
+        # elif self.elevator.left_sensor and self.elevator.right_sensor:
+        #     y_output = 0
 
         if -0.02 < y_output < 0.02:
             y_output = 0

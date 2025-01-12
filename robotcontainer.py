@@ -6,7 +6,7 @@ from commands2 import Command, button, SequentialCommandGroup, ParallelCommandGr
 from constants import OIConstants
 from subsystems.ledsubsystem import LEDs
 from subsystems.utilsubsystem import UtilSubsystem
-from subsystems.elevator import ElevatorSubsystem
+from subsystems.elevatorandarm import ElevatorAndArmSubsystem
 from wpilib import SmartDashboard, SendableChooser, DriverStation, DataLogManager, Timer, Alert
 from pathplannerlib.auto import NamedCommands, PathPlannerAuto
 from wpinet import PortForwarder
@@ -68,7 +68,7 @@ class RobotContainer:
         # Startup subsystems. ------------------------------------------------------------------------------------------
         self.leds = LEDs(self.timer)
         self.util = UtilSubsystem()
-        self.elevator = ElevatorSubsystem()
+        self.elevator_and_arm = ElevatorAndArmSubsystem()
 
         # Setup driver & operator controllers. -------------------------------------------------------------------------
         self.driver_controller = button.CommandXboxController(OIConstants.kDriverControllerPort)
@@ -182,17 +182,30 @@ class RobotContainer:
 
         # Manually control the elevator.
         self.operator_controller.axisGreaterThan(1, 0.2).or_(self.operator_controller.axisLessThan(1, -0.2)).whileTrue(
-            run(lambda: self.elevator.set_manual(self.operator_controller.getLeftY() * -1 * 12), self.elevator)
+            run(lambda: self.elevator_and_arm.set_elevator_manual(self.operator_controller.getLeftY() * -1 * 12), self.elevator_and_arm)
         ).onFalse(
-            runOnce(lambda: self.elevator.set_manual_off(), self.elevator)
+            runOnce(lambda: self.elevator_and_arm.set_elevator_manual_off(), self.elevator_and_arm)
         )
 
         # Set elevator to a known setpoint (ignore utility features).
+        # self.operator_controller.y().onTrue(
+        #     runOnce(lambda: self.elevator_and_arm.set_elevator_state("max"), self.elevator_and_arm)
+        # )
+        # self.operator_controller.a().onTrue(
+        #     runOnce(lambda: self.elevator_and_arm.set_elevator_state("stow"), self.elevator_and_arm)
+        # )
         self.operator_controller.y().onTrue(
-            runOnce(lambda: self.elevator.set_state("max"), self.elevator)
+            self.elevator_and_arm.set_elevator_and_arm("L4", "left")
         )
         self.operator_controller.a().onTrue(
-            runOnce(lambda: self.elevator.set_state("stow"), self.elevator)
+            self.elevator_and_arm.set_elevator_and_arm("stow", "na")
+        )
+
+        self.operator_controller.b().onTrue(
+            runOnce(lambda: self.elevator_and_arm.set_arm_state("score_right"), self.elevator_and_arm)
+        )
+        self.operator_controller.x().onTrue(
+            runOnce(lambda: self.elevator_and_arm.set_arm_state("score_left"), self.elevator_and_arm)
         )
 
         # Cube acquired light
@@ -298,13 +311,13 @@ class RobotContainer:
         (self.driver_controller.x().and_(lambda: self.test_bindings).and_(self.driver_controller.leftBumper())
          .whileTrue(self.drivetrain.sys_id_steer_dynamic(sysid.SysIdRoutine.Direction.kReverse)))
         (self.driver_controller.y().and_(lambda: self.test_bindings).and_(self.driver_controller.leftTrigger())
-         .whileTrue(self.elevator.sys_id_quasistatic(sysid.SysIdRoutine.Direction.kForward)))
+         .whileTrue(self.elevator_and_arm.sys_id_quasistatic_elevator(sysid.SysIdRoutine.Direction.kForward)))
         (self.driver_controller.b().and_(lambda: self.test_bindings).and_(self.driver_controller.leftTrigger())
-         .whileTrue(self.elevator.sys_id_quasistatic(sysid.SysIdRoutine.Direction.kReverse)))
+         .whileTrue(self.elevator_and_arm.sys_id_quasistatic_elevator(sysid.SysIdRoutine.Direction.kReverse)))
         (self.driver_controller.a().and_(lambda: self.test_bindings).and_(self.driver_controller.leftTrigger())
-         .whileTrue(self.elevator.sys_id_dynamic(sysid.SysIdRoutine.Direction.kForward)))
+         .whileTrue(self.elevator_and_arm.sys_id_dynamic_elevator(sysid.SysIdRoutine.Direction.kForward)))
         (self.driver_controller.x().and_(lambda: self.test_bindings).and_(self.driver_controller.leftTrigger())
-         .whileTrue(self.elevator.sys_id_quasistatic(sysid.SysIdRoutine.Direction.kReverse)))
+         .whileTrue(self.elevator_and_arm.sys_id_quasistatic_elevator(sysid.SysIdRoutine.Direction.kReverse)))
 
     def enable_test_bindings(self, enabled: bool) -> None:
         self.test_bindings = enabled
