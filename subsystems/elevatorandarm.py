@@ -11,7 +11,7 @@ from phoenix6.utils import get_current_time_seconds, is_simulation
 from phoenix6.signals import StaticFeedforwardSignValue
 from phoenix6 import SignalLogger
 
-from wpilib import Mechanism2d, Color8Bit, Color, SmartDashboard, DigitalInput
+from wpilib import Mechanism2d, Color8Bit, Color, SmartDashboard, DigitalInput, PWMSparkMax
 from wpilib.simulation import ElevatorSim, SingleJointedArmSim
 from wpimath.system.plant import DCMotor
 from wpimath.units import radiansToRotations
@@ -27,12 +27,17 @@ class ElevatorAndArmSubsystem(Subsystem):
         super().__init__()
 
         self._last_sim_time = get_current_time_seconds()
+
+        self.intake = PWMSparkMax(1)
+        self.intake.set(0)
+
         self.elevator_state_values = ElevatorConstants.state_values
         self.arm_state_values = ArmConstants.state_values
         self.elevator_state = "stow"
         self.arm_state = "stow"
         self.last_time = get_current_time_seconds()
         self.setName("ElevatorAndArm")
+        self.accel_limit_scalar = 1
 
         self.lift_main_mm = MotionMagicVoltage(0, enable_foc=False)
         self.lift_main_vo = VoltageOut(0, enable_foc=False)
@@ -257,6 +262,12 @@ class ElevatorAndArmSubsystem(Subsystem):
     def sys_id_dynamic_arm(self, direction: SysIdRoutine.Direction) -> Command:
         return self.sys_id_routine_arm.dynamic(direction)
 
+    def set_accel_limit(self, scalar: float) -> None:
+        self.accel_limit_scalar = scalar
+
+    def get_accel_limit(self) -> float:
+        return self.accel_limit_scalar
+
     def update_sim(self) -> None:
         current_time = get_current_time_seconds()
         dt = current_time - self.last_time
@@ -281,27 +292,9 @@ class ElevatorAndArmSubsystem(Subsystem):
             self.arm_m2d.setAngle(degrees(self.arm_sim.getAngle()))
             SmartDashboard.putData("Elevator M2D", self.lift_m2d)
             SmartDashboard.putString("Elevator Position", str(self.elevator_sim.getPositionInches()))
+            SmartDashboard.putString("Arm Setpoint", self.get_arm_state())
         # else:
         #     self.elevator_m2d.setLength(self.lift_main.get_position().value_as_double * pi *
         #                                 ElevatorConstants.drum_diameter_in)
         SmartDashboard.putString("Lift Motor Position", str(self.lift_main.get_position()))
         SmartDashboard.putString("Elevator Setpoint", self.elevator_state)
-
-    def set_elevator_and_arm(self, state: str, side: str) -> Command:
-        if state == "stow" or state == "L1" or state == "L2" or state == "L3" or state == "L4":
-            if state != "stow":
-                arm_target = "stage_" + side
-            else:
-                arm_target = "stow"
-            if self.elevator_state_values[self.get_elevator_state()] < self.elevator_state_values[state]:
-                return SequentialCommandGroup(
-                    runOnce(lambda: self.set_elevator_state(state), self),
-                    WaitCommand(25).until(lambda: self.get_elevator_at_target()),
-                    runOnce(lambda: self.set_arm_state(arm_target), self)
-                )
-            else:
-                return SequentialCommandGroup(
-                    runOnce(lambda: self.set_arm_state(arm_target), self),
-                    WaitCommand(25).until(lambda: self.get_arm_at_target()),
-                    runOnce(lambda: self.set_elevator_state(state), self)
-                )

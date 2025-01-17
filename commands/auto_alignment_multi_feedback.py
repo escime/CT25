@@ -12,14 +12,15 @@ from wpilib import DriverStation, SmartDashboard
 
 
 class AutoAlignmentMultiFeedback(Command):
-    def __init__(self, drive: CommandSwerveDrivetrain, util: UtilSubsystem, flipped: bool,
-                 joystick: button.CommandXboxController):
+    def __init__(self, drive: CommandSwerveDrivetrain, util: UtilSubsystem,
+                 joystick: button.CommandXboxController, side: str):
         super().__init__()
         self.drive = drive
         # self.elevator = elevator
         self.joystick = joystick
         self.util = util
-        self.flipped = flipped
+        self.flipped = True
+        self.side = side
 
         self.forward_request = (swerve.requests.RobotCentric()
                                 .with_drive_request_type(swerve.SwerveModule.DriveRequestType.VELOCITY)
@@ -60,16 +61,6 @@ class AutoAlignmentMultiFeedback(Command):
 
         rotate_output = self.rotate_controller.calculate(current_heading, theta)
         y_output = self.y_controller.calculate(self.get_vector_to_line(current_pose, self.target[2]), 0)
-
-        # if self.drive.target_lateral_offset != -1 and self.drive.visible_tag == self.target[4]:
-        #     y_output = self.closing_controller.calculate(self.drive.target_lateral_offset, 0)
-
-        # if self.elevator.left_sensor and not self.elevator.right_sensor:
-        #     y_output = -0.1
-        # elif not self.elevator.left_sensor and self.elevator.right_sensor:
-        #     y_output = 0.1
-        # elif self.elevator.left_sensor and self.elevator.right_sensor:
-        #     y_output = 0
 
         if -0.02 < y_output < 0.02:
             y_output = 0
@@ -152,18 +143,40 @@ class AutoAlignmentMultiFeedback(Command):
     def get_closest_target(self) -> [float, float, float, float, float]:
         pose = [self.drive.get_pose().x, self.drive.get_pose().y]
         mini = 100000
-        mini_target = [0, 0, 0]
-        if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-            for i in self.util.scoring_locations_red:
-                c = sqrt(((i[0] - pose[0]) * (i[0] - pose[0])) + ((i[1] - pose[1]) * (i[1] - pose[1])))
-                if c < mini:
-                    mini = c
-                    mini_target = [i[0], i[1], i[2], i[3], i[4]]
-        else:
-            for i in self.util.scoring_locations_blue:
-                c = sqrt(((i[0] - pose[0]) * (i[0] - pose[0])) + ((i[1] - pose[1]) * (i[1] - pose[1])))
-                if c < mini:
-                    mini = c
-                    mini_target = [i[0], i[1], i[2], i[3], i[4]]
 
-        return mini_target
+        if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
+            possible_sides = self.util.scoring_sides_red
+        else:
+            possible_sides = self.util.scoring_sides_blue
+
+        for i in possible_sides:
+            c = sqrt(((i[0] - pose[0]) * (i[0] - pose[0])) + ((i[1] - pose[1]) * (i[1] - pose[1])))
+            if c < mini:
+                mini = c
+                mini_target = [i[0], i[1], i[2]]
+
+        if self.side == "left":
+            if self.check_to_use():
+                SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][0][-1])
+                self.flipped = True
+                return mini_target[2][0]
+            else:
+                SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][2][-1])
+                self.flipped = False
+                return mini_target[2][2]
+        else:
+            if self.check_to_use():
+                SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][1][-1])
+                self.flipped = True
+                return mini_target[2][1]
+            else:
+                SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][3][-1])
+                self.flipped = False
+                return mini_target[2][3]
+
+    def check_to_use(self):
+        if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
+            if self.drive.get_pose().x >= 13.067:
+                return -90 < self.drive.get_pose().rotation().degrees() < 90
+            else:
+                return not -90 < self.drive.get_pose().rotation().degrees() < 90
