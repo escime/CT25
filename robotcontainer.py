@@ -25,6 +25,8 @@ from commands.check_drivetrain import CheckDrivetrain
 from commands.alignment_leds import AlignmentLEDs
 from commands.profiled_target import ProfiledTarget
 from commands.auto_alignment_multi_feedback import AutoAlignmentMultiFeedback
+from commands.set_elevator_and_arm import SetElevatorAndArm
+from commands.score import Score
 
 
 class RobotContainer:
@@ -148,9 +150,9 @@ class RobotContainer:
                     self.drivetrain.apply_request(
                         lambda: (
                             self.drivetrain.drive_clt(
-                                self.driver_controller.getLeftY() * self._max_speed * -1,
-                                self.driver_controller.getLeftX() * self._max_speed * -1,
-                                self.driver_controller.getRightX() * -1
+                                self.driver_controller.getLeftY() * self._max_speed * -1 * self.elevator_and_arm.get_accel_limit(),
+                                self.driver_controller.getLeftX() * self._max_speed * -1 * self.elevator_and_arm.get_accel_limit(),
+                                self.driver_controller.getRightX() * -1 * self.elevator_and_arm.get_accel_limit()
                             )
                         )
                     )
@@ -169,8 +171,10 @@ class RobotContainer:
             ))
 
         # Auto selecting auto alignment.
-        self.driver_controller.rightTrigger().and_(lambda: not self.test_bindings).whileTrue(
-            AutoAlignmentMultiFeedback(self.drivetrain, self.util, True, self.driver_controller))
+        self.driver_controller.leftBumper().and_(lambda: not self.test_bindings).whileTrue(
+            AutoAlignmentMultiFeedback(self.drivetrain, self.util, self.driver_controller, "left"))
+        self.driver_controller.rightBumper().and_(lambda: not self.test_bindings).whileTrue(
+            AutoAlignmentMultiFeedback(self.drivetrain, self.util, self.driver_controller, "right"))
 
         # Cycle through scoring set points.
         self.driver_controller.povLeft().and_(lambda: not self.test_bindings).onTrue(
@@ -195,17 +199,18 @@ class RobotContainer:
         #     runOnce(lambda: self.elevator_and_arm.set_elevator_state("stow"), self.elevator_and_arm)
         # )
         self.operator_controller.y().onTrue(
-            self.elevator_and_arm.set_elevator_and_arm("L4", "left")
+            SetElevatorAndArm("L4", self.elevator_and_arm, self.drivetrain)
         )
         self.operator_controller.a().onTrue(
-            self.elevator_and_arm.set_elevator_and_arm("stow", "na")
+            SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain)
         )
 
         self.operator_controller.b().onTrue(
-            runOnce(lambda: self.elevator_and_arm.set_arm_state("score_right"), self.elevator_and_arm)
+            Score(self.elevator_and_arm, self.timer)
+            .andThen(SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain))
         )
         self.operator_controller.x().onTrue(
-            runOnce(lambda: self.elevator_and_arm.set_arm_state("score_left"), self.elevator_and_arm)
+            SetElevatorAndArm("L3", self.elevator_and_arm, self.drivetrain)
         )
 
         # Cube acquired light
