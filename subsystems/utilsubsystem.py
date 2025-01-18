@@ -10,34 +10,6 @@ class UtilSubsystem(Subsystem):
 
         self.scoring_location = 0
         # FORMAT: X, Y, ANGLE, LOCATION NAME, APRILTAG FOR SERVOING
-        self.scoring_locations_blue = [
-            [3.248, 4.516, 0.001, "Blue A", -10],
-            [3.248, 4.182, 0.001, "Blue B", -10],
-            [3.447, 3.163, 60, "Blue C", -10],
-            [3.754, 3, 60, "Blue D", -10],
-            [4.737, 2.7, 120, "Blue E", -10],
-            [5.021, 2.871, 120, "Blue F", -10],
-            [5.748, 3.562, 180.001, "Blue G", -10],
-            [5.748, 3.9, 180.001, "Blue H", -10],
-            [5.499, 3.539, 240, "Blue I", -10],
-            [5.214, 5.058, 240, "Blue J", -10],
-            [4.281, 5.328, 300, "Blue K", -10],
-            [3.967, 5.186, 300, "Blue L", -10]
-        ]
-        self.scoring_locations_red = [
-            [13.449, 3.560, 180.001, "Red A"],
-            [13.449, 3.894, 180.001, "Red B"],
-            [13.613, 4.095, 240, "Red C"],
-            [13.348, 4.264, 240, "Red D"],
-            [13.276, 4.593, 300, "Red E"],
-            [13.003, 4.416, 300, "Red F"],
-            [12.729, 4.473, 0.001, "Red G"],
-            [12.729, 4.151, 0.001, "Red H"],
-            [12.512, 3.975, 60, "Red I"],
-            [12.810, 3.838, 60, "Red J"],
-            [12.786, 3.565, 120, "Red K"],
-            [13.083, 3.709, 120, "Red L"],
-        ]
         self.scoring_sides_red = [
             [13.766, 4.031, [
                 [13.449, 3.560, 180.001, "Red A Normal"],
@@ -76,28 +48,59 @@ class UtilSubsystem(Subsystem):
                 [13.637, 4.007, 300, "Red L Flipped"],
             ]]
         ]
+        self.scoring_sides_blue = [
+            [3.795, 4.018, [
+                [4.204, 4.482, 0.001, "Blue A Normal"],
+                [4.204, 4.148, 0.001, "Blue B Normal"],
+                [4.242, 3.900, 0.001, "Blue A Flipped"],
+                [4.215, 3.555, 0.001, "Blue B Flipped"],
+            ]],
+            [4.140, 3.426, [
+                [3.935, 4.024, 60, "Blue C Normal"],
+                [4.221, 3.873, 60, "Blue D Normal"],
+                [4.468, 3.679, 60, "Blue C Flipped"],
+                [4.743, 3.523, 60, "Blue D Flipped"],
+            ]],
+            [4.829, 3.437, [
+                [4.226, 3.560, 300, "Blue E Normal"],
+                [4.501, 3.711, 300, "Blue F Normal"],
+                [4.748, 3.835, 300, "Blue E Flipped"],
+                [5.055, 3.981, 300, "Blue F Flipped"],
+            ]],
+            [5.169, 4.029, [
+                [4.765, 3.582, 180.001, "Blue G Normal"],
+                [4.765, 3.889, 180.001, "Blue H Normal"],
+                [4.765, 4.164, 180.001, "Blue G Flipped"],
+                [4.765, 4.498, 180.001, "Blue H Flipped"],
+            ]],
+            [4.824, 4.627, [
+                [4.996, 3.991, 240, "Blue I Normal"],
+                [4.748, 4.207, 240, "Blue J Normal"],
+                [4.506, 4.341, 240, "Blue I Flipped"],
+                [4.231, 4.482, 240, "Blue J Flipped"],
+            ]],
+            [4.145, 4.611, [
+                [4.775, 4.482, 120, "Blue K Normal"],
+                [4.458, 4.341, 120, "Blue L Normal"],
+                [4.242, 4.180, 120, "Blue K Flipped"],
+                [3.951, 4.045, 120, "Blue L Flipped"],
+            ]]
+        ]
+
+        self.feeder_sides_red = [
+            [16.667, 7.245, 55],
+            [16.639, 0.758, 125]
+        ]
+        self.feeder_sides_blue = [
+            [0.683, 7.245, 305],
+            [0.683, 0.758, 235]
+        ]
 
         self.scoring_setpoint = 0
         self.scoring_setpoints = ["stow", "max"]
 
     def toggle_channel(self, on: bool) -> None:
         self.pdh.setSwitchableChannel(on)
-
-    def cycle_scoring_locations(self, cycle_amount: int) -> None:
-        if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-            if cycle_amount + self.scoring_location >= len(self.scoring_locations_red):
-                self.scoring_location = 0
-            elif cycle_amount + self.scoring_location < 0:
-                self.scoring_location = len(self.scoring_locations_red) - 1
-            else:
-                self.scoring_location += cycle_amount
-        if DriverStation.getAlliance() == DriverStation.Alliance.kBlue:
-            if cycle_amount + self.scoring_location >= len(self.scoring_locations_blue):
-                self.scoring_location = 0
-            elif cycle_amount + self.scoring_location < 0:
-                self.scoring_location = len(self.scoring_locations_blue) - 1
-            else:
-                self.scoring_location += cycle_amount
 
     def cycle_scoring_setpoints(self, cycle_amount: int) -> None:
         if cycle_amount + self.scoring_setpoint >= len(self.scoring_setpoints):
@@ -108,8 +111,4 @@ class UtilSubsystem(Subsystem):
             self.scoring_setpoint += cycle_amount
 
     def periodic(self) -> None:
-        if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-            SmartDashboard.putString("Scoring Location", self.scoring_locations_red[self.scoring_location][3])
-        else:
-            SmartDashboard.putString("Scoring Location", self.scoring_locations_blue[self.scoring_location][3])
         SmartDashboard.putString("Scoring Setpoint", self.scoring_setpoints[self.scoring_setpoint])

@@ -11,27 +11,63 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "score"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "I-CS4"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "CS4-L"
+            "name": "collect"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "L-CS4"
+            "pathName": "CS4-A"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "score"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "CS4-L"
+            "pathName": "A-CS4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "collect"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CS4-K"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stow"
           }
         }
       ]
