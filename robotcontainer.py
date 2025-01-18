@@ -27,6 +27,9 @@ from commands.profiled_target import ProfiledTarget
 from commands.auto_alignment_multi_feedback import AutoAlignmentMultiFeedback
 from commands.set_elevator_and_arm import SetElevatorAndArm
 from commands.score import Score
+from commands.collect_from_cs import Collect
+from commands.auto_set_elevator_and_arm import AutoSetElevatorAndArm
+from commands.coral_station_alignment import CoralStationAlignment
 
 
 class RobotContainer:
@@ -126,7 +129,7 @@ class RobotContainer:
 
         # Setup autonomous selector on the dashboard. ------------------------------------------------------------------
         self.m_chooser = SendableChooser()
-        self.auto_names = ["Test", "Baseline", "CheckDrivetrain", "BuildPlay"]
+        self.auto_names = ["Test", "Baseline", "CheckDrivetrain", "BuildPlay", "StartA-Score3"]
         self.m_chooser.setDefaultOption("DoNothing", "DoNothing")
         for x in self.auto_names:
             self.m_chooser.addOption(x, x)
@@ -176,6 +179,13 @@ class RobotContainer:
         self.driver_controller.rightBumper().and_(lambda: not self.test_bindings).whileTrue(
             AutoAlignmentMultiFeedback(self.drivetrain, self.util, self.driver_controller, "right"))
 
+        self.driver_controller.leftTrigger(0.5).and_(lambda: not self.test_bindings).whileTrue(
+            ParallelDeadlineGroup(
+                CoralStationAlignment(self.drivetrain, self.util, self.driver_controller),
+                SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain)
+                .andThen(Collect(self.elevator_and_arm)))
+        )
+
         # Cycle through scoring set points.
         self.driver_controller.povLeft().and_(lambda: not self.test_bindings).onTrue(
             runOnce(lambda: self.util.cycle_scoring_setpoints(1), self.util).ignoringDisable(True)
@@ -191,13 +201,6 @@ class RobotContainer:
             runOnce(lambda: self.elevator_and_arm.set_elevator_manual_off(), self.elevator_and_arm)
         )
 
-        # Set elevator to a known setpoint (ignore utility features).
-        # self.operator_controller.y().onTrue(
-        #     runOnce(lambda: self.elevator_and_arm.set_elevator_state("max"), self.elevator_and_arm)
-        # )
-        # self.operator_controller.a().onTrue(
-        #     runOnce(lambda: self.elevator_and_arm.set_elevator_state("stow"), self.elevator_and_arm)
-        # )
         self.operator_controller.y().onTrue(
             SetElevatorAndArm("L4", self.elevator_and_arm, self.drivetrain)
         )
@@ -213,24 +216,24 @@ class RobotContainer:
             SetElevatorAndArm("L3", self.elevator_and_arm, self.drivetrain)
         )
 
-        # Cube acquired light
-        # button.Trigger(lambda: self.arm.get_sensor_on() and DriverStation.isTeleop()).onTrue(
-        #     SequentialCommandGroup(
-        #         runOnce(lambda: self.leds.set_flash_color_rate(10), self.leds),
-        #         runOnce(lambda: self.leds.set_flash_color_color([0, 255, 0]), self.leds),
-        #         runOnce(lambda: self.leds.set_state("flash_color"), self.leds),
-        #         WaitCommand(2),
-        #         runOnce(lambda: self.leds.set_state("gp_held"), self.leds)
-        #     ).ignoringDisable(True)
-        # ).onFalse(
-        #     SequentialCommandGroup(
-        #         runOnce(lambda: self.leds.set_flash_color_rate(10), self.leds),
-        #         runOnce(lambda: self.leds.set_flash_color_color([255, 0, 0]), self.leds),
-        #         runOnce(lambda: self.leds.set_state("flash_color"), self.leds),
-        #         WaitCommand(0.5),
-        #         runOnce(lambda: self.leds.set_state("default"), self.leds)
-        #     ).ignoringDisable(True)
-        # )
+        # Coral acquired light
+        button.Trigger(lambda: self.elevator_and_arm.get_coral_sensors() and DriverStation.isTeleop()).onTrue(
+            SequentialCommandGroup(
+                runOnce(lambda: self.leds.set_flash_color_rate(10), self.leds),
+                runOnce(lambda: self.leds.set_flash_color_color([0, 255, 0]), self.leds),
+                runOnce(lambda: self.leds.set_state("flash_color"), self.leds),
+                WaitCommand(2),
+                runOnce(lambda: self.leds.set_state("gp_held"), self.leds)
+            ).ignoringDisable(True)
+        ).onFalse(
+            SequentialCommandGroup(
+                runOnce(lambda: self.leds.set_flash_color_rate(10), self.leds),
+                runOnce(lambda: self.leds.set_flash_color_color([255, 0, 0]), self.leds),
+                runOnce(lambda: self.leds.set_state("flash_color"), self.leds),
+                WaitCommand(0.5),
+                runOnce(lambda: self.leds.set_state("default"), self.leds)
+            ).ignoringDisable(True)
+        )
 
         # Configuration for telemetry.
         self.drivetrain.register_telemetry(
@@ -377,3 +380,11 @@ class RobotContainer:
                                           runOnce(lambda: self.drivetrain.set_lookahead(False)),
                                           runOnce(lambda: self.drivetrain.set_pathplanner_rotation_override("none"))
                                       ))
+        NamedCommands.registerCommand("L4_left",
+                                      AutoSetElevatorAndArm("L4", "left", self.elevator_and_arm))
+        NamedCommands.registerCommand("L4_right",
+                                      AutoSetElevatorAndArm("L4", "right", self.elevator_and_arm))
+        NamedCommands.registerCommand("stow",
+                                      AutoSetElevatorAndArm("stow", "stow", self.elevator_and_arm))
+        NamedCommands.registerCommand("score", Score(self.elevator_and_arm, self.timer))
+        NamedCommands.registerCommand("collect", Collect(self.elevator_and_arm))

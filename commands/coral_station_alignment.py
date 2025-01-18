@@ -2,33 +2,31 @@ from commands2 import Command, button
 
 from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
 from subsystems.utilsubsystem import UtilSubsystem
-from subsystems.elevatorandarm import ElevatorAndArmSubsystem
 from phoenix6 import swerve
 from wpimath.controller import PIDController
 from generated.tuner_constants import TunerConstants
-from wpimath.units import degreesToRadians, radiansToDegrees, metersToInches
+from wpimath.units import degreesToRadians, radiansToDegrees
 from math import sqrt, pow, cos, sin, atan2
-from wpilib import DriverStation, SmartDashboard
+from wpilib import DriverStation
 
 
-class AutoAlignmentMultiFeedback(Command):
+class CoralStationAlignment(Command):
     def __init__(self, drive: CommandSwerveDrivetrain, util: UtilSubsystem,
-                 joystick: button.CommandXboxController, side: str):
+                 joystick: button.CommandXboxController):
         super().__init__()
         self.drive = drive
         # self.elevator = elevator
         self.joystick = joystick
         self.util = util
         self.flipped = True
-        self.side = side
 
         self.forward_request = (swerve.requests.RobotCentric()
                                 .with_drive_request_type(swerve.SwerveModule.DriveRequestType.VELOCITY)
-                                .with_velocity_y(0))
+                                .with_velocity_x(0))
 
         self.rotate_controller = PIDController(0.1, 0, 0, 0.02)
         self.rotate_controller.enableContinuousInput(-180, 180)
-        self.y_controller = PIDController(0.5, 0, 0, 0.02)
+        self.x_controller = PIDController(0.5, 0, 0, 0.02)
         self.closing_controller = PIDController(0.1, 0, 0, 0.02)
         self.target = [0, 0]
 
@@ -40,39 +38,39 @@ class AutoAlignmentMultiFeedback(Command):
         # self.arm.set_state(self.util.scoring_setpoints[self.util.scoring_setpoint])
 
     def execute(self):
-        x_move = self.joystick.getLeftY() * -1
+        y_move = self.joystick.getLeftY()
 
         current_pose = self.drive.get_pose()
         a = self.target[0] - current_pose.x
         b = self.target[1] - current_pose.y
 
-        theta = radiansToDegrees(atan2(b, a))
+        theta = radiansToDegrees(atan2(b, a)) + 90
 
         if theta < 0:
             theta = 360 + theta
 
         if self.flipped:
             theta += 180
-            x_move = x_move * -1
+            y_move = y_move * -1
 
         current_heading = current_pose.rotation().degrees()
         if current_heading < 0:
             current_heading = 360 + current_heading
 
         rotate_output = self.rotate_controller.calculate(current_heading, theta)
-        y_output = self.y_controller.calculate(self.get_vector_to_line(current_pose, self.target[2]), 0)
+        x_output = self.x_controller.calculate(self.get_vector_to_line(current_pose, self.target[2]), 0)
 
-        if -0.02 < y_output < 0.02:
-            y_output = 0
+        if -0.02 < x_output < 0.02:
+            x_output = 0
 
         if self.joystick.a().getAsBoolean():
-            y_output = self.joystick.getLeftX() * 0.25
+            x_output = self.joystick.getLeftX() * 0.25
             rotate_output = 0
 
         self.drive.apply_request(lambda: (self.forward_request
-                                          .with_velocity_x(x_move * TunerConstants.speed_at_12_volts * 0.35)
+                                          .with_velocity_y(y_move * TunerConstants.speed_at_12_volts * 0.35)
                                           .with_rotational_rate(rotate_output)
-                                          .with_velocity_y(y_output * TunerConstants.speed_at_12_volts))).schedule()
+                                          .with_velocity_x(x_output * TunerConstants.speed_at_12_volts))).schedule()
 
     def end(self, interrupted: bool):
         self.drive.apply_request(lambda: self.forward_request).withTimeout(0.02).schedule()
@@ -145,9 +143,9 @@ class AutoAlignmentMultiFeedback(Command):
         mini = 100000
 
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-            possible_sides = self.util.scoring_sides_red
+            possible_sides = self.util.feeder_sides_red
         else:
-            possible_sides = self.util.scoring_sides_blue
+            possible_sides = self.util.feeder_sides_blue
 
         for i in possible_sides:
             c = sqrt(((i[0] - pose[0]) * (i[0] - pose[0])) + ((i[1] - pose[1]) * (i[1] - pose[1])))
@@ -155,33 +153,4 @@ class AutoAlignmentMultiFeedback(Command):
                 mini = c
                 mini_target = [i[0], i[1], i[2]]
 
-        if self.side == "left":
-            if self.check_to_use():
-                SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][0][-1])
-                self.flipped = True
-                return mini_target[2][0]
-            else:
-                SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][2][-1])
-                self.flipped = False
-                return mini_target[2][2]
-        else:
-            if self.check_to_use():
-                SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][1][-1])
-                self.flipped = True
-                return mini_target[2][1]
-            else:
-                SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][3][-1])
-                self.flipped = False
-                return mini_target[2][3]
-
-    def check_to_use(self):
-        if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-            if self.drive.get_pose().x >= 13.067:
-                return -90 < self.drive.get_pose().rotation().degrees() < 90
-            else:
-                return not -90 < self.drive.get_pose().rotation().degrees() < 90
-        else:
-            if self.drive.get_pose().x <= 4.484:
-                return not -90 < self.drive.get_pose().rotation().degrees() < 90
-            else:
-                return -90 < self.drive.get_pose().rotation().degrees() < 90
+        return mini_target

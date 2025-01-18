@@ -30,6 +30,8 @@ class ElevatorAndArmSubsystem(Subsystem):
 
         self.intake = PWMSparkMax(1)
         self.intake.set(0)
+        self.intake_sensor_left = DigitalInput(0)
+        self.intake_sensor_right = DigitalInput(1)
 
         self.elevator_state_values = ElevatorConstants.state_values
         self.arm_state_values = ArmConstants.state_values
@@ -201,6 +203,9 @@ class ElevatorAndArmSubsystem(Subsystem):
     def set_arm_manual(self, voltage: float) -> None:
         self.arm_state = "manual"
         self.wrist.set_control(self.wrist_vo.with_output(voltage))
+
+    def get_coral_sensors(self) -> bool:
+        return self.intake_sensor_left.get() and self.intake_sensor_right.get()
 
     def set_elevator_manual_off(self) -> None:
         self.elevator_state = "manual_off"

@@ -398,6 +398,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             ),
             self.config,
             lambda: DriverStation.getAlliance() == DriverStation.Alliance.kRed,
+            # lambda: False,
             self
         )
 
