@@ -9,6 +9,7 @@ class UtilSubsystem(Subsystem):
         self.pdh = PowerDistribution(1, PowerDistribution.ModuleType.kRev)
 
         self.scoring_location = 0
+        self.algae_mode = False
         # FORMAT: X, Y, ANGLE, LOCATION NAME, APRILTAG FOR SERVOING
         self.scoring_sides_red = [
             [13.766, 4.031, [
@@ -109,6 +110,10 @@ class UtilSubsystem(Subsystem):
             self.scoring_setpoint = len(self.scoring_setpoints) - 1
         else:
             self.scoring_setpoint += cycle_amount
+
+    def change_algae_mode(self, algae_mode_enabled: bool) -> None:
+        self.algae_mode = algae_mode_enabled
+        SmartDashboard.putBoolean("Algae Mode?", algae_mode_enabled)
 
     def periodic(self) -> None:
         SmartDashboard.putString("Scoring Setpoint", self.scoring_setpoints[self.scoring_setpoint])
