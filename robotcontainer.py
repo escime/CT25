@@ -80,6 +80,7 @@ class RobotContainer:
         self.operator_controller = button.CommandXboxController(OIConstants.kOperatorControllerPort)
         DriverStation.silenceJoystickConnectionWarning(True)
         self.test_bindings = False
+        self.algae_mode = False
 
         # Configure drivetrain settings. -------------------------------------------------------------------------------
         self._max_speed = TunerConstants.speed_at_12_volts  # speed_at_12_volts desired top speed
@@ -129,7 +130,7 @@ class RobotContainer:
 
         # Setup autonomous selector on the dashboard. ------------------------------------------------------------------
         self.m_chooser = SendableChooser()
-        self.auto_names = ["Test", "Baseline", "CheckDrivetrain", "BuildPlay", "StartA-Score3"]
+        self.auto_names = ["Test", "Baseline", "CheckDrivetrain", "BuildPlay", "1-Score4"]
         self.m_chooser.setDefaultOption("DoNothing", "DoNothing")
         for x in self.auto_names:
             self.m_chooser.addOption(x, x)
@@ -167,18 +168,19 @@ class RobotContainer:
             runOnce(lambda: self.drivetrain.reset_odometry(), self.drivetrain))
 
         # Motion profiled Alignment
-        self.driver_controller.b().and_(lambda: not self.test_bindings).whileTrue(
-            ParallelCommandGroup(
-                AlignmentLEDs(self.leds, self.drivetrain),
-                ProfiledTarget(self.drivetrain, [16.5, 5.53])
-            ))
+        # self.driver_controller.b().and_(lambda: not self.test_bindings).whileTrue(
+        #     ParallelCommandGroup(
+        #         AlignmentLEDs(self.leds, self.drivetrain),
+        #         ProfiledTarget(self.drivetrain, [16.5, 5.53])
+        #     ))
 
-        # Auto selecting auto alignment.
+        # Auto selecting auto alignment for Reef scoring positions.
         self.driver_controller.leftBumper().and_(lambda: not self.test_bindings).whileTrue(
             AutoAlignmentMultiFeedback(self.drivetrain, self.util, self.driver_controller, "left"))
         self.driver_controller.rightBumper().and_(lambda: not self.test_bindings).whileTrue(
             AutoAlignmentMultiFeedback(self.drivetrain, self.util, self.driver_controller, "right"))
 
+        # Auto selecting auto alignment for Coral Stations.
         self.driver_controller.leftTrigger(0.5).and_(lambda: not self.test_bindings).whileTrue(
             ParallelDeadlineGroup(
                 CoralStationAlignment(self.drivetrain, self.util, self.driver_controller),
@@ -186,13 +188,21 @@ class RobotContainer:
                 .andThen(Collect(self.elevator_and_arm)))
         )
 
+        # Change between CORAL and ALGAE scoring modes.
+        self.operator_controller.start().and_(lambda: not self.test_bindings).onTrue(
+            runOnce(lambda: self.change_algae_mode(False))
+        )
+        self.operator_controller.back().and_(lambda: not self.test_bindings).onTrue(
+            runOnce(lambda: self.change_algae_mode(True))
+        )
+
         # Cycle through scoring set points.
-        self.driver_controller.povLeft().and_(lambda: not self.test_bindings).onTrue(
-            runOnce(lambda: self.util.cycle_scoring_setpoints(1), self.util).ignoringDisable(True)
-        )
-        self.driver_controller.povRight().and_(lambda: not self.test_bindings).onTrue(
-            runOnce(lambda: self.util.cycle_scoring_setpoints(-1), self.util).ignoringDisable(True)
-        )
+        # self.driver_controller.povLeft().and_(lambda: not self.test_bindings).onTrue(
+        #     runOnce(lambda: self.util.cycle_scoring_setpoints(1), self.util).ignoringDisable(True)
+        # )
+        # self.driver_controller.povRight().and_(lambda: not self.test_bindings).onTrue(
+        #     runOnce(lambda: self.util.cycle_scoring_setpoints(-1), self.util).ignoringDisable(True)
+        # )
 
         # Manually control the elevator.
         self.operator_controller.axisGreaterThan(1, 0.2).or_(self.operator_controller.axisLessThan(1, -0.2)).whileTrue(
@@ -201,19 +211,27 @@ class RobotContainer:
             runOnce(lambda: self.elevator_and_arm.set_elevator_manual_off(), self.elevator_and_arm)
         )
 
-        self.operator_controller.y().onTrue(
+        # Set the Elevator and Arm.
+        self.operator_controller.rightBumper().and_(lambda: not self.test_bindings).and_(lambda: not self.algae_mode).onTrue(
             SetElevatorAndArm("L4", self.elevator_and_arm, self.drivetrain)
         )
-        self.operator_controller.a().onTrue(
+        self.operator_controller.y().and_(lambda: not self.test_bindings).and_(lambda: not self.algae_mode).onTrue(
+            SetElevatorAndArm("L3", self.elevator_and_arm, self.drivetrain)
+        )
+        self.operator_controller.x().and_(lambda: not self.test_bindings).and_(lambda: not self.algae_mode).onTrue(
+            SetElevatorAndArm("L2", self.elevator_and_arm, self.drivetrain)
+        )
+        self.operator_controller.b().and_(lambda: not self.test_bindings).and_(lambda: not self.algae_mode).onTrue(
+            SetElevatorAndArm("L1", self.elevator_and_arm, self.drivetrain)
+        )
+        self.operator_controller.a().and_(lambda: not self.test_bindings).and_(lambda: not self.algae_mode).onTrue(
             SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain)
         )
 
-        self.operator_controller.b().onTrue(
+        # When in Coral mode, score Coral.
+        self.operator_controller.rightTrigger().and_(lambda: not self.test_bindings).and_(lambda: not self.algae_mode).onTrue(
             Score(self.elevator_and_arm, self.timer)
             .andThen(SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain))
-        )
-        self.operator_controller.x().onTrue(
-            SetElevatorAndArm("L3", self.elevator_and_arm, self.drivetrain)
         )
 
         # Coral acquired light
@@ -234,6 +252,11 @@ class RobotContainer:
                 runOnce(lambda: self.leds.set_state("default"), self.leds)
             ).ignoringDisable(True)
         )
+
+        # Toggle the switchable channel on the PDH when enabled/disabled.
+        (button.Trigger(lambda: DriverStation.isEnabled()).onTrue(runOnce(lambda: self.util.toggle_channel(True))
+                                                                  .ignoringDisable(True))
+         .onFalse(runOnce(lambda: self.util.toggle_channel(True)).ignoringDisable(True)))
 
         # Configuration for telemetry.
         self.drivetrain.register_telemetry(
@@ -329,6 +352,9 @@ class RobotContainer:
 
     def enable_test_bindings(self, enabled: bool) -> None:
         self.test_bindings = enabled
+
+    def change_algae_mode(self, algae_mode_enabled: bool) -> None:
+        self.algae_mode = algae_mode_enabled
 
     def registerCommands(self):
         NamedCommands.registerCommand("rainbow_leds", runOnce(lambda: self.leds.set_state("rainbow"),
