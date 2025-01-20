@@ -111,4 +111,22 @@ class ArmConstants:
     arm_weight = lbsToKilograms(10)
     arm_length = inchesToMeters(20)
 
+class IntakeConstants:
+    intake_state_values = {"stow": 0, "intake_coral": 0.25, "intake_algae": 0.15, "score_coral": 0.1}
+    wheel_speed_values = {"stow": 0, "intake_coral": 12, "intake_algae": -12, "score_coral": -2.4}
+    wheel_can_id = 30
+    arm_can_id = 31
+    gearbox_ratio = 12
+
+    mm_cruise_velocity = 0.5
+    mm_acceleration = 5
+    mm_jerk = 100
+
+    kg = 1.02
+    ks = 0.25
+    kv = 0.23
+    ka = 0.02
+    kp = 80
+    ki = 0
+    kd = 0
 

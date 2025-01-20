@@ -4,6 +4,7 @@ from commands2 import Command, button, SequentialCommandGroup, ParallelCommandGr
     InterruptionBehavior, ParallelDeadlineGroup, WaitCommand
 
 from constants import OIConstants
+from subsystems.intake import Intake
 from subsystems.ledsubsystem import LEDs
 from subsystems.utilsubsystem import UtilSubsystem
 from subsystems.elevatorandarm import ElevatorAndArmSubsystem
@@ -75,6 +76,7 @@ class RobotContainer:
         self.leds = LEDs(self.timer)
         self.util = UtilSubsystem()
         self.elevator_and_arm = ElevatorAndArmSubsystem()
+        self.intake_arm = Intake()
 
         # Setup driver & operator controllers. -------------------------------------------------------------------------
         self.driver_controller = button.CommandXboxController(OIConstants.kDriverControllerPort)
@@ -278,6 +280,17 @@ class RobotContainer:
         self.operator_controller.a().and_(lambda: not self.test_bindings).and_(lambda: not self.algae_mode).onTrue(
             SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain)
         )
+        
+        # Intake controls.
+        self.operator_controller.leftTrigger(0.5).onTrue(
+            runOnce( lambda: self.intake_arm.set_state("intake_coral"), self.intake_arm)
+        ).onFalse(
+            runOnce( lambda: self.intake_arm.set_state("stow"), self.intake_arm)
+        )
+        self.operator_controller.rightTrigger(0.5).onTrue(
+            runOnce(lambda: self.intake_arm.set_state("score_coral"), self.intake_arm)
+        ).onFalse(
+            runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
 
         # Coral acquired light
         button.Trigger(lambda: self.elevator_and_arm.get_coral_sensors() and DriverStation.isTeleop()).onTrue(
