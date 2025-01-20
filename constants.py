@@ -58,6 +58,7 @@ class ElevatorConstants:
     drum_diameter_in = 1.685  # 14T sprocket
     drum_diameter_m = inchesToMeters(drum_diameter_in)
     state_values = {"stow": 0, "max": max_height_in / (drum_diameter_in * pi),
+                    "L1": 5 / (drum_diameter_in * pi),
                     "L2": 10 / (drum_diameter_in * pi),
                     "L3": 20 / (drum_diameter_in * pi),
                     "L4": 30 / (drum_diameter_in * pi)}
@@ -88,7 +89,7 @@ class ElevatorConstants:
 
 class ArmConstants:
     state_values = {"stow": 0.25, "stage_right": 0.2, "score_right": 0.1, "stage_left": 0.3, "score_left": 0.4}
-    wrist_can_id = 40
+    wrist_can_id = 34
     score_speed = 0.25
     supply_current_limit = 40
     use_supply_current_limit = False

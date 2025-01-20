@@ -63,10 +63,6 @@ class CoralStationAlignment(Command):
         if -0.02 < x_output < 0.02:
             x_output = 0
 
-        if self.joystick.a().getAsBoolean():
-            x_output = self.joystick.getLeftX() * 0.25
-            rotate_output = 0
-
         self.drive.apply_request(lambda: (self.forward_request
                                           .with_velocity_y(y_move * TunerConstants.speed_at_12_volts * 0.35)
                                           .with_rotational_rate(rotate_output)
