@@ -9,9 +9,7 @@ from phoenix6.status_code import StatusCode
 from phoenix6.signals import InvertedValue
 from phoenix6.utils import get_current_time_seconds, is_simulation
 
-from rev import SparkMax, SparkBaseConfig, SparkBase
-
-from wpilib import Mechanism2d, Color8Bit, Color, SmartDashboard, DigitalInput
+from wpilib import Mechanism2d, Color8Bit, Color, SmartDashboard, DigitalInput, PWMVictorSPX
 from wpilib.simulation import SingleJointedArmSim
 from wpimath.system.plant import DCMotor
 from wpimath.units import inchesToMeters, lbsToKilograms, radiansToRotations
@@ -56,13 +54,9 @@ class Intake(Subsystem):
         self.intake_arm_slot0_configs.k_i = IntakeConstants.ki
         self.intake_arm_slot0_configs.k_d = IntakeConstants.kd
 
-        self.intake = SparkMax(IntakeConstants.wheel_can_id, SparkMax.MotorType.kBrushless)
-        intake_config = SparkBaseConfig().smartCurrentLimit(40, 60).inverted(True)
-        self.intake.configure(intake_config, SparkMax.ResetMode.kResetSafeParameters,
-                              SparkMax.PersistMode.kPersistParameters)
-
+        self.intake = PWMVictorSPX(2)
         self.intake_speed_values = IntakeConstants.wheel_speed_values
-        self.intake.setVoltage(self.intake_speed_values[self.state])
+        self.intake.set(self.intake_speed_values[self.state])
 
         self.gp_sensor = DigitalInput(2)
 
@@ -103,9 +97,9 @@ class Intake(Subsystem):
         self.intake_arm.set_control(self.intake_arm_mm.with_position(self.state_values[state]).with_slot(0))
         if self.state == "score_coral":
             if self.get_at_target():
-                self.intake.setVoltage(self.intake_speed_values[state])
+                self.intake.set(self.intake_speed_values[state])
         else:
-            self.intake.setVoltage(self.intake_speed_values[state])
+            self.intake.set(self.intake_speed_values[state])
 
 
     def get_state(self) -> str:
