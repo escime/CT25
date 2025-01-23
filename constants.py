@@ -130,3 +130,6 @@ class IntakeConstants:
     ki = 0
     kd = 0
 
+class ClimberConstants:
+    climber_can_id = 36
+    gearbox_ratio = 100

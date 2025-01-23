@@ -4,7 +4,8 @@ from commands2 import Command, button, SequentialCommandGroup, ParallelCommandGr
     InterruptionBehavior, ParallelDeadlineGroup, WaitCommand
 
 from constants import OIConstants
-from subsystems.intake import Intake
+from subsystems.climbersubsystem import Climber
+from subsystems.intakesubsystem import Intake
 from subsystems.ledsubsystem import LEDs
 from subsystems.utilsubsystem import UtilSubsystem
 from subsystems.elevatorandarm import ElevatorAndArmSubsystem
@@ -77,6 +78,7 @@ class RobotContainer:
         self.util = UtilSubsystem()
         self.elevator_and_arm = ElevatorAndArmSubsystem()
         self.intake_arm = Intake()
+        self.climber_arm = Climber()
 
         # Setup driver & operator controllers. -------------------------------------------------------------------------
         self.driver_controller = button.CommandXboxController(OIConstants.kDriverControllerPort)
@@ -280,6 +282,20 @@ class RobotContainer:
         self.operator_controller.a().and_(lambda: not self.test_bindings).and_(lambda: not self.algae_mode).onTrue(
             SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain)
         )
+
+        # Manually control the climber
+        self.operator_controller.axisGreaterThan(4, 0.2).whileTrue(
+            run( lambda: self.climber_arm.set_climber_manual(self.operator_controller.getLeftY() * -1 * 12),
+                self.climber_arm)
+        ).onFalse(
+            runOnce( lambda: self.climber_arm.set_climber_manual(0), self.climber_arm)
+        )
+        (self.operator_controller.axisLessThan(4, -0.2)).whileTrue(
+            run(lambda: self.climber_arm.set_climber_manual(self.operator_controller.getLeftY() * 1 * 12),
+                self.climber_arm)
+        ).onFalse(
+            runOnce(lambda: self.climber_arm.set_climber_manual(0), self.climber_arm)
+        )
         
         # Intake controls.
         self.operator_controller.leftTrigger(0.5).onTrue(
@@ -291,6 +307,7 @@ class RobotContainer:
             runOnce(lambda: self.intake_arm.set_state("score_coral"), self.intake_arm)
         ).onFalse(
             runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
+        )
 
         # Coral acquired light
         button.Trigger(lambda: self.elevator_and_arm.get_coral_sensors() and DriverStation.isTeleop()).onTrue(
