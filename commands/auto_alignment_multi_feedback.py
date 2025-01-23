@@ -26,10 +26,10 @@ class AutoAlignmentMultiFeedback(Command):
                                 .with_drive_request_type(swerve.SwerveModule.DriveRequestType.VELOCITY)
                                 .with_velocity_y(0))
 
-        self.rotate_controller = PIDController(0.1, 0, 0, 0.02)
+        self.rotate_controller = PIDController(0.1, 0, 0, 0.04)
         self.rotate_controller.enableContinuousInput(-180, 180)
-        self.y_controller = PIDController(0.5, 0, 0, 0.02)
-        self.closing_controller = PIDController(0.1, 0, 0, 0.02)
+        self.y_controller = PIDController(0.5, 0, 0, 0.04)
+        self.closing_controller = PIDController(0.1, 0, 0, 0.04)
         self.target = [0, 0]
 
         # self.addRequirements(self.elevator)
