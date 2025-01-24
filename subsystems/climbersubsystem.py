@@ -62,9 +62,6 @@ class Climber(Subsystem):
             1
         )
 
-        SmartDashboard.putNumberArray("Climber Arm Location", [inchesToMeters(5.5), inchesToMeters(0), inchesToMeters(11.5),
-                                                       0, 0, 0])
-
         self.climber_arm_volts = VoltageOut(0, False)
 
         self.last_time = get_current_time_seconds()
@@ -74,8 +71,8 @@ class Climber(Subsystem):
 
     def set_voltage_direct(self, output: float):
         self.climber_arm.set_control(self.climber_arm_volts.with_output(output)
-                               .with_limit_forward_motion(self.get_forward_limit_triggered())
-                               .with_limit_reverse_motion(self.get_reverse_limit_triggered()))
+                                     .with_limit_forward_motion(self.get_forward_limit_triggered())
+                                     .with_limit_reverse_motion(self.get_reverse_limit_triggered()))
 
     def get_forward_limit_triggered(self) -> bool:
         if self.climber_arm.get_position().value_as_double > 0.5:
@@ -91,8 +88,8 @@ class Climber(Subsystem):
 
     def set_climber_manual(self, voltage: float) -> None:
         self.climber_arm.set_control(self.climber_arm_volts.with_output(voltage)
-                                   .with_limit_reverse_motion(self.get_reverse_limit_triggered())
-                                   .with_limit_forward_motion(self.get_forward_limit_triggered()))
+                                     .with_limit_reverse_motion(self.get_reverse_limit_triggered())
+                                     .with_limit_forward_motion(self.get_forward_limit_triggered()))
 
     def update_sim(self):
         current_time = get_current_time_seconds()
@@ -107,8 +104,6 @@ class Climber(Subsystem):
         if is_simulation():
             self.update_sim()
             self.climber_arm_m2d_elbow.setAngle(degrees(self.arm_sim.getAngle()))
-            SmartDashboard.putNumberArray("Climber Arm Location", [inchesToMeters(5.5), inchesToMeters(0), inchesToMeters(11.5),
-                                                           0, 0, self.arm_sim.getAngle()])
         else:
             self.climber_arm_m2d_elbow.setAngle(self.climber_arm.get_position().value_as_double)
 

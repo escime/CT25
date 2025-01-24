@@ -111,9 +111,10 @@ class ArmConstants:
     arm_weight = lbsToKilograms(10)
     arm_length = inchesToMeters(20)
 
+
 class IntakeConstants:
-    intake_state_values = {"stow": 0, "intake_coral": 0.25, "intake_algae": 0.15, "score_coral": 0.1}
-    wheel_speed_values = {"stow": 0, "intake_coral": 12, "intake_algae": -12, "score_coral": -2.4}
+    intake_state_values = {"stow": 0.25, "intake_coral": 0.5, "intake_algae": 0.35, "score_coral": 0.27, "score_algae": 0.25, "climbing": 0.5}
+    wheel_speed_values = {"stow": 0, "intake_coral": 12, "intake_algae": -12, "score_coral": -2.4, "score_algae": -12, "climbing": 0}
     wheel_can_id = 30
     arm_can_id = 31
     gearbox_ratio = 12
@@ -129,6 +130,7 @@ class IntakeConstants:
     kp = 80
     ki = 0
     kd = 0
+
 
 class ClimberConstants:
     climber_can_id = 36

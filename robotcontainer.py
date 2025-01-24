@@ -85,7 +85,6 @@ class RobotContainer:
         self.operator_controller = button.CommandXboxController(OIConstants.kOperatorControllerPort)
         DriverStation.silenceJoystickConnectionWarning(True)
         self.test_bindings = False
-        self.algae_mode = False
 
         # Configure drivetrain settings. -------------------------------------------------------------------------------
         self._max_speed = TunerConstants.speed_at_12_volts  # speed_at_12_volts desired top speed
@@ -207,7 +206,7 @@ class RobotContainer:
 
         # Score Coral
         self.driver_controller.leftTrigger().and_(lambda: not self.test_bindings).and_(
-            lambda: not self.algae_mode).onTrue(
+            lambda: not self.util.algae_mode).onTrue(
             Score(self.elevator_and_arm, self.timer)
             .andThen(SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain))
         )
@@ -267,44 +266,61 @@ class RobotContainer:
         )
 
         # Set the Elevator and Arm.
-        self.operator_controller.rightBumper().and_(lambda: not self.test_bindings).and_(lambda: not self.algae_mode).onTrue(
+        self.operator_controller.rightBumper().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
             SetElevatorAndArm("L4", self.elevator_and_arm, self.drivetrain)
         )
-        self.operator_controller.y().and_(lambda: not self.test_bindings).and_(lambda: not self.algae_mode).onTrue(
+        self.operator_controller.y().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
             SetElevatorAndArm("L3", self.elevator_and_arm, self.drivetrain)
         )
-        self.operator_controller.x().and_(lambda: not self.test_bindings).and_(lambda: not self.algae_mode).onTrue(
+        self.operator_controller.x().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
             SetElevatorAndArm("L2", self.elevator_and_arm, self.drivetrain)
         )
-        self.operator_controller.b().and_(lambda: not self.test_bindings).and_(lambda: not self.algae_mode).onTrue(
+        self.operator_controller.b().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
             SetElevatorAndArm("L1", self.elevator_and_arm, self.drivetrain)
         )
-        self.operator_controller.a().and_(lambda: not self.test_bindings).and_(lambda: not self.algae_mode).onTrue(
+        self.operator_controller.a().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
             SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain)
         )
 
         # Manually control the climber
-        self.operator_controller.axisGreaterThan(4, 0.2).whileTrue(
-            run( lambda: self.climber_arm.set_climber_manual(self.operator_controller.getLeftY() * -1 * 12),
-                self.climber_arm)
+        self.operator_controller.axisGreaterThan(4, 0.2).and_(lambda: not self.test_bindings).onTrue(
+            SequentialCommandGroup(
+                runOnce(lambda: self.intake_arm.set_state("climbing"), self.intake_arm),
+                run(lambda: self.climber_arm.set_climber_manual(self.operator_controller.getRightX() * -1 * 12),
+                    self.climber_arm)
+            )
         ).onFalse(
-            runOnce( lambda: self.climber_arm.set_climber_manual(0), self.climber_arm)
+            runOnce(lambda: self.climber_arm.set_climber_manual(0), self.climber_arm)
         )
-        (self.operator_controller.axisLessThan(4, -0.2)).whileTrue(
-            run(lambda: self.climber_arm.set_climber_manual(self.operator_controller.getLeftY() * 1 * 12),
-                self.climber_arm)
+        self.operator_controller.axisLessThan(4, -0.2).and_(lambda: not self.test_bindings).onTrue(
+            SequentialCommandGroup(
+                runOnce(lambda: self.intake_arm.set_state("climbing"), self.intake_arm),
+                run(lambda: self.climber_arm.set_climber_manual(self.operator_controller.getRightX() * -1 * 12),
+                    self.climber_arm)
+            )
         ).onFalse(
             runOnce(lambda: self.climber_arm.set_climber_manual(0), self.climber_arm)
         )
         
         # Intake controls.
-        self.operator_controller.leftTrigger(0.5).onTrue(
-            runOnce( lambda: self.intake_arm.set_state("intake_coral"), self.intake_arm)
+        self.operator_controller.axisGreaterThan(1, 0.1).and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
+            runOnce(lambda: self.intake_arm.set_state("intake_coral"), self.intake_arm)
         ).onFalse(
-            runOnce( lambda: self.intake_arm.set_state("stow"), self.intake_arm)
+            runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
         )
-        self.operator_controller.rightTrigger(0.5).onTrue(
+        self.operator_controller.axisGreaterThan(1, 0.1).and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
+            runOnce(lambda: self.intake_arm.set_state("intake_algae"), self.intake_arm)
+        ).onFalse(
+            runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
+        )
+        self.driver_controller.rightBumper().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
             runOnce(lambda: self.intake_arm.set_state("score_coral"), self.intake_arm)
+        ).onFalse(
+            runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
+        )
+        self.driver_controller.rightBumper().and_(lambda: not self.test_bindings).and_(
+            lambda: self.util.algae_mode).onTrue(
+            runOnce(lambda: self.intake_arm.set_state("score_algae"), self.intake_arm)
         ).onFalse(
             runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
         )

@@ -35,10 +35,6 @@ class Intake(Subsystem):
         self.intake_arm_configs.current_limits.stator_current_limit_enable = False
         self.intake_arm_gear_ratio = IntakeConstants.gearbox_ratio
         self.intake_arm_configs.feedback.sensor_to_mechanism_ratio = self.intake_arm_gear_ratio
-        if not phoenix6.utils.is_simulation():
-            self.intake_arm_configs.motor_output.inverted = InvertedValue.CLOCKWISE_POSITIVE
-        else:
-            self.intake_arm_configs.motor_output.inverted = InvertedValue.COUNTER_CLOCKWISE_POSITIVE
 
         self.intake_arm_mm_configs = self.intake_arm_configs.motion_magic
         self.intake_arm_mm_configs.motion_magic_cruise_velocity = IntakeConstants.mm_cruise_velocity
@@ -77,16 +73,13 @@ class Intake(Subsystem):
         self.arm_sim = SingleJointedArmSim(
             DCMotor.krakenX60(1),
             self.intake_arm_gear_ratio,
-            SingleJointedArmSim.estimateMOI(inchesToMeters(20), lbsToKilograms(10)),
-            inchesToMeters(20),
+            SingleJointedArmSim.estimateMOI(inchesToMeters(8), lbsToKilograms(5)),
+            inchesToMeters(8),
             -0.1,
             pi + 0.1,
             True,
             1
         )
-
-        SmartDashboard.putNumberArray("Intake Arm Location", [inchesToMeters(5.5), inchesToMeters(0), inchesToMeters(11.5),
-                                                       0, 0, 0])
 
         self.intake_arm_volts = VoltageOut(0, False)
 
@@ -95,12 +88,7 @@ class Intake(Subsystem):
     def set_state(self, state: str) -> None:
         self.state = state
         self.intake_arm.set_control(self.intake_arm_mm.with_position(self.state_values[state]).with_slot(0))
-        if self.state == "score_coral":
-            if self.get_at_target():
-                self.intake.set(self.intake_speed_values[state])
-        else:
-            self.intake.set(self.intake_speed_values[state])
-
+        self.intake.set(self.intake_speed_values[state])
 
     def get_state(self) -> str:
         return self.state
@@ -147,8 +135,6 @@ class Intake(Subsystem):
         if is_simulation():
             self.update_sim()
             self.intake_arm_m2d_elbow.setAngle(degrees(self.arm_sim.getAngle()))
-            SmartDashboard.putNumberArray("Intake Arm Location", [inchesToMeters(5.5), inchesToMeters(0), inchesToMeters(11.5),
-                                                           0, 0, self.arm_sim.getAngle()])
         else:
             self.intake_arm_m2d_elbow.setAngle(self.intake_arm.get_position().value_as_double)
 
@@ -162,3 +148,4 @@ class Intake(Subsystem):
 
         SmartDashboard.putData("Arm M2D", self.intake_arm_m2d)
         SmartDashboard.putNumber("Intake Position", self.intake_arm.get_position().value_as_double)
+        SmartDashboard.putString("Intake State", self.get_state())
