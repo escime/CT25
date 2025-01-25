@@ -41,13 +41,13 @@ class ElevatorAndArmSubsystem(Subsystem):
         self.setName("ElevatorAndArm")
         self.accel_limit_scalar = 1
 
-        self.lift_main_mm = MotionMagicVoltage(0, enable_foc=False)
-        self.lift_main_vo = VoltageOut(0, enable_foc=False)
-        self.lift_main_pid = PositionVoltage(0, enable_foc=False)
+        self.lift_main_mm = MotionMagicVoltage(0, enable_foc=True)
+        self.lift_main_vo = VoltageOut(0, enable_foc=True)
+        self.lift_main_pid = PositionVoltage(0, enable_foc=True)
 
-        self.wrist_mm = MotionMagicVoltage(0, enable_foc=False)
-        self.wrist_vo = VoltageOut(0, enable_foc=False)
-        self.wrist_pid = PositionVoltage(0, enable_foc=False)
+        self.wrist_mm = MotionMagicVoltage(0, enable_foc=True)
+        self.wrist_vo = VoltageOut(0, enable_foc=True)
+        self.wrist_pid = PositionVoltage(0, enable_foc=True)
 
         for motor_id in ElevatorConstants.can_ids:
             motor = TalonFX(motor_id, "rio")
@@ -91,7 +91,7 @@ class ElevatorAndArmSubsystem(Subsystem):
 
         self.lift_sim = self.lift_main.sim_state
         self.elevator_sim = ElevatorSim(
-            gearbox=DCMotor.krakenX60(len(ElevatorConstants.can_ids)),
+            gearbox=DCMotor.krakenX60FOC(len(ElevatorConstants.can_ids)),
             gearing=ElevatorConstants.gearbox_ratio,
             carriageMass=ElevatorConstants.carriage_weight,
             drumRadius=ElevatorConstants.drum_diameter_m / 2,

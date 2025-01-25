@@ -72,10 +72,10 @@ class ElevatorConstants:
     mm_acceleration = 650  # rot/s^2
     mm_jerk = 1000  # rot/s^3
 
-    kg = 0.09
+    kg = 0.24
     ks = 0.1
     kv = 3.11
-    ka = 0
+    ka = 0.03
     kp = 60
     ki = 0
     kd = 0
@@ -100,10 +100,10 @@ class ArmConstants:
     mm_acceleration = 5
     mm_jerk = 100
 
-    kg = 0.66
+    kg = 0.25
     ks = 0.25
-    kv = 0.4
-    ka = 0.02
+    kv = 0.71
+    ka = 0.01
     kp = 90
     ki = 0
     kd = 0
@@ -123,10 +123,10 @@ class IntakeConstants:
     mm_acceleration = 5
     mm_jerk = 100
 
-    kg = 1.02
+    kg = 1.25
     ks = 0.25
-    kv = 0.23
-    ka = 0.02
+    kv = 0.32
+    ka = 0.06
     kp = 80
     ki = 0
     kd = 0

@@ -347,6 +347,25 @@ class RobotContainer:
             ).ignoringDisable(True)
         )
 
+        # Algae acquired light
+        button.Trigger(lambda: self.intake_arm.get_sensor_on() and DriverStation.isTeleop()).onTrue(
+            SequentialCommandGroup(
+                runOnce(lambda: self.leds.set_flash_color_rate(10), self.leds),
+                runOnce(lambda: self.leds.set_flash_color_color([0, 0, 255]), self.leds),
+                runOnce(lambda: self.leds.set_state("flash_color"), self.leds),
+                WaitCommand(2),
+                runOnce(lambda: self.leds.set_state("gp_held"), self.leds)
+            ).ignoringDisable(True)
+        ).onFalse(
+            SequentialCommandGroup(
+                runOnce(lambda: self.leds.set_flash_color_rate(10), self.leds),
+                runOnce(lambda: self.leds.set_flash_color_color([255, 153, 0]), self.leds),
+                runOnce(lambda: self.leds.set_state("flash_color"), self.leds),
+                WaitCommand(0.5),
+                runOnce(lambda: self.leds.set_state("default"), self.leds)
+            ).ignoringDisable(True)
+        )
+
         # Toggle the switchable channel on the PDH when enabled/disabled.
         (button.Trigger(lambda: DriverStation.isEnabled()).onTrue(runOnce(lambda: self.util.toggle_channel(True))
                                                                   .ignoringDisable(True))

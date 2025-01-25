@@ -52,7 +52,7 @@ class Climber(Subsystem):
 
         self.climber_arm_sim = self.climber_arm.sim_state
         self.arm_sim = SingleJointedArmSim(
-            DCMotor.krakenX60(1),
+            DCMotor.krakenX60FOC(1),
             self.climber_arm_gear_ratio,
             SingleJointedArmSim.estimateMOI(inchesToMeters(20), lbsToKilograms(10)),
             inchesToMeters(20),
@@ -62,7 +62,7 @@ class Climber(Subsystem):
             1
         )
 
-        self.climber_arm_volts = VoltageOut(0, False)
+        self.climber_arm_volts = VoltageOut(0, True)
 
         self.last_time = get_current_time_seconds()
 

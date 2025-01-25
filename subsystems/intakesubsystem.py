@@ -27,7 +27,7 @@ class Intake(Subsystem):
         self.intake_arm = TalonFX(IntakeConstants.arm_can_id, "rio")
         self.intake_arm.set_position(0)
 
-        self.intake_arm_mm = MotionMagicVoltage(0, enable_foc=False)
+        self.intake_arm_mm = MotionMagicVoltage(0, enable_foc=True)
         self.intake_arm_configs = TalonFXConfiguration()
 
         self.intake_arm_configs.current_limits.supply_current_limit = 60
@@ -71,7 +71,7 @@ class Intake(Subsystem):
 
         self.intake_arm_sim = self.intake_arm.sim_state
         self.arm_sim = SingleJointedArmSim(
-            DCMotor.krakenX60(1),
+            DCMotor.krakenX60FOC(1),
             self.intake_arm_gear_ratio,
             SingleJointedArmSim.estimateMOI(inchesToMeters(8), lbsToKilograms(5)),
             inchesToMeters(8),
@@ -81,7 +81,7 @@ class Intake(Subsystem):
             1
         )
 
-        self.intake_arm_volts = VoltageOut(0, False)
+        self.intake_arm_volts = VoltageOut(0, True)
 
         self.last_time = get_current_time_seconds()
 
@@ -94,7 +94,7 @@ class Intake(Subsystem):
         return self.state
 
     def get_sensor_on(self) -> bool:
-        return not self.gp_sensor.get()
+        return self.gp_sensor.get()
 
     def get_position(self) -> float:
         return self.intake_arm.get_position(True).value_as_double
@@ -107,8 +107,8 @@ class Intake(Subsystem):
 
     def set_voltage_direct(self, output: float):
         self.intake_arm.set_control(self.intake_arm_volts.with_output(output)
-                               .with_limit_forward_motion(self.get_forward_limit_triggered())
-                               .with_limit_reverse_motion(self.get_reverse_limit_triggered()))
+                                    .with_limit_forward_motion(self.get_forward_limit_triggered())
+                                    .with_limit_reverse_motion(self.get_reverse_limit_triggered()))
 
     def get_forward_limit_triggered(self) -> bool:
         if self.intake_arm.get_position().value_as_double > 0.5:
