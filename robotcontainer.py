@@ -286,6 +286,7 @@ class RobotContainer:
         self.operator_controller.axisGreaterThan(4, 0.2).and_(lambda: not self.test_bindings).onTrue(
             SequentialCommandGroup(
                 runOnce(lambda: self.intake_arm.set_state("climbing"), self.intake_arm),
+                runOnce(lambda: self.leds.set_state("rainbow"), self.leds),
                 run(lambda: self.climber_arm.set_climber_manual(self.operator_controller.getRightX() * -1 * 12),
                     self.climber_arm)
             )
@@ -295,6 +296,7 @@ class RobotContainer:
         self.operator_controller.axisLessThan(4, -0.2).and_(lambda: not self.test_bindings).onTrue(
             SequentialCommandGroup(
                 runOnce(lambda: self.intake_arm.set_state("climbing"), self.intake_arm),
+                runOnce(lambda: self.leds.set_state("rainbow"), self.leds),
                 run(lambda: self.climber_arm.set_climber_manual(self.operator_controller.getRightX() * -1 * 12),
                     self.climber_arm)
             )
@@ -303,11 +305,12 @@ class RobotContainer:
         )
         
         # Intake controls.
-        self.operator_controller.axisGreaterThan(1, 0.1).and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
+        (self.operator_controller.axisGreaterThan(1, 0.1).and_(lambda: not self.test_bindings)
+            .and_(lambda: not self.util.algae_mode).onTrue(
             runOnce(lambda: self.intake_arm.set_state("intake_coral"), self.intake_arm)
         ).onFalse(
             runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
-        )
+        ))
         self.operator_controller.axisGreaterThan(1, 0.1).and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
             runOnce(lambda: self.intake_arm.set_state("intake_algae"), self.intake_arm)
         ).onFalse(
