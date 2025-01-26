@@ -10,8 +10,8 @@ class CheckDrivetrain(Command):
 
     def __init__(self, drive: CommandSwerveDrivetrain, timer: Timer):
         super().__init__()
-        self.normal_drive_currents = [100, 100, 100, 100]
-        self.normal_steer_currents = [50, 50, 50, 50]
+        self.normal_drive_currents = [60, 60, 60, 60]
+        self.normal_steer_currents = [40, 40, 40, 40]
         
         self.fl_drive_warning = Alert("FRONT LEFT DRIVE ABNORMAL CURRENT DRAW", Alert.AlertType.kWarning)
         self.fl_steer_warning = Alert("FRONT LEFT STEER ABNORMAL CURRENT DRAW", Alert.AlertType.kWarning)

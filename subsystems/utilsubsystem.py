@@ -1,5 +1,5 @@
 from commands2 import Subsystem
-from wpilib import PowerDistribution, SmartDashboard, DriverStation
+from wpilib import PowerDistribution, SmartDashboard, DriverStation, DigitalInput
 
 
 class UtilSubsystem(Subsystem):
@@ -7,6 +7,8 @@ class UtilSubsystem(Subsystem):
         super().__init__()
 
         self.pdh = PowerDistribution(1, PowerDistribution.ModuleType.kRev)
+
+        self.sensor_test = DigitalInput(0)
 
         self.scoring_location = 0
         self.algae_mode = False
@@ -117,3 +119,4 @@ class UtilSubsystem(Subsystem):
 
     def periodic(self) -> None:
         SmartDashboard.putString("Scoring Setpoint", self.scoring_setpoints[self.scoring_setpoint])
+        SmartDashboard.putBoolean("Sensor Test", self.sensor_test.get())
