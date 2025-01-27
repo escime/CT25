@@ -41,6 +41,8 @@ class AutoConstants:
     drive_base_radius = Translation2d(_front_left_x_pos, _front_left_y_pos).norm()
     speed_at_12_volts: units.meters_per_second = 4.73
 
+    drive_gear_ratio = 6.746031746031747
+
     # PID Constants for PathPlanner
     x_pid = [5, 0, 0]
     y_pid = [5, 0, 0]

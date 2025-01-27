@@ -33,6 +33,7 @@ from commands.collect_from_cs import Collect
 from commands.auto_set_elevator_and_arm import AutoSetElevatorAndArm
 from commands.coral_station_alignment import CoralStationAlignment
 from commands.score_attempt import ScoreAttempt
+from commands.wheel_radius_calculator import WheelRadiusCalculator
 
 
 class RobotContainer:
@@ -428,6 +429,10 @@ class RobotContainer:
                 lambda: self._point.with_module_direction(
                     Rotation2d(-1 * self.driver_controller.getLeftY()
                                -1 * self.driver_controller.getLeftX()))))
+
+        self.driver_controller.back().and_(lambda: self.test_bindings).onTrue(
+            WheelRadiusCalculator(self.drivetrain, self.timer)
+        )
 
     def configure_sys_id(self) -> None:
         (self.driver_controller.y().and_(lambda: self.test_bindings).and_(self.driver_controller.rightTrigger())
