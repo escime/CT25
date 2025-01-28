@@ -77,7 +77,7 @@ class RobotContainer:
         self.leds = LEDs(self.timer)
         self.util = UtilSubsystem()
         # self.elevator_and_arm = ElevatorAndArmSubsystem()
-        # self.intake_arm = Intake()
+        self.intake_arm = Intake()
         # self.climber_arm = Climber()
 
         # Setup driver & operator controllers. -------------------------------------------------------------------------
@@ -305,28 +305,28 @@ class RobotContainer:
         # )
         
         # Intake controls.
-        # (self.operator_controller.axisGreaterThan(1, 0.1).and_(lambda: not self.test_bindings)
-        #     .and_(lambda: not self.util.algae_mode).onTrue(
-        #     runOnce(lambda: self.intake_arm.set_state("intake_coral"), self.intake_arm)
-        # ).onFalse(
-        #     runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
-        # ))
-        # self.operator_controller.axisGreaterThan(1, 0.1).and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
-        #     runOnce(lambda: self.intake_arm.set_state("intake_algae"), self.intake_arm)
-        # ).onFalse(
-        #     runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
-        # )
-        # self.driver_controller.rightBumper().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
-        #     runOnce(lambda: self.intake_arm.set_state("score_coral"), self.intake_arm)
-        # ).onFalse(
-        #     runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
-        # )
-        # self.driver_controller.rightBumper().and_(lambda: not self.test_bindings).and_(
-        #     lambda: self.util.algae_mode).onTrue(
-        #     runOnce(lambda: self.intake_arm.set_state("score_algae"), self.intake_arm)
-        # ).onFalse(
-        #     runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
-        # )
+        (self.operator_controller.axisGreaterThan(1, 0.1).and_(lambda: not self.test_bindings)
+            .and_(lambda: not self.util.algae_mode).onTrue(
+            runOnce(lambda: self.intake_arm.set_state("intake_coral"), self.intake_arm)
+        ).onFalse(
+            runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
+        ))
+        self.operator_controller.axisGreaterThan(1, 0.1).and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
+            runOnce(lambda: self.intake_arm.set_state("intake_algae"), self.intake_arm)
+        ).onFalse(
+            runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
+        )
+        self.driver_controller.rightBumper().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
+            runOnce(lambda: self.intake_arm.set_state("score_coral"), self.intake_arm)
+        ).onFalse(
+            runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
+        )
+        self.driver_controller.rightBumper().and_(lambda: not self.test_bindings).and_(
+            lambda: self.util.algae_mode).onTrue(
+            runOnce(lambda: self.intake_arm.set_state("score_algae"), self.intake_arm)
+        ).onFalse(
+            runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
+        )
 
         # Coral acquired light
         # button.Trigger(lambda: self.elevator_and_arm.get_coral_sensors() and DriverStation.isTeleop()).onTrue(
