@@ -18,7 +18,7 @@ class CoralStationAlignment(Command):
         # self.elevator = elevator
         self.joystick = joystick
         self.util = util
-        self.flipped = True
+        self.flipped = False
 
         self.forward_request = (swerve.requests.RobotCentric()
                                 .with_drive_request_type(swerve.SwerveModule.DriveRequestType.VELOCITY)
@@ -35,6 +35,7 @@ class CoralStationAlignment(Command):
 
     def initialize(self):
         self.target = self.get_closest_target()
+        self.drive.set_used_tags("border")
         # self.arm.set_state(self.util.scoring_setpoints[self.util.scoring_setpoint])
 
     def execute(self):
@@ -70,6 +71,7 @@ class CoralStationAlignment(Command):
 
     def end(self, interrupted: bool):
         self.drive.apply_request(lambda: self.forward_request).withTimeout(0.02).schedule()
+        self.drive.set_used_tags("all")
         # self.arm.set_state("stow")
 
     def get_closest_target_coordinates(self, current_pose, alpha) -> [float, float]:

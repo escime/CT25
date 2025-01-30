@@ -38,25 +38,25 @@ class SetElevatorAndArm(Command):
                 if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
                     if self.drive.get_pose().x > 13:
                         if -90 < self.drive.get_pose().rotation().degrees() < 90:
-                            self.arm_target += "left"
-                        else:
                             self.arm_target += "right"
+                        else:
+                            self.arm_target += "left"
                     if self.drive.get_pose().x < 13:
                         if -90 < self.drive.get_pose().rotation().degrees() < 90:
-                            self.arm_target += "right"
-                        else:
                             self.arm_target += "left"
+                        else:
+                            self.arm_target += "right"
                 else:
                     if self.drive.get_pose().x > 4:
                         if -90 < self.drive.get_pose().rotation().degrees() < 90:
-                            self.arm_target += "left"
-                        else:
                             self.arm_target += "right"
+                        else:
+                            self.arm_target += "left"
                     if self.drive.get_pose().x < 4:
                         if -90 < self.drive.get_pose().rotation().degrees() < 90:
-                            self.arm_target += "right"
-                        else:
                             self.arm_target += "left"
+                        else:
+                            self.arm_target += "right"
             else:
                 self.arm_target = "stow"
 

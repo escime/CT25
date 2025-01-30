@@ -37,6 +37,10 @@ class AutoAlignmentMultiFeedback(Command):
 
     def initialize(self):
         self.target = self.get_closest_target()
+        if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
+            self.drive.set_used_tags("red_reef")
+        else:
+            self.drive.set_used_tags("blue_reef")
         # self.arm.set_state(self.util.scoring_setpoints[self.util.scoring_setpoint])
 
     def execute(self):
@@ -76,6 +80,7 @@ class AutoAlignmentMultiFeedback(Command):
 
     def end(self, interrupted: bool):
         self.drive.apply_request(lambda: self.forward_request).withTimeout(0.02).schedule()
+        self.drive.set_used_tags("all")
         # self.arm.set_state("stow")
 
     def get_closest_target_coordinates(self, current_pose, alpha) -> [float, float]:

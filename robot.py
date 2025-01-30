@@ -5,14 +5,21 @@ from phoenix6 import SignalLogger, utils
 from ntcore import NetworkTableInstance
 from wpimath.geometry import Pose2d, Translation2d, Rotation2d
 from helpers import elasticlib
+from wpimath.units import inchesToMeters, degreesToRadians
 
 
 class Robot(TimedCommandRobot):
     """This class allows the programmer to control what runs in each individual robot operation mode."""
     m_autonomous_command: Command  # Definition for autonomous command groups used in autonomousInit
     m_robotcontainer: RobotContainer  # Type-check for robotcontainer class
-    ll1 = NetworkTableInstance.getDefault().getTable("limelight")
+
+    # Limelight setup
+    # ll1 = NetworkTableInstance.getDefault().getTable("limelight")
+
+    # Scheduler frequency delay
     CommandScheduler.getInstance().setPeriod(0.04)
+
+    # Notification setup for Elastic
     teleop_notification = elasticlib.Notification(level="INFO", title="Teleop activated!",
                                                   description="The robot is now in teleop mode.", display_time=3000)
     auto_notification = elasticlib.Notification(level="INFO", title="Auto activated!",
@@ -29,24 +36,25 @@ class Robot(TimedCommandRobot):
         """Set the constant robot periodic state (in command based, that's just run the scheduler loop)"""
         CommandScheduler.getInstance().run()
         SmartDashboard.putString("Drivetrain Command", str(self.m_robotcontainer.drivetrain.getCurrentCommand()))
-        self.ll1.putNumberArray("robot_orientation_set",
-                                         [self.m_robotcontainer.drivetrain.get_pose().rotation().degrees(), 0, 0,
-                                          0, 0, 0])
-        ll1_pose = self.ll1.getEntry("botpose_orb_wpiblue").getDoubleArray([0.0, 0.0, 0.0, 0.0, 0.0,
-                                                                                  0.0, 0.0, 0.0, 0.0, 0.0,
-                                                                                  0.0, 0.0])
-        self.m_robotcontainer.drivetrain.target_lateral_offset = self.ll1.getNumber("tx", -1)
-        self.m_robotcontainer.drivetrain.visible_tag = self.ll1.getNumber("tid", -1)
-        if (ll1_pose[9] < 5 and ll1_pose[7] >= 1 and
-                0 < ll1_pose[0] < 16.7 and 0 < ll1_pose[1] < 6):
-            self.m_robotcontainer.drivetrain.add_vision_measurement(
-                Pose2d(
-                    Translation2d(
-                        ll1_pose[0],
-                        ll1_pose[1]),
-                    Rotation2d.fromDegrees((ll1_pose[5] + 360) % 360)),
-                utils.get_current_time_seconds() - (ll1_pose[6] / 1000.0),
-                (0.2, 0.2, 999999999))
+
+        # self.ll1.putNumberArray("robot_orientation_set",
+        #                                  [self.m_robotcontainer.drivetrain.get_pose().rotation().degrees(), 0, 0,
+        #                                   0, 0, 0])
+        # ll1_pose = self.ll1.getEntry("botpose_orb_wpiblue").getDoubleArray([0.0, 0.0, 0.0, 0.0, 0.0,
+        #                                                                           0.0, 0.0, 0.0, 0.0, 0.0,
+        #                                                                           0.0, 0.0])
+        # self.m_robotcontainer.drivetrain.target_lateral_offset = self.ll1.getNumber("tx", -1)
+        # self.m_robotcontainer.drivetrain.visible_tag = self.ll1.getNumber("tid", -1)
+        # if (ll1_pose[9] < 5 and ll1_pose[7] >= 1 and
+        #         0 < ll1_pose[0] < 16.7 and 0 < ll1_pose[1] < 6):
+        #     self.m_robotcontainer.drivetrain.add_vision_measurement(
+        #         Pose2d(
+        #             Translation2d(
+        #                 ll1_pose[0],
+        #                 ll1_pose[1]),
+        #             Rotation2d.fromDegrees((ll1_pose[5] + 360) % 360)),
+        #         utils.get_current_time_seconds() - (ll1_pose[6] / 1000.0),
+        #         (0.2, 0.2, 999999999))
 
     def disabledInit(self) -> None:
         """Nothing is written here yet. Probably will not modify unless something is required for end-of-match."""

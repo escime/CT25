@@ -13,78 +13,78 @@ class UtilSubsystem(Subsystem):
         # FORMAT: X, Y, ANGLE, LOCATION NAME, APRILTAG FOR SERVOING
         self.scoring_sides_red = [
             [13.766, 4.031, [
-                [13.449, 3.560, 180.001, "Red A Normal"],
-                [13.449, 3.894, 180.001, "Red B Normal"],
                 [13.324, 4.151, 180.001, "Red A Flipped"],
                 [13.324, 4.489, 180.001, "Red B Flipped"],
+                [13.449, 3.560, 180.001, "Red A Normal"],
+                [13.449, 3.894, 180.001, "Red B Normal"],
             ]],
             [13.404, 4.609, [
-                [13.613, 4.095, 240, "Red C Normal"],
-                [13.348, 4.264, 240, "Red D Normal"],
                 [13.107, 4.344, 240, "Red C Flipped"],
                 [12.810, 4.473, 240, "Red D Flipped"],
+                [13.613, 4.095, 240, "Red C Normal"],
+                [13.348, 4.264, 240, "Red D Normal"],
             ]],
             [12.729, 4.585, [
-                [13.316, 4.497, 120, "Red E Normal"],
-                [13.043, 4.336, 120, "Red F Normal"],
                 [12.810, 4.191, 120, "Red E Flipped"],
                 [12.528, 4.031, 120, "Red F Flipped"],
+                [13.316, 4.497, 120, "Red E Normal"],
+                [13.043, 4.336, 120, "Red F Normal"],
             ]],
             [12.384, 4.015, [
-                [12.729, 4.473, 0.001, "Red G Normal"],
-                [12.729, 4.151, 0.001, "Red H Normal"],
                 [12.753, 3.910, 0.001, "Red G Flipped"],
                 [12.753, 3.541, 0.001, "Red H Flipped"],
+                [12.729, 4.473, 0.001, "Red G Normal"],
+                [12.729, 4.151, 0.001, "Red H Normal"],
             ]],
             [12.729, 3.412, [
-                [12.512, 3.975, 60, "Red I Normal"],
-                [12.810, 3.838, 60, "Red J Normal"],
                 [13.043, 3.709, 60, "Red I Flipped"],
                 [13.308, 3.541, 60, "Red J Flipped"],
+                [12.512, 3.975, 60, "Red I Normal"],
+                [12.810, 3.838, 60, "Red J Normal"],
             ]],
             [13.388, 3.482, [
-                [12.786, 3.565, 300, "Red K Normal"],
-                [13.083, 3.709, 300, "Red L Normal"],
                 [13.340, 3.822, 300, "Red K Flipped"],
                 [13.637, 4.007, 300, "Red L Flipped"],
+                [12.786, 3.565, 300, "Red K Normal"],
+                [13.083, 3.709, 300, "Red L Normal"],
             ]]
         ]
         self.scoring_sides_blue = [
             [3.795, 4.018, [
-                [4.204, 4.482, 0.001, "Blue A Normal"],
-                [4.204, 4.148, 0.001, "Blue B Normal"],
                 [4.242, 3.900, 0.001, "Blue A Flipped"],
                 [4.215, 3.555, 0.001, "Blue B Flipped"],
+                [4.204, 4.482, 0.001, "Blue A Normal"],
+                [4.204, 4.148, 0.001, "Blue B Normal"],
             ]],
             [4.140, 3.426, [
-                [3.935, 4.024, 60, "Blue C Normal"],
-                [4.221, 3.873, 60, "Blue D Normal"],
                 [4.468, 3.679, 60, "Blue C Flipped"],
                 [4.743, 3.523, 60, "Blue D Flipped"],
+                [3.935, 4.024, 60, "Blue C Normal"],
+                [4.221, 3.873, 60, "Blue D Normal"],
             ]],
             [4.829, 3.437, [
-                [4.226, 3.560, 300, "Blue E Normal"],
-                [4.501, 3.711, 300, "Blue F Normal"],
                 [4.748, 3.835, 300, "Blue E Flipped"],
                 [5.055, 3.981, 300, "Blue F Flipped"],
+                [4.226, 3.560, 300, "Blue E Normal"],
+                [4.501, 3.711, 300, "Blue F Normal"],
             ]],
             [5.169, 4.029, [
-                [4.765, 3.582, 180.001, "Blue G Normal"],
-                [4.765, 3.889, 180.001, "Blue H Normal"],
                 [4.765, 4.164, 180.001, "Blue G Flipped"],
                 [4.765, 4.498, 180.001, "Blue H Flipped"],
+                [4.765, 3.582, 180.001, "Blue G Normal"],
+                [4.765, 3.889, 180.001, "Blue H Normal"],
             ]],
             [4.824, 4.627, [
-                [4.996, 3.991, 240, "Blue I Normal"],
-                [4.748, 4.207, 240, "Blue J Normal"],
                 [4.506, 4.341, 240, "Blue I Flipped"],
                 [4.231, 4.482, 240, "Blue J Flipped"],
+                [4.996, 3.991, 240, "Blue I Normal"],
+                [4.748, 4.207, 240, "Blue J Normal"],
             ]],
             [4.145, 4.611, [
-                [4.775, 4.482, 120, "Blue K Normal"],
-                [4.458, 4.341, 120, "Blue L Normal"],
                 [4.242, 4.180, 120, "Blue K Flipped"],
                 [3.951, 4.045, 120, "Blue L Flipped"],
+                [4.775, 4.482, 120, "Blue K Normal"],
+                [4.458, 4.341, 120, "Blue L Normal"],
             ]]
         ]
 
@@ -115,5 +115,5 @@ class UtilSubsystem(Subsystem):
         self.algae_mode = algae_mode_enabled
         SmartDashboard.putBoolean("Algae Mode?", algae_mode_enabled)
 
-    def periodic(self) -> None:
-        SmartDashboard.putString("Scoring Setpoint", self.scoring_setpoints[self.scoring_setpoint])
+    # def periodic(self) -> None:
+    #     SmartDashboard.putString("Scoring Setpoint", self.scoring_setpoints[self.scoring_setpoint])

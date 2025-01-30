@@ -33,6 +33,8 @@ class ElevatorAndArmSubsystem(Subsystem):
         self.intake_sensor_left = DigitalInput(0)
         self.intake_sensor_right = DigitalInput(1)
 
+        self.lower_limit_switch = DigitalInput(3)
+
         self.elevator_state_values = ElevatorConstants.state_values
         self.arm_state_values = ArmConstants.state_values
         self.elevator_state = "stow"
@@ -303,3 +305,47 @@ class ElevatorAndArmSubsystem(Subsystem):
         #                                 ElevatorConstants.drum_diameter_in)
         SmartDashboard.putString("Lift Motor Position", str(self.lift_main.get_position()))
         SmartDashboard.putString("Elevator Setpoint", self.elevator_state)
+        if self.elevator_state == "stow" and not self.lower_limit_switch.get():
+            self.lift_main.set_position(0)
+
+
+class ReZeroTorque(Command):
+    def __init__(self, elevator_and_arm: ElevatorAndArmSubsystem):
+        super().__init__()
+        self.elevator_and_arm = elevator_and_arm
+        self.current_limit_configuration = TalonFXConfiguration()
+        self.config_failure = False
+        self.current_limit = 10
+
+    def initialize(self):
+        self.current_limit_configuration.current_limits.supply_current_limit = self.current_limit
+
+        status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
+        for _ in range(0, 5):
+            status = self.elevator_and_arm.lift_main.configurator.apply(self.current_limit_configuration)
+            if status.is_ok():
+                break
+        if not status.is_ok():
+            self.config_failure = True
+
+    def execute(self):
+        self.elevator_and_arm.set_elevator_manual(-2)
+
+    def isFinished(self) -> bool:
+        if self.config_failure or self.elevator_and_arm.lift_main.get_supply_current().value_as_double >= self.current_limit:
+            return True
+        else:
+            return False
+
+    def end(self, interrupted: bool):
+        self.elevator_and_arm.set_elevator_manual(0)
+
+        if not self.config_failure:
+            self.elevator_and_arm.lift_main.set_position(0)
+
+        self.current_limit_configuration.current_limits.supply_current_limit = ElevatorConstants.supply_current_limit
+
+        for _ in range(0, 5):
+            status = self.elevator_and_arm.lift_main.configurator.apply(self.current_limit_configuration)
+            if status.is_ok():
+                break

@@ -135,8 +135,9 @@ class Intake(Subsystem):
         if is_simulation():
             self.update_sim()
             self.intake_arm_m2d_elbow.setAngle(degrees(self.arm_sim.getAngle()))
-        else:
-            self.intake_arm_m2d_elbow.setAngle(self.intake_arm.get_position().value_as_double)
+            SmartDashboard.putData("Arm M2D", self.intake_arm_m2d)
+        # else:
+        #     self.intake_arm_m2d_elbow.setAngle(self.intake_arm.get_position().value_as_double)
 
         #if self.state == "score_coral":
         #    if self.get_at_target():
@@ -146,6 +147,6 @@ class Intake(Subsystem):
         #else:
         #    self.intake.setVoltage(0)
 
-        SmartDashboard.putData("Arm M2D", self.intake_arm_m2d)
+        # SmartDashboard.putData("Arm M2D", self.intake_arm_m2d)
         SmartDashboard.putNumber("Intake Position", self.intake_arm.get_position().value_as_double)
         SmartDashboard.putString("Intake State", self.get_state())

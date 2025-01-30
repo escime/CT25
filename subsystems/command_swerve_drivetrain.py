@@ -5,13 +5,16 @@ from phoenix6 import swerve, units, utils, SignalLogger
 from typing import Callable, overload
 from wpilib import DriverStation, Notifier, RobotController, SmartDashboard, Alert
 from wpilib.sysid import SysIdRoutineLog
-from wpimath.geometry import Rotation2d, Pose2d
+from wpimath.geometry import Rotation2d, Pose2d, Transform3d, Translation3d, Rotation3d, Pose3d
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.config import PIDConstants, RobotConfig
 from pathplannerlib.path import PathConstraints
 from pathplannerlib.controller import PPHolonomicDriveController
 from constants import AutoConstants
-from wpimath.units import degreesToRadians
+from wpimath.units import degreesToRadians, inchesToMeters
+from robotpy_apriltag import AprilTagFieldLayout, AprilTagField
+from photonlibpy import photonCamera, photonPoseEstimator
+from photonlibpy.simulation import VisionSystemSim, SimCameraProperties, PhotonCameraSim
 
 
 class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
@@ -255,6 +258,44 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             ),
         )
 
+        april_tag_field_layout = AprilTagFieldLayout.loadField(AprilTagField.k2025Reefscape)
+        cam1 = photonCamera.PhotonCamera("TAG_DETECT_FL")
+        cam2 = photonCamera.PhotonCamera("TAG_DETECT_FR")
+        robot_to_cam1 = Transform3d(Translation3d(inchesToMeters(9.625), inchesToMeters(9.625), inchesToMeters(8)),
+                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(-45)))
+        robot_to_cam2 = Transform3d(Translation3d(inchesToMeters(9.625), inchesToMeters(-9.625), inchesToMeters(8)),
+                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(45)))
+
+        photon_pose_cam1 = (
+            photonPoseEstimator.PhotonPoseEstimator(april_tag_field_layout,
+                                                    photonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY,
+                                                    cam1,
+                                                    robot_to_cam1))
+        photon_pose_cam2 = (
+            photonPoseEstimator.PhotonPoseEstimator(april_tag_field_layout,
+                                                    photonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY,
+                                                    cam2,
+                                                    robot_to_cam2))
+
+        self.photon_cam_array = [cam1, cam2]
+        self.photon_pose_array = [photon_pose_cam1, photon_pose_cam2]
+
+        self.used_tags = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
+
+        if utils.is_simulation():
+            self.vision_sim = VisionSystemSim("main")
+            self.vision_sim.addAprilTags(AprilTagFieldLayout.loadField(AprilTagField.k2025Reefscape))
+            camera_prop = SimCameraProperties()
+            camera_prop.setCalibrationFromFOV(1280, 800, Rotation2d.fromDegrees(75))
+            camera_prop.setCalibError(0.25, 0.08)
+            camera_prop.setFPS(30)
+            camera_prop.setAvgLatency(0.01)
+            camera_prop.setLatencyStdDev(0.01)
+            cam1_sim = PhotonCameraSim(cam1, camera_prop)
+            cam2_sim = PhotonCameraSim(cam2, camera_prop)
+            self.vision_sim.addCamera(cam1_sim, robot_to_cam1)
+            self.vision_sim.addCamera(cam2_sim, robot_to_cam2)
+
     def apply_request(self, request: Callable[[], swerve.requests.SwerveRequest]) -> Command:
         """
         Returns a command that applies the specified control request to this swerve drivetrain.
@@ -285,6 +326,51 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         # Update robot velocity and acceleration.
         if self.lookahead_active:
             self.vel_acc_periodic()
+
+        # Update Photonvision cameras.
+        if self.photon_cam_array[0].isConnected():
+            self.select_best_vision_pose()
+
+        if utils.is_simulation():
+            self.vision_sim.update(self.get_pose())
+
+    def select_best_vision_pose(self) -> None:
+        accepted_poses = []
+        accepted_cameras = []
+        final_pose = Pose3d(0, 0, 0, Rotation3d(0, 0, 0))
+        final_timestamp = 0
+        for i in range(0, len(self.photon_cam_array)):
+            if self.photon_cam_array[i].getLatestResult().hasTargets():
+                estimated_pose = self.photon_pose_array[i].update().estimatedPose
+                if (0 < estimated_pose.x < 17.658 and 0 < estimated_pose.y < 8.131 and 0 <= estimated_pose.z <= 0.05 and
+                        self.photon_cam_array[i].getLatestResult().getBestTarget().fiducialId in self.used_tags):
+                    accepted_poses.append(estimated_pose)
+                    accepted_cameras.append(self.photon_cam_array[i])
+
+        if accepted_poses:
+            min_ambiguity = 3940
+            for j in range(0, len(accepted_cameras)):
+                pose_ambiguity = accepted_cameras[j].getLatestResult().getBestTarget().getPoseAmbiguity()
+                if pose_ambiguity < min_ambiguity:
+                    min_ambiguity = pose_ambiguity
+                    final_pose = accepted_poses[j]
+                    final_timestamp = accepted_cameras[j].getLatestResult().getTimestampSeconds()
+
+        if final_pose != Pose3d(0, 0, 0, Rotation3d(0, 0, 0)):
+            SmartDashboard.putBoolean("Accepted new pose?", True)
+            self.add_vision_measurement(Pose2d(final_pose.x, final_pose.y, Rotation2d(0)), final_timestamp, (0.4, 0.4, 999999999))
+        else:
+            SmartDashboard.putBoolean("Accepted new pose?", False)
+
+    def set_used_tags(self, tags: str):
+        if tags == "red_reef":
+            self.used_tags = [6, 7, 8, 9, 10, 11]
+        elif tags == "blue_reef":
+            self.used_tags = [17, 18, 19, 20, 21, 22]
+        elif tags == "border":
+            self.used_tags = [1, 2, 3, 13, 12, 16]
+        else:
+            self.used_tags = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
 
     def set_lookahead(self, on: bool) -> None:
         self.lookahead_active = on

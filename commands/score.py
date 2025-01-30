@@ -35,6 +35,7 @@ class Score(Command):
             self.elevator_and_arm.set_arm_state("stow")
 
     def isFinished(self) -> bool:
+        # print(self.elevator_and_arm.get_arm_at_target())
         return self.timer.get() - self.time_in > 0.5
 
     def end(self, interrupted: bool):

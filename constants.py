@@ -96,7 +96,7 @@ class ArmConstants:
     supply_current_limit = 40
     use_supply_current_limit = False
     gearbox_ratio = 20.8
-    arm_at_target_threshold = 0.01
+    arm_at_target_threshold = 0.05
 
     mm_cruise_velocity = 0.5
     mm_acceleration = 5

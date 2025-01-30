@@ -104,8 +104,8 @@ class Climber(Subsystem):
         if is_simulation():
             self.update_sim()
             self.climber_arm_m2d_elbow.setAngle(degrees(self.arm_sim.getAngle()))
-        else:
-            self.climber_arm_m2d_elbow.setAngle(self.climber_arm.get_position().value_as_double)
+            SmartDashboard.putData("Climber Arm M2D", self.climber_arm_m2d)
+        # else:
+        #     self.climber_arm_m2d_elbow.setAngle(self.climber_arm.get_position().value_as_double)
 
-        SmartDashboard.putData("Climber Arm M2D", self.climber_arm_m2d)
         SmartDashboard.putNumber("Climber Position", self.climber_arm.get_position().value_as_double)
