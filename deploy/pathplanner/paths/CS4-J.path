@@ -12,20 +12,20 @@
         "y": 7.028925841205995
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "CS4"
     },
     {
       "anchor": {
-        "x": 5.23575,
-        "y": 5.077999999999999
+        "x": 5.240774428182291,
+        "y": 5.069588423469
       },
       "prevControl": {
-        "x": 5.21625,
-        "y": 5.789750000000001
+        "x": 5.22127442818229,
+        "y": 5.781338423469001
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "J"
     }
   ],
   "rotationTargets": [],
@@ -54,7 +54,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -116.93952806380081
+    "rotation": -119.99999999999999
   },
   "reversed": false,
   "folder": null,

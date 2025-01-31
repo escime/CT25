@@ -10,7 +10,7 @@ from subsystems.ledsubsystem import LEDs
 from subsystems.utilsubsystem import UtilSubsystem
 from subsystems.elevatorandarm import ElevatorAndArmSubsystem
 from wpilib import SmartDashboard, SendableChooser, DriverStation, DataLogManager, Timer, Alert
-from pathplannerlib.auto import NamedCommands, PathPlannerAuto
+from pathplannerlib.auto import NamedCommands, PathPlannerAuto, AutoBuilder
 from wpinet import PortForwarder
 
 from generated.tuner_constants import TunerConstants
@@ -118,12 +118,12 @@ class RobotContainer:
         self.registerCommands()
 
         # Set up new autonomous selection structure
-        self.m_auto_start_location = SendableChooser()
-        self.m_auto_start_location.setDefaultOption("A", "A")
-        self.m_auto_num_gp = SendableChooser()
-        self.m_auto_num_gp.setDefaultOption("1", "1")
-        SmartDashboard.putData("Auto Start Selector", self.m_auto_start_location)
-        SmartDashboard.putData("Auto GP Num Selector", self.m_auto_num_gp)
+        # self.m_auto_start_location = SendableChooser()
+        # self.m_auto_start_location.setDefaultOption("A", "A")
+        # self.m_auto_num_gp = SendableChooser()
+        # self.m_auto_num_gp.setDefaultOption("1", "1")
+        # SmartDashboard.putData("Auto Start Selector", self.m_auto_start_location)
+        # SmartDashboard.putData("Auto GP Num Selector", self.m_auto_num_gp)
 
         SmartDashboard.putBoolean("Misalignment Indicator Active?", False)
         SmartDashboard.putNumber("Misalignment Angle", 0)
@@ -134,11 +134,13 @@ class RobotContainer:
         self.configure_triggers()
 
         # Setup autonomous selector on the dashboard. ------------------------------------------------------------------
-        self.m_chooser = SendableChooser()
-        self.auto_names = ["Test", "Baseline", "CheckDrivetrain", "BuildPlay", "1-Score4"]
-        self.m_chooser.setDefaultOption("DoNothing", "DoNothing")
-        for x in self.auto_names:
-            self.m_chooser.addOption(x, x)
+        # self.m_chooser = SendableChooser()
+        # self.auto_names = ["Test", "Baseline", "CheckDrivetrain", "BuildPlay", "1-Score4"]
+        # self.m_chooser.setDefaultOption("DoNothing", "DoNothing")
+        # for x in self.auto_names:
+        #     self.m_chooser.addOption(x, x)
+        # SmartDashboard.putData("Auto Select", self.m_chooser)
+        self.m_chooser = AutoBuilder.buildAutoChooser("DoNothing")
         SmartDashboard.putData("Auto Select", self.m_chooser)
 
     def configure_triggers(self) -> None:
@@ -329,6 +331,15 @@ class RobotContainer:
             runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
         )
 
+        # Debug Mode Toggle
+        self.driver_controller.start().and_(lambda: not self.test_bindings).onTrue(
+            SequentialCommandGroup(
+                runOnce(lambda: self.intake_arm.set_debug_mode(), self.intake_arm),
+                runOnce(lambda: self.elevator_and_arm.set_debug_mode(), self.elevator_and_arm),
+                runOnce(lambda: self.climber_arm.set_debug_mode(), self.climber_arm)
+            )
+        )
+
         # Coral acquired light
         button.Trigger(lambda: self.elevator_and_arm.get_coral_sensors() and DriverStation.isTeleop()).onTrue(
             SequentialCommandGroup(
@@ -402,24 +413,25 @@ class RobotContainer:
         """Use this to pass the autonomous command to the main Robot class.
         Returns the command to run in autonomous
         """
-        if self.m_chooser.getSelected() == "DoNothing":
-            return None
-        elif self.m_chooser.getSelected() == "BuildPlay":
-            try:
-                selected_auto = PathPlannerAuto(self.m_auto_start_location.getSelected() + "_Score" +
-                                                self.m_auto_num_gp.getSelected())
-            except FileNotFoundError:
-                selected_auto = None
-            return selected_auto
-        else:
-            selected_auto = None
-            for y in self.auto_names:
-                if self.m_chooser.getSelected() == y:
-                    try:
-                        selected_auto = PathPlannerAuto(y)
-                    except FileNotFoundError:
-                        selected_auto = None
-            return selected_auto
+        return self.m_chooser.getSelected()
+        # if self.m_chooser.getSelected() == "DoNothing":
+        #     return None
+        # elif self.m_chooser.getSelected() == "BuildPlay":
+        #     try:
+        #         selected_auto = PathPlannerAuto(self.m_auto_start_location.getSelected() + "_Score" +
+        #                                         self.m_auto_num_gp.getSelected())
+        #     except FileNotFoundError:
+        #         selected_auto = None
+        #     return selected_auto
+        # else:
+        #     selected_auto = None
+        #     for y in self.auto_names:
+        #         if self.m_chooser.getSelected() == y:
+        #             try:
+        #                 selected_auto = PathPlannerAuto(y)
+        #             except FileNotFoundError:
+        #                 selected_auto = None
+        #     return selected_auto
 
     def configure_test_bindings(self) -> None:
         self.configure_sys_id()

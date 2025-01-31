@@ -64,6 +64,8 @@ class Climber(Subsystem):
 
         self.climber_arm_volts = VoltageOut(0, True)
 
+        self.debug_mode = False
+
         self.last_time = get_current_time_seconds()
 
     def get_position(self) -> float:
@@ -91,6 +93,9 @@ class Climber(Subsystem):
                                      .with_limit_reverse_motion(self.get_reverse_limit_triggered())
                                      .with_limit_forward_motion(self.get_forward_limit_triggered()))
 
+    def set_debug_mode(self) -> None:
+        self.debug_mode = not self.debug_mode
+
     def update_sim(self):
         current_time = get_current_time_seconds()
         dt = current_time - self.last_time
@@ -108,4 +113,5 @@ class Climber(Subsystem):
         # else:
         #     self.climber_arm_m2d_elbow.setAngle(self.climber_arm.get_position().value_as_double)
 
-        SmartDashboard.putNumber("Climber Position", self.climber_arm.get_position().value_as_double)
+        if self.debug_mode:
+            SmartDashboard.putNumber("Climber Position", self.climber_arm.get_position().value_as_double)

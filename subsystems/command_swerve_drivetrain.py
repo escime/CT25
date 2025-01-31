@@ -15,6 +15,7 @@ from wpimath.units import degreesToRadians, inchesToMeters
 from robotpy_apriltag import AprilTagFieldLayout, AprilTagField
 from photonlibpy import photonCamera, photonPoseEstimator
 from photonlibpy.simulation import VisionSystemSim, SimCameraProperties, PhotonCameraSim
+from wpiutil import Sendable, SendableBuilder
 
 
 class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
@@ -296,6 +297,8 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             self.vision_sim.addCamera(cam1_sim, robot_to_cam1)
             self.vision_sim.addCamera(cam2_sim, robot_to_cam2)
 
+        SmartDashboard.putData("Swerve Drive", SwerveDriveSendable(self))
+
     def apply_request(self, request: Callable[[], swerve.requests.SwerveRequest]) -> Command:
         """
         Returns a command that applies the specified control request to this swerve drivetrain.
@@ -358,7 +361,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
 
         if final_pose != Pose3d(0, 0, 0, Rotation3d(0, 0, 0)):
             SmartDashboard.putBoolean("Accepted new pose?", True)
-            self.add_vision_measurement(Pose2d(final_pose.x, final_pose.y, Rotation2d(0)), final_timestamp, (0.4, 0.4, 999999999))
+            self.add_vision_measurement(final_pose.toPose2d(), final_timestamp, (0.4, 0.4, 999999999))
         else:
             SmartDashboard.putBoolean("Accepted new pose?", False)
 
@@ -569,3 +572,37 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
                 .with_velocity_x(x_speed)
                 .with_velocity_y(y_speed)
                 .with_target_direction(self.target_direction))
+
+    def get_speed_callable_0(self) -> float:
+        return self.get_state().module_states[0].speed
+
+    def get_speed_callable_1(self) -> float:
+        return self.get_state().module_states[1].speed
+
+    def get_speed_callable_2(self) -> float:
+        return self.get_state().module_states[1].speed
+
+    def get_speed_callable_3(self) -> float:
+        return self.get_state().module_states[1].speed
+
+    def set_nothing(self) -> None:
+        print("Wow, look at all that nothing.")
+
+
+class SwerveDriveSendable(Sendable):
+
+    def __init__(self, drive: CommandSwerveDrivetrain):
+        super().__init__()
+        self.drive = drive
+
+    def initSendable(self, builder: SendableBuilder):
+        builder.setSmartDashboardType("SwerveDrive")
+        builder.addDoubleProperty("Front Left Angle", self.drive.get_state().module_states[0].angle.radians, self.drive.set_nothing)
+        builder.addDoubleProperty("Front Left Velocity", self.drive.get_speed_callable_0, self.drive.set_nothing)
+        builder.addDoubleProperty("Front Right Angle", self.drive.get_state().module_states[1].angle.radians, self.drive.set_nothing)
+        builder.addDoubleProperty("Front Right Velocity", self.drive.get_speed_callable_1, self.drive.set_nothing)
+        builder.addDoubleProperty("Back Left Angle", self.drive.get_state().module_states[2].angle.radians, self.drive.set_nothing)
+        builder.addDoubleProperty("Back Left Velocity", self.drive.get_speed_callable_2, self.drive.set_nothing)
+        builder.addDoubleProperty("Back Right Angle", self.drive.get_state().module_states[3].angle.radians, self.drive.set_nothing)
+        builder.addDoubleProperty("Back Right Velocity", self.drive.get_speed_callable_3, self.drive.set_nothing)
+        builder.addDoubleProperty("Robot Angle", self.drive.get_pose().rotation().radians, self.drive.set_nothing)

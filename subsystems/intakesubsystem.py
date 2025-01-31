@@ -83,6 +83,8 @@ class Intake(Subsystem):
 
         self.intake_arm_volts = VoltageOut(0, True)
 
+        self.debug_mode = False
+
         self.last_time = get_current_time_seconds()
 
     def set_state(self, state: str) -> None:
@@ -122,6 +124,9 @@ class Intake(Subsystem):
         else:
             return False
 
+    def set_debug_mode(self) -> None:
+        self.debug_mode = not self.debug_mode
+
     def update_sim(self):
         current_time = get_current_time_seconds()
         dt = current_time - self.last_time
@@ -148,5 +153,6 @@ class Intake(Subsystem):
         #    self.intake.setVoltage(0)
 
         # SmartDashboard.putData("Arm M2D", self.intake_arm_m2d)
-        SmartDashboard.putNumber("Intake Position", self.intake_arm.get_position().value_as_double)
-        SmartDashboard.putString("Intake State", self.get_state())
+        if self.debug_mode:
+            SmartDashboard.putNumber("Intake Position", self.intake_arm.get_position().value_as_double)
+            SmartDashboard.putString("Intake State", self.get_state())

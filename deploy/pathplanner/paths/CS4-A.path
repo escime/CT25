@@ -12,20 +12,20 @@
         "y": 6.532072257589494
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "CS4"
     },
     {
       "anchor": {
-        "x": 3.2224735773296214,
-        "y": 3.886892970173576
+        "x": 3.2199367268143506,
+        "y": 3.8893098806660196
       },
       "prevControl": {
-        "x": 2.6297775078417387,
-        "y": 5.103534259712035
+        "x": 2.627240657326468,
+        "y": 5.105951170204478
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "A"
     }
   ],
   "rotationTargets": [],

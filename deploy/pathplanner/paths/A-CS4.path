@@ -12,7 +12,7 @@
         "y": 5.367474013364998
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "A"
     },
     {
       "anchor": {
@@ -25,7 +25,7 @@
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "CS4"
     }
   ],
   "rotationTargets": [],

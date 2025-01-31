@@ -188,6 +188,8 @@ class ElevatorAndArmSubsystem(Subsystem):
 
         self.set_arm_state("stow")
 
+        self.debug_mode = False
+
     def set_elevator_state(self, state: str) -> None:
         self.elevator_state = state
         self.lift_main.set_control(self.lift_main_mm.with_position(self.elevator_state_values[state]).with_slot(0))
@@ -275,6 +277,9 @@ class ElevatorAndArmSubsystem(Subsystem):
     def get_accel_limit(self) -> float:
         return self.accel_limit_scalar
 
+    def set_debug_mode(self) -> None:
+        self.debug_mode = not self.debug_mode
+
     def update_sim(self) -> None:
         current_time = get_current_time_seconds()
         dt = current_time - self.last_time
@@ -303,8 +308,9 @@ class ElevatorAndArmSubsystem(Subsystem):
         # else:
         #     self.elevator_m2d.setLength(self.lift_main.get_position().value_as_double * pi *
         #                                 ElevatorConstants.drum_diameter_in)
-        SmartDashboard.putString("Lift Motor Position", str(self.lift_main.get_position()))
-        SmartDashboard.putString("Elevator Setpoint", self.elevator_state)
+        if self.debug_mode:
+            SmartDashboard.putString("Lift Motor Position", str(self.lift_main.get_position()))
+            SmartDashboard.putString("Elevator Setpoint", self.elevator_state)
         if self.elevator_state == "stow" and not self.lower_limit_switch.get():
             self.lift_main.set_position(0)
 
