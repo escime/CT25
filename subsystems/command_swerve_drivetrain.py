@@ -14,7 +14,8 @@ from constants import AutoConstants
 from wpimath.units import degreesToRadians, inchesToMeters
 from robotpy_apriltag import AprilTagFieldLayout, AprilTagField
 from photonlibpy import photonCamera, photonPoseEstimator
-from photonlibpy.simulation import VisionSystemSim, SimCameraProperties, PhotonCameraSim
+if utils.is_simulation():
+    from photonlibpy.simulation import VisionSystemSim, SimCameraProperties, PhotonCameraSim
 from wpiutil import Sendable, SendableBuilder
 
 
@@ -297,7 +298,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             self.vision_sim.addCamera(cam1_sim, robot_to_cam1)
             self.vision_sim.addCamera(cam2_sim, robot_to_cam2)
 
-        SmartDashboard.putData("Swerve Drive", SwerveDriveSendable(self))
+        # SmartDashboard.putData("Swerve Drive", SwerveDriveSendable(self))
 
     def apply_request(self, request: Callable[[], swerve.requests.SwerveRequest]) -> Command:
         """
@@ -343,21 +344,29 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         final_pose = Pose3d(0, 0, 0, Rotation3d(0, 0, 0))
         final_timestamp = 0
         for i in range(0, len(self.photon_cam_array)):
-            if self.photon_cam_array[i].getLatestResult().hasTargets():
-                estimated_pose = self.photon_pose_array[i].update().estimatedPose
-                if (0 < estimated_pose.x < 17.658 and 0 < estimated_pose.y < 8.131 and 0 <= estimated_pose.z <= 0.05 and
-                        self.photon_cam_array[i].getLatestResult().getBestTarget().fiducialId in self.used_tags):
-                    accepted_poses.append(estimated_pose)
-                    accepted_cameras.append(self.photon_cam_array[i])
+            estimated_pose = self.photon_pose_array[i].update()
+            best_target = self.photon_cam_array[i].getLatestResult().getBestTarget()
+            if estimated_pose is not None:
+            # if self.photon_cam_array[i].getLatestResult().hasTargets() and self.photon_pose_array[i].update().estimatedPose:
+                estimated_pose = estimated_pose.estimatedPose
+                # if (0 < estimated_pose.x < 17.658 and 0 < estimated_pose.y < 8.131 and 0 <= estimated_pose.z <= 0.05 and
+                #         self.photon_cam_array[i].getLatestResult().getBestTarget().fiducialId in self.used_tags):
+                if best_target is not None:
+                    if (0 < estimated_pose.x < 17.658 and 0 < estimated_pose.y < 8.131 and
+                       best_target.fiducialId in self.used_tags):
+                        accepted_poses.append(estimated_pose)
+                        accepted_cameras.append(self.photon_cam_array[i])
 
         if accepted_poses:
             min_ambiguity = 3940
             for j in range(0, len(accepted_cameras)):
-                pose_ambiguity = accepted_cameras[j].getLatestResult().getBestTarget().getPoseAmbiguity()
-                if pose_ambiguity < min_ambiguity:
-                    min_ambiguity = pose_ambiguity
-                    final_pose = accepted_poses[j]
-                    final_timestamp = accepted_cameras[j].getLatestResult().getTimestampSeconds()
+                pose_ambiguity = accepted_cameras[j].getLatestResult().getBestTarget()
+                if pose_ambiguity is not None:
+                    pose_ambiguity = pose_ambiguity.getPoseAmbiguity()
+                    if pose_ambiguity < min_ambiguity:
+                        min_ambiguity = pose_ambiguity
+                        final_pose = accepted_poses[j]
+                        final_timestamp = accepted_cameras[j].getLatestResult().getTimestampSeconds()
 
         if final_pose != Pose3d(0, 0, 0, Rotation3d(0, 0, 0)):
             SmartDashboard.putBoolean("Accepted new pose?", True)
@@ -589,20 +598,20 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         print("Wow, look at all that nothing.")
 
 
-class SwerveDriveSendable(Sendable):
+# class SwerveDriveSendable(Sendable):
+#
+#     def __init__(self, drive: CommandSwerveDrivetrain):
+#         super().__init__()
+#         self.drive = drive
 
-    def __init__(self, drive: CommandSwerveDrivetrain):
-        super().__init__()
-        self.drive = drive
-
-    def initSendable(self, builder: SendableBuilder):
-        builder.setSmartDashboardType("SwerveDrive")
-        builder.addDoubleProperty("Front Left Angle", self.drive.get_state().module_states[0].angle.radians, self.drive.set_nothing)
-        builder.addDoubleProperty("Front Left Velocity", self.drive.get_speed_callable_0, self.drive.set_nothing)
-        builder.addDoubleProperty("Front Right Angle", self.drive.get_state().module_states[1].angle.radians, self.drive.set_nothing)
-        builder.addDoubleProperty("Front Right Velocity", self.drive.get_speed_callable_1, self.drive.set_nothing)
-        builder.addDoubleProperty("Back Left Angle", self.drive.get_state().module_states[2].angle.radians, self.drive.set_nothing)
-        builder.addDoubleProperty("Back Left Velocity", self.drive.get_speed_callable_2, self.drive.set_nothing)
-        builder.addDoubleProperty("Back Right Angle", self.drive.get_state().module_states[3].angle.radians, self.drive.set_nothing)
-        builder.addDoubleProperty("Back Right Velocity", self.drive.get_speed_callable_3, self.drive.set_nothing)
-        builder.addDoubleProperty("Robot Angle", self.drive.get_pose().rotation().radians, self.drive.set_nothing)
+    # def initSendable(self, builder: SendableBuilder):
+    #     builder.setSmartDashboardType("SwerveDrive")
+    #     builder.addDoubleProperty("Front Left Angle", self.drive.get_state().module_states[0].angle.radians, self.drive.set_nothing)
+    #     builder.addDoubleProperty("Front Left Velocity", self.drive.get_speed_callable_0, self.drive.set_nothing)
+    #     builder.addDoubleProperty("Front Right Angle", self.drive.get_state().module_states[1].angle.radians, self.drive.set_nothing)
+    #     builder.addDoubleProperty("Front Right Velocity", self.drive.get_speed_callable_1, self.drive.set_nothing)
+    #     builder.addDoubleProperty("Back Left Angle", self.drive.get_state().module_states[2].angle.radians, self.drive.set_nothing)
+    #     builder.addDoubleProperty("Back Left Velocity", self.drive.get_speed_callable_2, self.drive.set_nothing)
+    #     builder.addDoubleProperty("Back Right Angle", self.drive.get_state().module_states[3].angle.radians, self.drive.set_nothing)
+    #     builder.addDoubleProperty("Back Right Velocity", self.drive.get_speed_callable_3, self.drive.set_nothing)
+    #     builder.addDoubleProperty("Robot Angle", self.drive.get_pose().rotation().radians, self.drive.set_nothing)

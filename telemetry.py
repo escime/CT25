@@ -61,8 +61,10 @@ class Telemetry:
                 .appendLigament("Direction", 0.1, 0, 0, Color8Bit(Color.kWhite)),
         ]
 
-        # Attempt at adding pathplanner logging
-        self._field_2d = Field2d()
+        self.traj_field = Field2d()
+        self._traj_pub = self._table.getStructArrayTopic("trajectory", Pose2d).publish()
+        self._traj_type_pub = self._table.getStringTopic(".type").publish()
+        PathPlannerLogging.setLogActivePathCallback(lambda poses: self.traj_field.getObject('path').setPoses(poses))
 
     def telemeterize(self, state: swerve.SwerveDrivetrain.SwerveDriveState):
         """
@@ -73,6 +75,7 @@ class Telemetry:
 
         self._field_type_pub.set("Field2d")
         self._field_pub.set(pose_array)
+        self._traj_pub.set(self.traj_field.getObject('path').getPoses())
 
         # Telemeterize the robot's general speeds
         current_time = utils.get_current_time_seconds()
@@ -99,6 +102,3 @@ class Telemetry:
 
         SignalLogger.write_double_array("odometry", pose_array)
         SignalLogger.write_double("odom period", state.odometry_period, "seconds")
-
-        SmartDashboard.putData("active_trajectory", self._field_2d)
-        PathPlannerLogging.setLogActivePathCallback(lambda poses: self._field_2d.getObject('path').setPoses(poses))
