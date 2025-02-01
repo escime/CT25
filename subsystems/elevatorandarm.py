@@ -172,18 +172,20 @@ class ElevatorAndArmSubsystem(Subsystem):
             )
         )
 
-        self.lift_m2d = Mechanism2d(25, ElevatorConstants.max_height_in)
-        lift_root = self.lift_m2d.getRoot("Lift Root", 10, 0)
+        self.height_multiplier = 0.08
+        self.root = -0.1
+        self.lift_m2d = Mechanism2d(0.01, ElevatorConstants.max_height_in * self.height_multiplier)
+        lift_root = self.lift_m2d.getRoot("Lift Root", self.root, 0)
         self.elevator_m2d = lift_root.appendLigament("Elevator",
-                                                     self.elevator_sim.getPositionInches(),
+                                                     self.elevator_sim.getPositionInches() * self.height_multiplier,
                                                      ElevatorConstants.elevator_angle_degrees,
                                                      6,
                                                      Color8Bit(Color.kRed))
-        self.arm_root = self.lift_m2d.getRoot("Arm Root", 10, 0)
+        self.arm_root = self.lift_m2d.getRoot("Arm Root", self.root, 0)
         self.arm_m2d = self.arm_root.appendLigament("Arm",
-                                                    5,
+                                                    0.5,
                                                     90,
-                                                    10,
+                                                    6,
                                                     Color8Bit(Color.kBlue))
 
         self.set_arm_state("stow")
@@ -299,8 +301,8 @@ class ElevatorAndArmSubsystem(Subsystem):
     def periodic(self) -> None:
         if is_simulation():
             self.update_sim()
-            self.elevator_m2d.setLength(self.elevator_sim.getPositionInches())
-            self.arm_root.setPosition(10, self.elevator_m2d.getLength())
+            self.elevator_m2d.setLength(self.elevator_sim.getPositionInches() * self.height_multiplier)
+            self.arm_root.setPosition(self.root, self.elevator_m2d.getLength())
             self.arm_m2d.setAngle(degrees(self.arm_sim.getAngle()))
             SmartDashboard.putData("Elevator M2D", self.lift_m2d)
             SmartDashboard.putString("Elevator Position", str(self.elevator_sim.getPositionInches()))
