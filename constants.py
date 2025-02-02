@@ -49,7 +49,7 @@ class AutoConstants:
 
 
 class ElevatorConstants:
-    can_ids = [32, 33]  # The main motor should be listed first. The rest may be listed in any order.
+    can_ids = [33, 32]  # The main motor should be listed first. The rest may be listed in any order.
 
     carriage_weight = lbsToKilograms(10)
     min_height_in = 0
@@ -59,11 +59,11 @@ class ElevatorConstants:
 
     drum_diameter_in = 1.685  # 14T sprocket
     drum_diameter_m = inchesToMeters(drum_diameter_in)
-    state_values = {"stow": 0, "max": max_height_in / (drum_diameter_in * pi),
-                    "L1": 5 / (drum_diameter_in * pi),
-                    "L2": 10 / (drum_diameter_in * pi),
-                    "L3": 20 / (drum_diameter_in * pi),
-                    "L4": 30 / (drum_diameter_in * pi)}
+    state_values = {"stow": 0, "max": 6.5,
+                    "L1": 1,
+                    "L2": 2,
+                    "L3": 3,
+                    "L4": 4}
 
     supply_current_limit = 80
     use_supply_current_limit = True
@@ -90,12 +90,13 @@ class ElevatorConstants:
 
 
 class ArmConstants:
-    state_values = {"stow": 0.25, "stage_right": 0.2, "score_right": 0.1, "stage_left": 0.3, "score_left": 0.4}
+    state_values = {"stow": 0, "stage_right": 0.15, "score_right": 0.15, "stage_left": -0.1, "score_left": -0.15}
     wrist_can_id = 34
+    intake_channel = 2
     score_speed = 0.25
     supply_current_limit = 40
     use_supply_current_limit = False
-    gearbox_ratio = 20.8
+    gearbox_ratio = 30
     arm_at_target_threshold = 0.05
 
     mm_cruise_velocity = 0.5
@@ -115,14 +116,14 @@ class ArmConstants:
 
 
 class IntakeConstants:
-    intake_state_values = {"stow": 0.25, "intake_coral": 0.5, "intake_algae": 0.35, "score_coral": 0.27, "score_algae": 0.25, "climbing": 0.5}
+    intake_state_values = {"stow": 0, "intake_coral": 1.15, "intake_algae": 0.5, "score_coral": 0.3, "score_algae": 0.2, "climbing": 0.6}
     wheel_speed_values = {"stow": 0, "intake_coral": 12, "intake_algae": -12, "score_coral": -2.4, "score_algae": -12, "climbing": 0}
     wheel_can_id = 30
     arm_can_id = 31
     gearbox_ratio = 12
 
-    mm_cruise_velocity = 0.5
-    mm_acceleration = 5
+    mm_cruise_velocity = 2
+    mm_acceleration = 10
     mm_jerk = 100
 
     kg = 1.25

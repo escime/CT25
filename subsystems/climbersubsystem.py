@@ -77,7 +77,7 @@ class Climber(Subsystem):
                                      .with_limit_reverse_motion(self.get_reverse_limit_triggered()))
 
     def get_forward_limit_triggered(self) -> bool:
-        if self.climber_arm.get_position().value_as_double > 0.5:
+        if self.climber_arm.get_position().value_as_double > 5:
             return True
         else:
             return False

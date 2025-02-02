@@ -30,9 +30,13 @@ class Intake(Subsystem):
         self.intake_arm_mm = MotionMagicVoltage(0, enable_foc=True)
         self.intake_arm_configs = TalonFXConfiguration()
 
+        self.intake_arm_configs.motor_output.neutral_mode = self.intake_arm_configs.motor_output.neutral_mode.BRAKE
+        self.intake_arm_configs.motor_output.inverted = self.intake_arm_configs.motor_output.inverted.CLOCKWISE_POSITIVE
+
         self.intake_arm_configs.current_limits.supply_current_limit = 60
+        self.intake_arm_configs.current_limits.stator_current_limit = 120
         self.intake_arm_configs.current_limits.supply_current_limit_enable = True
-        self.intake_arm_configs.current_limits.stator_current_limit_enable = False
+        self.intake_arm_configs.current_limits.stator_current_limit_enable = True
         self.intake_arm_gear_ratio = IntakeConstants.gearbox_ratio
         self.intake_arm_configs.feedback.sensor_to_mechanism_ratio = self.intake_arm_gear_ratio
 
@@ -50,7 +54,7 @@ class Intake(Subsystem):
         self.intake_arm_slot0_configs.k_i = IntakeConstants.ki
         self.intake_arm_slot0_configs.k_d = IntakeConstants.kd
 
-        self.intake = PWMVictorSPX(2)
+        self.intake = PWMVictorSPX(1)
         self.intake_speed_values = IntakeConstants.wheel_speed_values
         self.intake.set(self.intake_speed_values[self.state])
 

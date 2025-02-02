@@ -11,7 +11,7 @@ from phoenix6.utils import get_current_time_seconds, is_simulation
 from phoenix6.signals import StaticFeedforwardSignValue
 from phoenix6 import SignalLogger
 
-from wpilib import Mechanism2d, Color8Bit, Color, SmartDashboard, DigitalInput, PWMSparkMax
+from wpilib import Mechanism2d, Color8Bit, Color, SmartDashboard, DigitalInput, PWMVictorSPX
 from wpilib.simulation import ElevatorSim, SingleJointedArmSim
 from wpimath.system.plant import DCMotor
 from wpimath.units import radiansToRotations
@@ -28,7 +28,7 @@ class ElevatorAndArmSubsystem(Subsystem):
 
         self._last_sim_time = get_current_time_seconds()
 
-        self.intake = PWMSparkMax(1)
+        self.intake = PWMVictorSPX(ArmConstants.intake_channel)
         self.intake.set(0)
         self.intake_sensor_left = DigitalInput(0)
         self.intake_sensor_right = DigitalInput(1)
@@ -59,7 +59,8 @@ class ElevatorAndArmSubsystem(Subsystem):
 
             motor_config.current_limits.supply_current_limit = ElevatorConstants.supply_current_limit
             motor_config.current_limits.supply_current_limit_enable = ElevatorConstants.use_supply_current_limit
-            motor_config.current_limits.stator_current_limit_enable = False
+            motor_config.current_limits.stator_current_limit = 120
+            motor_config.current_limits.stator_current_limit_enable = True
             motor_config.feedback.sensor_to_mechanism_ratio = ElevatorConstants.gearbox_ratio
 
             motor_mm_config = motor_config.motion_magic
@@ -118,6 +119,8 @@ class ElevatorAndArmSubsystem(Subsystem):
 
         self.wrist = TalonFX(ArmConstants.wrist_can_id, "rio")
         wrist_config = TalonFXConfiguration()
+
+        wrist_config.motor_output.neutral_mode = wrist_config.motor_output.neutral_mode.BRAKE
 
         wrist_config.current_limits.supply_current_limit = ArmConstants.supply_current_limit
         wrist_config.current_limits.supply_current_limit_enable = ArmConstants.use_supply_current_limit
@@ -188,7 +191,7 @@ class ElevatorAndArmSubsystem(Subsystem):
                                                     6,
                                                     Color8Bit(Color.kBlue))
 
-        self.set_arm_state("stow")
+        # self.set_arm_state("stow")
 
         self.debug_mode = False
 
@@ -199,12 +202,13 @@ class ElevatorAndArmSubsystem(Subsystem):
     def set_arm_state(self, state: str) -> None:
         self.arm_state = state
         self.wrist.set_control(self.wrist_mm.with_position(self.arm_state_values[state]).with_slot(0))
+        # print("Attempted and failed to set the arm state. Good job!")
 
     def set_elevator_manual(self, voltage: float) -> None:
         self.elevator_state = "manual"
-        self.lift_main.set_control(self.lift_main_vo.with_output(voltage)
-                                   .with_limit_reverse_motion(self.get_reverse_limit_triggered())
-                                   .with_limit_forward_motion(self.get_forward_limit_triggered()))
+        self.lift_main.set_control(self.lift_main_vo.with_output(voltage))
+        #                            .with_limit_reverse_motion(self.get_reverse_limit_triggered())
+        #                            .with_limit_forward_motion(self.get_forward_limit_triggered()))
 
     def set_arm_manual(self, voltage: float) -> None:
         self.arm_state = "manual"
@@ -215,12 +219,14 @@ class ElevatorAndArmSubsystem(Subsystem):
 
     def set_elevator_manual_off(self) -> None:
         self.elevator_state = "manual_off"
-        self.lift_main.set_control(self.lift_main_pid.with_position(self.get_elevator_position())
-                                   .with_limit_reverse_motion(self.get_reverse_limit_triggered())
-                                   .with_limit_forward_motion(self.get_forward_limit_triggered()))
+        # self.lift_main.set_control(self.lift_main_vo.with_output(0))
+        self.lift_main.set_control(self.lift_main_pid.with_position(self.get_elevator_position()))
+        #                            .with_limit_reverse_motion(self.get_reverse_limit_triggered())
+        #                            .with_limit_forward_motion(self.get_forward_limit_triggered()))
 
     def set_arm_manual_off(self) -> None:
         self.arm_state = "manual_off"
+        # self.wrist.set_control(self.wrist_vo.with_output(0))
         self.wrist.set_control(self.wrist_pid.with_position(self.get_arm_position()))
 
     def get_elevator_state(self) -> str:
@@ -312,6 +318,7 @@ class ElevatorAndArmSubsystem(Subsystem):
         #                                 ElevatorConstants.drum_diameter_in)
         if self.debug_mode:
             SmartDashboard.putString("Lift Motor Position", str(self.lift_main.get_position()))
+            SmartDashboard.putString("Arm Position", str(self.wrist.get_position()))
             SmartDashboard.putString("Elevator Setpoint", self.elevator_state)
         if self.elevator_state == "stow" and not self.lower_limit_switch.get():
             self.lift_main.set_position(0)

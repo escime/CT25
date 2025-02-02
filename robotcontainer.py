@@ -78,8 +78,8 @@ class RobotContainer:
         self.leds = LEDs(self.timer)
         self.util = UtilSubsystem()
         self.elevator_and_arm = ElevatorAndArmSubsystem()
-        # self.intake_arm = Intake()
-        # self.climber_arm = Climber()
+        self.intake_arm = Intake()
+        self.climber_arm = Climber()
 
         # Setup driver & operator controllers. -------------------------------------------------------------------------
         self.driver_controller = button.CommandXboxController(OIConstants.kDriverControllerPort)
@@ -229,10 +229,10 @@ class RobotContainer:
 
         # Change between CORAL and ALGAE scoring modes.
         self.operator_controller.rightTrigger(0.1).and_(lambda: not self.test_bindings).onTrue(
-            runOnce(lambda: self.util.change_algae_mode(False), self.util)
+            runOnce(lambda: self.util.change_algae_mode(False), self.util).ignoringDisable(True)
         )
         self.operator_controller.leftTrigger(0.1).and_(lambda: not self.test_bindings).onTrue(
-            runOnce(lambda: self.util.change_algae_mode(True), self.util)
+            runOnce(lambda: self.util.change_algae_mode(True), self.util).ignoringDisable(True)
         )
 
         # Intake coral
@@ -252,21 +252,21 @@ class RobotContainer:
         )
 
         # Cycle through scoring set points.
-        self.driver_controller.povLeft().and_(lambda: not self.test_bindings).onTrue(
-            runOnce(lambda: self.util.cycle_scoring_setpoints(1), self.util).ignoringDisable(True)
-        )
-        self.driver_controller.povRight().and_(lambda: not self.test_bindings).onTrue(
-            runOnce(lambda: self.util.cycle_scoring_setpoints(-1), self.util).ignoringDisable(True)
-        )
+        # self.driver_controller.povLeft().and_(lambda: not self.test_bindings).onTrue(
+        #     runOnce(lambda: self.util.cycle_scoring_setpoints(1), self.util).ignoringDisable(True)
+        # )
+        # self.driver_controller.povRight().and_(lambda: not self.test_bindings).onTrue(
+        #     runOnce(lambda: self.util.cycle_scoring_setpoints(-1), self.util).ignoringDisable(True)
+        # )
 
         # Manually control the elevator.
         self.operator_controller.povUp().whileTrue(
-            run(lambda: self.elevator_and_arm.set_elevator_manual(0.25 * 12), self.elevator_and_arm)
+            run(lambda: self.elevator_and_arm.set_elevator_manual(0.15 * 12), self.elevator_and_arm)
         ).onFalse(
             runOnce(lambda: self.elevator_and_arm.set_elevator_manual_off(), self.elevator_and_arm)
         )
         self.operator_controller.povDown().whileTrue(
-            run(lambda: self.elevator_and_arm.set_elevator_manual(0.25 * -1 * 12), self.elevator_and_arm)
+            run(lambda: self.elevator_and_arm.set_elevator_manual(0.05 * -1 * 12), self.elevator_and_arm)
         ).onFalse(
             runOnce(lambda: self.elevator_and_arm.set_elevator_manual_off(), self.elevator_and_arm)
         )
@@ -294,64 +294,64 @@ class RobotContainer:
         self.operator_controller.b().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
             SetElevatorAndArm("L1", self.elevator_and_arm, self.drivetrain)
         )
-        self.operator_controller.a().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
+        self.operator_controller.a().and_(lambda: not self.test_bindings).onTrue(
             SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain)
         )
 
         # Manually control the climber
-        # self.operator_controller.axisGreaterThan(4, 0.2).and_(lambda: not self.test_bindings).onTrue(
-        #     SequentialCommandGroup(
-        #         runOnce(lambda: self.intake_arm.set_state("climbing"), self.intake_arm),
-        #         runOnce(lambda: self.leds.set_state("rainbow"), self.leds),
-        #         run(lambda: self.climber_arm.set_climber_manual(self.operator_controller.getRightX() * -1 * 12),
-        #             self.climber_arm)
-        #     )
-        # ).onFalse(
-        #     runOnce(lambda: self.climber_arm.set_climber_manual(0), self.climber_arm)
-        # )
-        # self.operator_controller.axisLessThan(4, -0.2).and_(lambda: not self.test_bindings).onTrue(
-        #     SequentialCommandGroup(
-        #         runOnce(lambda: self.intake_arm.set_state("climbing"), self.intake_arm),
-        #         runOnce(lambda: self.leds.set_state("rainbow"), self.leds),
-        #         run(lambda: self.climber_arm.set_climber_manual(self.operator_controller.getRightX() * -1 * 12),
-        #             self.climber_arm)
-        #     )
-        # ).onFalse(
-        #     runOnce(lambda: self.climber_arm.set_climber_manual(0), self.climber_arm)
-        # )
+        self.operator_controller.axisGreaterThan(4, 0.2).and_(lambda: not self.test_bindings).onTrue(
+            SequentialCommandGroup(
+                runOnce(lambda: self.intake_arm.set_state("climbing"), self.intake_arm),
+                runOnce(lambda: self.leds.set_state("rainbow"), self.leds),
+                run(lambda: self.climber_arm.set_climber_manual(self.operator_controller.getRightX() * -1 * 12),
+                    self.climber_arm)
+            )
+        ).onFalse(
+            runOnce(lambda: self.climber_arm.set_climber_manual(0), self.climber_arm)
+        )
+        self.operator_controller.axisLessThan(4, -0.2).and_(lambda: not self.test_bindings).onTrue(
+            SequentialCommandGroup(
+                runOnce(lambda: self.intake_arm.set_state("climbing"), self.intake_arm),
+                runOnce(lambda: self.leds.set_state("rainbow"), self.leds),
+                run(lambda: self.climber_arm.set_climber_manual(self.operator_controller.getRightX() * -1 * 12),
+                    self.climber_arm)
+            )
+        ).onFalse(
+            runOnce(lambda: self.climber_arm.set_climber_manual(0), self.climber_arm)
+        )
         
         # Intake controls.
-        # (self.operator_controller.axisGreaterThan(1, 0.1).and_(lambda: not self.test_bindings)
-        #     .and_(lambda: not self.util.algae_mode).onTrue(
-        #     runOnce(lambda: self.intake_arm.set_state("intake_coral"), self.intake_arm)
-        # ).onFalse(
-        #     runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
-        # ))
-        # self.operator_controller.axisGreaterThan(1, 0.1).and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
-        #     runOnce(lambda: self.intake_arm.set_state("intake_algae"), self.intake_arm)
-        # ).onFalse(
-        #     runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
-        # )
-        # self.driver_controller.rightBumper().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
-        #     runOnce(lambda: self.intake_arm.set_state("score_coral"), self.intake_arm)
-        # ).onFalse(
-        #     runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
-        # )
-        # self.driver_controller.rightBumper().and_(lambda: not self.test_bindings).and_(
-        #     lambda: self.util.algae_mode).onTrue(
-        #     runOnce(lambda: self.intake_arm.set_state("score_algae"), self.intake_arm)
-        # ).onFalse(
-        #     runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
-        # )
+        (self.operator_controller.axisGreaterThan(1, 0.1).and_(lambda: not self.test_bindings)
+            .and_(lambda: not self.util.algae_mode).onTrue(
+            runOnce(lambda: self.intake_arm.set_state("intake_coral"), self.intake_arm)
+        ).onFalse(
+            runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
+        ))
+        self.operator_controller.axisGreaterThan(1, 0.1).and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
+            runOnce(lambda: self.intake_arm.set_state("intake_algae"), self.intake_arm)
+        ).onFalse(
+            runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
+        )
+        self.driver_controller.rightBumper().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
+            runOnce(lambda: self.intake_arm.set_state("score_coral"), self.intake_arm)
+        ).onFalse(
+            runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
+        )
+        self.driver_controller.rightBumper().and_(lambda: not self.test_bindings).and_(
+            lambda: self.util.algae_mode).onTrue(
+            runOnce(lambda: self.intake_arm.set_state("score_algae"), self.intake_arm)
+        ).onFalse(
+            runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
+        )
 
         # Debug Mode Toggle
-        # self.driver_controller.start().and_(lambda: not self.test_bindings).onTrue(
-        #     SequentialCommandGroup(
-        #         runOnce(lambda: self.intake_arm.set_debug_mode(), self.intake_arm),
-        #         runOnce(lambda: self.elevator_and_arm.set_debug_mode(), self.elevator_and_arm),
-        #         runOnce(lambda: self.climber_arm.set_debug_mode(), self.climber_arm)
-        #     )
-        # )
+        self.driver_controller.start().and_(lambda: not self.test_bindings).onTrue(
+            SequentialCommandGroup(
+                runOnce(lambda: self.intake_arm.set_debug_mode(), self.intake_arm),
+                runOnce(lambda: self.elevator_and_arm.set_debug_mode(), self.elevator_and_arm),
+                runOnce(lambda: self.climber_arm.set_debug_mode(), self.climber_arm)
+            ).ignoringDisable(True)
+        )
 
         # Coral acquired light
         button.Trigger(lambda: self.elevator_and_arm.get_coral_sensors() and DriverStation.isTeleop()).onTrue(
