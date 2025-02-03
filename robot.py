@@ -35,7 +35,7 @@ class Robot(TimedCommandRobot):
     def robotPeriodic(self) -> None:
         """Set the constant robot periodic state (in command based, that's just run the scheduler loop)"""
         CommandScheduler.getInstance().run()
-        SmartDashboard.putString("Drivetrain Command", str(self.m_robotcontainer.drivetrain.getCurrentCommand()))
+        # SmartDashboard.putString("Drivetrain Command", str(self.m_robotcontainer.drivetrain.getCurrentCommand()))
 
         # self.ll1.putNumberArray("robot_orientation_set",
         #                                  [self.m_robotcontainer.drivetrain.get_pose().rotation().degrees(), 0, 0,

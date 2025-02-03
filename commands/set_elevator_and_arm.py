@@ -17,52 +17,51 @@ class SetElevatorAndArm(Command):
         self.addRequirements(elevator_and_arm)
 
     def initialize(self):
-        if self.setpoint == "stow" or \
-                self.setpoint == "L1" or \
-                self.setpoint == "L2" or \
-                self.setpoint == "L3" or \
-                self.setpoint == "L4":
-            if self.setpoint == "stow":
-                self.elevator_and_arm.set_accel_limit(1)
-            if self.setpoint == "L1":
-                self.elevator_and_arm.set_accel_limit(0.9)
-            if self.setpoint == "L2":
-                self.elevator_and_arm.set_accel_limit(0.8)
-            if self.setpoint == "L3":
-                self.elevator_and_arm.set_accel_limit(0.7)
-            if self.setpoint == "L4":
-                self.elevator_and_arm.set_accel_limit(0.6)
+        if self.setpoint == "stow":
+            self.elevator_and_arm.set_accel_limit(1)
+        if self.setpoint == "L1":
+            self.elevator_and_arm.set_accel_limit(0.9)
+        if self.setpoint == "L2":
+            self.elevator_and_arm.set_accel_limit(0.8)
+        if self.setpoint == "L3":
+            self.elevator_and_arm.set_accel_limit(0.7)
+        if self.setpoint == "L4":
+            self.elevator_and_arm.set_accel_limit(0.6)
 
-            if self.setpoint != "stow":
-                self.arm_target = "stage_"  # TODO Check that this produces the correct arm result
-                if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-                    if self.drive.get_pose().x > 13:
-                        if -90 < self.drive.get_pose().rotation().degrees() < 90:
-                            self.arm_target += "left"
-                        else:
-                            self.arm_target += "right"
-                    if self.drive.get_pose().x < 13:
-                        if -90 < self.drive.get_pose().rotation().degrees() < 90:
-                            self.arm_target += "right"
-                        else:
-                            self.arm_target += "left"
-                else:
-                    if self.drive.get_pose().x > 4:
-                        if -90 < self.drive.get_pose().rotation().degrees() < 90:
-                            self.arm_target += "left"
-                        else:
-                            self.arm_target += "right"
-                    if self.drive.get_pose().x < 4:
-                        if -90 < self.drive.get_pose().rotation().degrees() < 90:
-                            self.arm_target += "right"
-                        else:
-                            self.arm_target += "left"
+        if self.setpoint != "stow" and self.setpoint != "net":
+            if self.setpoint == "L1" or self.setpoint == "L2" or self.setpoint == "L3" or self.setpoint == "L4":
+                self.arm_target = "stage_"
             else:
-                self.arm_target = "stow"
+                self.arm_target = "algae_"
 
-            self.elevator_and_arm.set_elevator_state(self.setpoint)
-            if self.elevator_and_arm.get_arm_state() != "stow":
-                self.elevator_and_arm.set_arm_state("stow")
+            if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
+                if self.drive.get_pose().x > 13:
+                    if -90 < self.drive.get_pose().rotation().degrees() < 90:
+                        self.arm_target += "left"
+                    else:
+                        self.arm_target += "right"
+                if self.drive.get_pose().x < 13:
+                    if -90 < self.drive.get_pose().rotation().degrees() < 90:
+                        self.arm_target += "right"
+                    else:
+                        self.arm_target += "left"
+            else:
+                if self.drive.get_pose().x > 4:
+                    if -90 < self.drive.get_pose().rotation().degrees() < 90:
+                        self.arm_target += "left"
+                    else:
+                        self.arm_target += "right"
+                if self.drive.get_pose().x < 4:
+                    if -90 < self.drive.get_pose().rotation().degrees() < 90:
+                        self.arm_target += "right"
+                    else:
+                        self.arm_target += "left"
+        else:
+            self.arm_target = "stow"
+
+        self.elevator_and_arm.set_elevator_state(self.setpoint)
+        if self.elevator_and_arm.get_arm_state() != "stow":
+            self.elevator_and_arm.set_arm_state("stow")
 
     def isFinished(self) -> bool:
         return self.elevator_and_arm.get_elevator_at_target()

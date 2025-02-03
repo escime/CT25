@@ -294,6 +294,15 @@ class RobotContainer:
         self.operator_controller.b().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
             SetElevatorAndArm("L1", self.elevator_and_arm, self.drivetrain)
         )
+        self.operator_controller.rightBumper().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
+            SetElevatorAndArm("net", self.elevator_and_arm, self.drivetrain)
+        )
+        self.operator_controller.y().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
+            SetElevatorAndArm("algae_high", self.elevator_and_arm, self.drivetrain)
+        )
+        self.operator_controller.b().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
+            SetElevatorAndArm("algae_low", self.elevator_and_arm, self.drivetrain)
+        )
         self.operator_controller.a().and_(lambda: not self.test_bindings).onTrue(
             SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain)
         )

@@ -63,7 +63,10 @@ class ElevatorConstants:
                     "L1": 1,
                     "L2": 2,
                     "L3": 3,
-                    "L4": 4}
+                    "L4": 4,
+                    "algae_high": 4,
+                    "algae_low": 2,
+                    "net": 5}
 
     supply_current_limit = 80
     use_supply_current_limit = True
@@ -90,14 +93,20 @@ class ElevatorConstants:
 
 
 class ArmConstants:
-    state_values = {"stow": 0, "stage_right": 0.15, "score_right": 0.15, "stage_left": -0.1, "score_left": -0.15}
+    state_values = {"stow": 0,
+                    "stage_left": 0.1,
+                    "score_left": 0.15,
+                    "stage_right": -0.1,
+                    "score_right": -0.15,
+                    "algae_left": 0.25,
+                    "algae_right": -0.25}
     wrist_can_id = 34
     intake_channel = 2
     score_speed = 0.25
     supply_current_limit = 40
     use_supply_current_limit = False
     gearbox_ratio = 30
-    arm_at_target_threshold = 0.05
+    arm_at_target_threshold = 0.01
 
     mm_cruise_velocity = 0.5
     mm_acceleration = 5

@@ -157,10 +157,10 @@ class ElevatorAndArmSubsystem(Subsystem):
             ArmConstants.gearbox_ratio,
             SingleJointedArmSim.estimateMOI(ArmConstants.arm_length, ArmConstants.arm_weight),
             ArmConstants.arm_length,
-            -0.1,
+            -pi,
             pi + 0.1,
             True,
-            1
+            0
         )
 
         self.sys_id_routine_arm = SysIdRoutine(
@@ -191,7 +191,7 @@ class ElevatorAndArmSubsystem(Subsystem):
                                                     6,
                                                     Color8Bit(Color.kBlue))
 
-        # self.set_arm_state("stow")
+        self.set_arm_state("stow")
 
         self.debug_mode = False
 
@@ -309,7 +309,7 @@ class ElevatorAndArmSubsystem(Subsystem):
             self.update_sim()
             self.elevator_m2d.setLength(self.elevator_sim.getPositionInches() * self.height_multiplier)
             self.arm_root.setPosition(self.root, self.elevator_m2d.getLength())
-            self.arm_m2d.setAngle(degrees(self.arm_sim.getAngle()))
+            self.arm_m2d.setAngle(degrees(self.arm_sim.getAngle()) + 90)
             SmartDashboard.putData("Elevator M2D", self.lift_m2d)
             SmartDashboard.putString("Elevator Position", str(self.elevator_sim.getPositionInches()))
             SmartDashboard.putString("Arm Setpoint", self.get_arm_state())
