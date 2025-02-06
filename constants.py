@@ -57,30 +57,30 @@ class ElevatorConstants:
     min_height_m = inchesToMeters(min_height_in)
     max_height_m = inchesToMeters(max_height_in)
 
-    drum_diameter_in = 1.685  # 14T sprocket
+    drum_diameter_in = 2  # 14T sprocket
     drum_diameter_m = inchesToMeters(drum_diameter_in)
     state_values = {"stow": 0, "max": 6.5,
-                    "L1": 1,
-                    "L2": 2,
-                    "L3": 3,
-                    "L4": 4,
+                    "L1": 0,
+                    "L2": 0.95,
+                    "L3": 3.0,
+                    "L4": 6.2,
                     "algae_high": 4,
                     "algae_low": 2,
-                    "net": 5}
+                    "net": 6.1}
 
     supply_current_limit = 80
     use_supply_current_limit = True
 
     gearbox_ratio = 4
 
-    mm_cruise_velocity = 24  # rot/s
-    mm_acceleration = 650  # rot/s^2
+    mm_cruise_velocity = 7 #  23  # rot/s
+    mm_acceleration = 15 # 100 # rot/s^2
     mm_jerk = 1000  # rot/s^3
 
-    kg = 0.24
+    kg = 0.33
     ks = 0.1
     kv = 3.11
-    ka = 0.03
+    ka = 0.04
     kp = 60
     ki = 0
     kd = 0
@@ -94,12 +94,12 @@ class ElevatorConstants:
 
 class ArmConstants:
     state_values = {"stow": 0,
-                    "stage_left": 0.1,
-                    "score_left": 0.15,
-                    "stage_right": -0.1,
-                    "score_right": -0.15,
-                    "algae_left": 0.25,
-                    "algae_right": -0.25}
+                    "stage_left": 0.07,
+                    "score_left": 0.12,
+                    "stage_right": -0.07,
+                    "score_right": -0.12,
+                    "algae_left": 0.15,
+                    "algae_right": -0.15}
     wrist_can_id = 34
     intake_channel = 2
     score_speed = 0.25
@@ -108,15 +108,15 @@ class ArmConstants:
     gearbox_ratio = 30
     arm_at_target_threshold = 0.01
 
-    mm_cruise_velocity = 0.5
-    mm_acceleration = 5
+    mm_cruise_velocity = 0.5 # 0.5
+    mm_acceleration = 1 # 5
     mm_jerk = 100
 
     kg = 0.25
     ks = 0.25
     kv = 0.71
     ka = 0.01
-    kp = 90
+    kp = 110
     ki = 0
     kd = 0
 
@@ -125,8 +125,8 @@ class ArmConstants:
 
 
 class IntakeConstants:
-    intake_state_values = {"stow": 0, "intake_coral": 1.15, "intake_algae": 0.5, "score_coral": 0.3, "score_algae": 0.2, "climbing": 0.6}
-    wheel_speed_values = {"stow": 0, "intake_coral": 12, "intake_algae": -12, "score_coral": -2.4, "score_algae": -12, "climbing": 0}
+    intake_state_values = {"stow": 0, "intake_coral": 0.678, "intake_algae": 0.29, "score_coral": 0.07, "score_algae": 0.07, "climbing": 0.3}
+    wheel_speed_values = {"stow": 0, "intake_coral": 12, "intake_algae": -12, "score_coral": -1, "score_algae": -12, "climbing": 0}
     wheel_can_id = 30
     arm_can_id = 31
     gearbox_ratio = 12

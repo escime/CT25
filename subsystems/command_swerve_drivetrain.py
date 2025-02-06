@@ -261,12 +261,12 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         )
 
         april_tag_field_layout = AprilTagFieldLayout.loadField(AprilTagField.k2025Reefscape)
-        cam1 = photonCamera.PhotonCamera("TAG_DETECT_FL")
-        cam2 = photonCamera.PhotonCamera("TAG_DETECT_FR")
-        robot_to_cam1 = Transform3d(Translation3d(inchesToMeters(9.625), inchesToMeters(9.625), inchesToMeters(8)),
-                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(-45)))
-        robot_to_cam2 = Transform3d(Translation3d(inchesToMeters(9.625), inchesToMeters(-9.625), inchesToMeters(8)),
-                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(45)))
+        cam1 = photonCamera.PhotonCamera("TAG_DETECT_FR")
+        cam2 = photonCamera.PhotonCamera("TAG_DETECT_FL")
+        robot_to_cam1 = Transform3d(Translation3d(inchesToMeters(11.831), inchesToMeters(-6.05), inchesToMeters(7.37+0.25)),
+                                    Rotation3d(0, degreesToRadians(10), degreesToRadians(34.8)))
+        robot_to_cam2 = Transform3d(Translation3d(inchesToMeters(-11.831), inchesToMeters(-6.05), inchesToMeters(7.37+0.25)),
+                                    Rotation3d(0, degreesToRadians(10), degreesToRadians(180-34.8)))
 
         photon_pose_cam1 = (
             photonPoseEstimator.PhotonPoseEstimator(april_tag_field_layout,

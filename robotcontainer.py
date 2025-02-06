@@ -34,6 +34,8 @@ from commands.auto_set_elevator_and_arm import AutoSetElevatorAndArm
 from commands.coral_station_alignment import CoralStationAlignment
 from commands.score_attempt import ScoreAttempt
 from commands.wheel_radius_calculator import WheelRadiusCalculator
+from commands.start_auto_timer import StartAutoTimer
+from commands.stop_auto_timer import StopAutoTimer
 
 
 class RobotContainer:
@@ -57,7 +59,7 @@ class RobotContainer:
 
         # Configure system logging. ------------------------------------------------------------------------------------
         self.alert_logging_enabled = Alert("Robot Logging is Enabled", Alert.AlertType.kWarning)
-        self.alert_limelight = Alert("Limelight ports forwarded", Alert.AlertType.kWarning)
+        self.alert_limelight = Alert("Photonvision ports forwarded.", Alert.AlertType.kWarning)
         if wpilib.RobotBase.isReal():
             if SmartDashboard.getBoolean("Logging Enabled?", False) is True:
                 DataLogManager.start()
@@ -68,8 +70,10 @@ class RobotContainer:
                 SignalLogger.stop()
             for port in range(5800, 5810):
                 PortForwarder.getInstance().add(port, "10.39.40.11", port)
-            for port in range(5800, 5810):
-                PortForwarder.getInstance().add(port+10, "10.39.40.12", port)
+            PortForwarder.getInstance().add(1182, "10.39.40.11", 1182)
+            PortForwarder.getInstance().add(1184, "10.39.40.11", 1184)
+            # for port in range(5800, 5810):
+            #     PortForwarder.getInstance().add(port+10, "10.39.40.12", port)
             self.alert_limelight.set(True)
         else:
             SignalLogger.stop()
@@ -237,7 +241,10 @@ class RobotContainer:
 
         # Intake coral
         self.operator_controller.leftBumper().and_(lambda: not self.test_bindings).whileTrue(
-            Collect(self.elevator_and_arm)
+            SequentialCommandGroup(
+                SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain),
+                Collect(self.elevator_and_arm)
+            )
         )
 
         # Human player LEDs
@@ -261,12 +268,12 @@ class RobotContainer:
 
         # Manually control the elevator.
         self.operator_controller.povUp().whileTrue(
-            run(lambda: self.elevator_and_arm.set_elevator_manual(0.15 * 12), self.elevator_and_arm)
+            run(lambda: self.elevator_and_arm.set_elevator_manual(0.25 * 12), self.elevator_and_arm)
         ).onFalse(
             runOnce(lambda: self.elevator_and_arm.set_elevator_manual_off(), self.elevator_and_arm)
         )
         self.operator_controller.povDown().whileTrue(
-            run(lambda: self.elevator_and_arm.set_elevator_manual(0.05 * -1 * 12), self.elevator_and_arm)
+            run(lambda: self.elevator_and_arm.set_elevator_manual(0.1 * -1 * 12), self.elevator_and_arm)
         ).onFalse(
             runOnce(lambda: self.elevator_and_arm.set_elevator_manual_off(), self.elevator_and_arm)
         )
@@ -563,3 +570,5 @@ class RobotContainer:
                                       AutoSetElevatorAndArm("stow", "stow", self.elevator_and_arm))
         NamedCommands.registerCommand("score", Score(self.elevator_and_arm, self.timer))
         NamedCommands.registerCommand("collect", Collect(self.elevator_and_arm))
+        NamedCommands.registerCommand("start_timer", StartAutoTimer(self.util, self.timer))
+        NamedCommands.registerCommand("stop_timer", StopAutoTimer(self.util, self.timer))

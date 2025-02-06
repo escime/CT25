@@ -5,9 +5,9 @@
     "data": {
       "commands": [
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 2.0
+            "name": "start_timer"
           }
         },
         {
@@ -98,6 +98,12 @@
           "type": "named",
           "data": {
             "name": "stow"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stop_timer"
           }
         }
       ]

@@ -126,7 +126,6 @@ class ElevatorAndArmSubsystem(Subsystem):
         wrist_config.current_limits.supply_current_limit_enable = ArmConstants.use_supply_current_limit
         wrist_config.current_limits.stator_current_limit_enable = False
         wrist_config.feedback.sensor_to_mechanism_ratio = ArmConstants.gearbox_ratio
-        self.wrist.set_position(0)
 
         wrist_mm_config = wrist_config.motion_magic
         wrist_mm_config.motion_magic_cruise_velocity = ArmConstants.mm_cruise_velocity
@@ -150,6 +149,8 @@ class ElevatorAndArmSubsystem(Subsystem):
                 break
         if not status.is_ok():
             print(f"Could not apply configs, error code: {status.name}")
+
+        self.wrist.set_position(0.156)
 
         self.wrist_sim = self.wrist.sim_state
         self.arm_sim = SingleJointedArmSim(

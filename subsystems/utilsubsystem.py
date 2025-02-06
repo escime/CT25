@@ -8,6 +8,8 @@ class UtilSubsystem(Subsystem):
 
         self.pdh = PowerDistribution(1, PowerDistribution.ModuleType.kRev)
 
+        self.auto_start_time = 0
+
         self.scoring_location = 0
         self.algae_mode = False
         # FORMAT: X, Y, ANGLE, LOCATION NAME, APRILTAG FOR SERVOING
