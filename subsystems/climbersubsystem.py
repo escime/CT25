@@ -72,9 +72,9 @@ class Climber(Subsystem):
         return self.climber_arm.get_position(True).value_as_double
 
     def set_voltage_direct(self, output: float):
-        self.climber_arm.set_control(self.climber_arm_volts.with_output(output)
-                                     .with_limit_forward_motion(self.get_forward_limit_triggered())
-                                     .with_limit_reverse_motion(self.get_reverse_limit_triggered()))
+        self.climber_arm.set_control(self.climber_arm_volts.with_output(output))
+                                     # .with_limit_forward_motion(self.get_forward_limit_triggered())
+                                     # .with_limit_reverse_motion(self.get_reverse_limit_triggered()))
 
     def get_forward_limit_triggered(self) -> bool:
         if self.climber_arm.get_position().value_as_double > 5:
@@ -89,9 +89,9 @@ class Climber(Subsystem):
             return False
 
     def set_climber_manual(self, voltage: float) -> None:
-        self.climber_arm.set_control(self.climber_arm_volts.with_output(voltage)
-                                     .with_limit_reverse_motion(self.get_reverse_limit_triggered())
-                                     .with_limit_forward_motion(self.get_forward_limit_triggered()))
+        self.climber_arm.set_control(self.climber_arm_volts.with_output(voltage))
+                                     # .with_limit_reverse_motion(self.get_reverse_limit_triggered())
+                                     # .with_limit_forward_motion(self.get_forward_limit_triggered()))
 
     def set_debug_mode(self) -> None:
         self.debug_mode = not self.debug_mode

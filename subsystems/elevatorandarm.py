@@ -4,14 +4,14 @@ from commands2.sysid import SysIdRoutine
 from wpilib.sysid import SysIdRoutineLog
 
 from phoenix6.hardware import TalonFX, CANcoder
-from phoenix6.controls import MotionMagicVoltage, VoltageOut, Follower, PositionVoltage
+from phoenix6.controls import MotionMagicVoltage, VoltageOut, Follower, PositionVoltage, TorqueCurrentFOC
 from phoenix6.configs import TalonFXConfiguration
 from phoenix6.status_code import StatusCode
 from phoenix6.utils import get_current_time_seconds, is_simulation
 from phoenix6.signals import StaticFeedforwardSignValue
 from phoenix6 import SignalLogger
 
-from wpilib import Mechanism2d, Color8Bit, Color, SmartDashboard, DigitalInput, PWMVictorSPX
+from wpilib import Mechanism2d, Color8Bit, Color, SmartDashboard, DigitalInput, PWMVictorSPX, Timer
 from wpilib.simulation import ElevatorSim, SingleJointedArmSim
 from wpimath.system.plant import DCMotor
 from wpimath.units import radiansToRotations
@@ -46,10 +46,12 @@ class ElevatorAndArmSubsystem(Subsystem):
         self.lift_main_mm = MotionMagicVoltage(0, enable_foc=True)
         self.lift_main_vo = VoltageOut(0, enable_foc=True)
         self.lift_main_pid = PositionVoltage(0, enable_foc=True)
+        self.lift_main_torque = TorqueCurrentFOC(0, 0.4)
 
         self.wrist_mm = MotionMagicVoltage(0, enable_foc=True)
         self.wrist_vo = VoltageOut(0, enable_foc=True)
         self.wrist_pid = PositionVoltage(0, enable_foc=True)
+        self.wrist_torque = TorqueCurrentFOC(0, 0.4)
 
         for motor_id in ElevatorConstants.can_ids:
             motor = TalonFX(motor_id, "rio")
@@ -76,6 +78,10 @@ class ElevatorAndArmSubsystem(Subsystem):
             motor_slot0_config.k_p = ElevatorConstants.kp
             motor_slot0_config.k_i = ElevatorConstants.ki
             motor_slot0_config.k_d = ElevatorConstants.kd
+
+            motor_torque_config = motor_config.torque_current
+            motor_torque_config.with_peak_forward_torque_current(10)
+            motor_torque_config.with_peak_reverse_torque_current(10)
 
             status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
             for _ in range(0, 5):
@@ -141,6 +147,10 @@ class ElevatorAndArmSubsystem(Subsystem):
         wrist_slot0_config.k_i = ElevatorConstants.ki
         wrist_slot0_config.k_d = ElevatorConstants.kd
 
+        wrist_torque_config = wrist_config.torque_current
+        wrist_torque_config.with_peak_forward_torque_current(10)
+        wrist_torque_config.with_peak_reverse_torque_current(10)
+
         status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
         for _ in range(0, 5):
             status = self.wrist.configurator.apply(wrist_config)
@@ -150,7 +160,7 @@ class ElevatorAndArmSubsystem(Subsystem):
         if not status.is_ok():
             print(f"Could not apply configs, error code: {status.name}")
 
-        self.wrist.set_position(0.156)
+        self.wrist.set_position(0.16)
 
         self.wrist_sim = self.wrist.sim_state
         self.arm_sim = SingleJointedArmSim(
@@ -178,7 +188,7 @@ class ElevatorAndArmSubsystem(Subsystem):
 
         self.height_multiplier = 0.08
         self.root = -0.1
-        self.lift_m2d = Mechanism2d(0.01, ElevatorConstants.max_height_in * self.height_multiplier)
+        self.lift_m2d = Mechanism2d(0.01, ElevatorConstants.max_height_in * self.height_multiplier + 1)
         lift_root = self.lift_m2d.getRoot("Lift Root", self.root, 0)
         self.elevator_m2d = lift_root.appendLigament("Elevator",
                                                      self.elevator_sim.getPositionInches() * self.height_multiplier,
@@ -216,7 +226,7 @@ class ElevatorAndArmSubsystem(Subsystem):
         self.wrist.set_control(self.wrist_vo.with_output(voltage))
 
     def get_coral_sensors(self) -> bool:
-        return self.intake_sensor_left.get() and self.intake_sensor_right.get()
+        return not self.intake_sensor_left.get() and not self.intake_sensor_right.get()
 
     def set_elevator_manual_off(self) -> None:
         self.elevator_state = "manual_off"
@@ -310,10 +320,8 @@ class ElevatorAndArmSubsystem(Subsystem):
             self.update_sim()
             self.elevator_m2d.setLength(self.elevator_sim.getPositionInches() * self.height_multiplier)
             self.arm_root.setPosition(self.root, self.elevator_m2d.getLength())
-            self.arm_m2d.setAngle(degrees(self.arm_sim.getAngle()) + 90)
+            self.arm_m2d.setAngle(degrees(self.arm_sim.getAngle()) + 90 + 55)
             SmartDashboard.putData("Elevator M2D", self.lift_m2d)
-            SmartDashboard.putString("Elevator Position", str(self.elevator_sim.getPositionInches()))
-            SmartDashboard.putString("Arm Setpoint", self.get_arm_state())
         # else:
         #     self.elevator_m2d.setLength(self.lift_main.get_position().value_as_double * pi *
         #                                 ElevatorConstants.drum_diameter_in)
@@ -321,47 +329,50 @@ class ElevatorAndArmSubsystem(Subsystem):
             SmartDashboard.putString("Lift Motor Position", str(self.lift_main.get_position()))
             SmartDashboard.putString("Arm Position", str(self.wrist.get_position()))
             SmartDashboard.putString("Elevator Setpoint", self.elevator_state)
-        if self.elevator_state == "stow" and not self.lower_limit_switch.get():
-            self.lift_main.set_position(0)
+            SmartDashboard.putString("Arm Setpoint", self.get_arm_state())
+        # if self.elevator_state == "stow" and not self.lower_limit_switch.get():
+        #     self.lift_main.set_position(0)
 
 
 class ReZeroTorque(Command):
     def __init__(self, elevator_and_arm: ElevatorAndArmSubsystem):
         super().__init__()
         self.elevator_and_arm = elevator_and_arm
-        self.current_limit_configuration = TalonFXConfiguration()
-        self.config_failure = False
         self.current_limit = 10
-
-    def initialize(self):
-        self.current_limit_configuration.current_limits.supply_current_limit = self.current_limit
-
-        status: StatusCode = StatusCode.STATUS_CODE_NOT_INITIALIZED
-        for _ in range(0, 5):
-            status = self.elevator_and_arm.lift_main.configurator.apply(self.current_limit_configuration)
-            if status.is_ok():
-                break
-        if not status.is_ok():
-            self.config_failure = True
+        self.start_time = 0
 
     def execute(self):
-        self.elevator_and_arm.set_elevator_manual(-2)
+        self.elevator_and_arm.lift_main.set_control(self.elevator_and_arm.lift_main_torque.with_output(-5))
 
     def isFinished(self) -> bool:
-        if self.config_failure or self.elevator_and_arm.lift_main.get_supply_current().value_as_double >= self.current_limit:
+        return False
+
+    def end(self, interrupted: bool):
+        self.elevator_and_arm.lift_main.set_position(0)
+        self.elevator_and_arm.set_elevator_manual(0)
+
+
+class ReZeroTorqueArm(Command):
+    def __init__(self, elevator_and_arm: ElevatorAndArmSubsystem, timer: Timer):
+        super().__init__()
+        self.elevator_and_arm = elevator_and_arm
+        self.timer = timer
+        self.start_time = 0
+
+    def initialize(self):
+        self.start_time = self.timer.get()
+
+    def execute(self):
+        self.elevator_and_arm.wrist.set_control(self.elevator_and_arm.wrist_torque.with_output(1))
+
+    def isFinished(self) -> bool:
+        if self.timer.get() - self.start_time > 1:
             return True
         else:
             return False
 
     def end(self, interrupted: bool):
-        self.elevator_and_arm.set_elevator_manual(0)
+        self.elevator_and_arm.set_arm_manual_off()
 
-        if not self.config_failure:
-            self.elevator_and_arm.lift_main.set_position(0)
-
-        self.current_limit_configuration.current_limits.supply_current_limit = ElevatorConstants.supply_current_limit
-
-        for _ in range(0, 5):
-            status = self.elevator_and_arm.lift_main.configurator.apply(self.current_limit_configuration)
-            if status.is_ok():
-                break
+        if not interrupted:
+            self.elevator_and_arm.wrist.set_position(0.16)

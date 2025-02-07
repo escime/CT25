@@ -264,9 +264,9 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         cam1 = photonCamera.PhotonCamera("TAG_DETECT_FR")
         cam2 = photonCamera.PhotonCamera("TAG_DETECT_FL")
         robot_to_cam1 = Transform3d(Translation3d(inchesToMeters(11.831), inchesToMeters(-6.05), inchesToMeters(7.37+0.25)),
-                                    Rotation3d(0, degreesToRadians(10), degreesToRadians(34.8)))
+                                    Rotation3d(0, degreesToRadians(10), degreesToRadians(180 + 34.8)))
         robot_to_cam2 = Transform3d(Translation3d(inchesToMeters(-11.831), inchesToMeters(-6.05), inchesToMeters(7.37+0.25)),
-                                    Rotation3d(0, degreesToRadians(10), degreesToRadians(180-34.8)))
+                                    Rotation3d(0, degreesToRadians(10), degreesToRadians(-34.8)))
 
         photon_pose_cam1 = (
             photonPoseEstimator.PhotonPoseEstimator(april_tag_field_layout,
@@ -289,8 +289,8 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             self.vision_sim.addAprilTags(AprilTagFieldLayout.loadField(AprilTagField.k2025Reefscape))
             camera_prop = SimCameraProperties()
             camera_prop.setCalibrationFromFOV(1280, 800, Rotation2d.fromDegrees(75))
-            camera_prop.setCalibError(0.25, 0.08)
-            camera_prop.setFPS(30)
+            camera_prop.setCalibError(0.01, 0.01)
+            camera_prop.setFPS(15)
             camera_prop.setAvgLatency(0.01)
             camera_prop.setLatencyStdDev(0.01)
             cam1_sim = PhotonCameraSim(cam1, camera_prop)
@@ -332,13 +332,13 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             self.vel_acc_periodic()
 
         # Update Photonvision cameras.
-        if self.photon_cam_array[0].isConnected():
-            self.select_best_vision_pose()
+        if self.photon_cam_array[0].isConnected(): # and not utils.is_simulation():
+            self.select_best_vision_pose((1, 1, 999999999))
 
         if utils.is_simulation():
             self.vision_sim.update(self.get_pose())
 
-    def select_best_vision_pose(self) -> None:
+    def select_best_vision_pose(self, stddevs: (float, float, float)) -> None:
         accepted_poses = []
         accepted_cameras = []
         final_pose = Pose3d(0, 0, 0, Rotation3d(0, 0, 0))
@@ -352,7 +352,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
                 # if (0 < estimated_pose.x < 17.658 and 0 < estimated_pose.y < 8.131 and 0 <= estimated_pose.z <= 0.05 and
                 #         self.photon_cam_array[i].getLatestResult().getBestTarget().fiducialId in self.used_tags):
                 if best_target is not None:
-                    if (0 < estimated_pose.x < 17.658 and 0 < estimated_pose.y < 8.131 and
+                    if (0 < estimated_pose.x < 17.658 and 0 < estimated_pose.y < 8.131 and 0 <= estimated_pose.z <= 0.05 and
                        best_target.fiducialId in self.used_tags):
                         accepted_poses.append(estimated_pose)
                         accepted_cameras.append(self.photon_cam_array[i])
@@ -370,7 +370,8 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
 
         if final_pose != Pose3d(0, 0, 0, Rotation3d(0, 0, 0)):
             SmartDashboard.putBoolean("Accepted new pose?", True)
-            self.add_vision_measurement(final_pose.toPose2d(), final_timestamp, (0.4, 0.4, 999999999))
+            # SmartDashboard.putNumberArray()
+            self.add_vision_measurement(final_pose.toPose2d(), utils.fpga_to_current_time(final_timestamp), stddevs)
         else:
             SmartDashboard.putBoolean("Accepted new pose?", False)
 

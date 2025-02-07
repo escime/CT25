@@ -8,7 +8,7 @@ from subsystems.climbersubsystem import Climber
 from subsystems.intakesubsystem import Intake
 from subsystems.ledsubsystem import LEDs
 from subsystems.utilsubsystem import UtilSubsystem
-from subsystems.elevatorandarm import ElevatorAndArmSubsystem
+from subsystems.elevatorandarm import ElevatorAndArmSubsystem, ReZeroTorque, ReZeroTorqueArm
 from wpilib import SmartDashboard, SendableChooser, DriverStation, DataLogManager, Timer, Alert
 from pathplannerlib.auto import NamedCommands, PathPlannerAuto, AutoBuilder
 from wpinet import PortForwarder
@@ -20,12 +20,12 @@ from phoenix6 import swerve, SignalLogger
 from wpimath.geometry import Rotation2d
 from wpimath.units import rotationsToRadians
 
-from math import pi
+from math import pi, pow, copysign
 
 from commands.baseline import Baseline
 from commands.check_drivetrain import CheckDrivetrain
-from commands.alignment_leds import AlignmentLEDs
-from commands.profiled_target import ProfiledTarget
+# from commands.alignment_leds import AlignmentLEDs
+# from commands.profiled_target import ProfiledTarget
 from commands.auto_alignment_multi_feedback import AutoAlignmentMultiFeedback
 from commands.set_elevator_and_arm import SetElevatorAndArm
 from commands.score import Score
@@ -152,9 +152,9 @@ class RobotContainer:
             self.drivetrain.apply_request(
                 lambda: (
                     self._drive.with_velocity_x(
-                        -self.driver_controller.getLeftY() * self._max_speed * self.elevator_and_arm.get_accel_limit())
-                    .with_velocity_y(-self.driver_controller.getLeftX() * self._max_speed * self.elevator_and_arm.get_accel_limit())
-                    .with_rotational_rate(-self.driver_controller.getRightX() * self._max_angular_rate * self.elevator_and_arm.get_accel_limit())
+                        -copysign(pow(self.driver_controller.getLeftY(), 2), self.driver_controller.getLeftY()) * self._max_speed * self.elevator_and_arm.get_accel_limit())
+                    .with_velocity_y(-copysign(pow(self.driver_controller.getLeftX(), 2), self.driver_controller.getLeftX()) * self._max_speed * self.elevator_and_arm.get_accel_limit())
+                    .with_rotational_rate(-copysign(pow(self.driver_controller.getRightX(), 2), self.driver_controller.getRightX()) * self._max_angular_rate * self.elevator_and_arm.get_accel_limit())
                 )
             )
         )
@@ -243,9 +243,17 @@ class RobotContainer:
         self.operator_controller.leftBumper().and_(lambda: not self.test_bindings).whileTrue(
             SequentialCommandGroup(
                 SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain),
+                # SequentialCommandGroup(
+                #     runOnce(lambda: self.leds.set_flash_color_rate(15), self.leds),
+                #     runOnce(lambda: self.leds.set_flash_color_color([255, 255, 255]), self.leds),
+                #     runOnce(lambda: self.leds.set_state("flash_color"), self.leds)
+                # ).ignoringDisable(True),
                 Collect(self.elevator_and_arm)
             )
         )
+        # ).onFalse(
+        #     runOnce(lambda: self.leds.set_state("default"), self.leds).ignoringDisable(True)
+        # )
 
         # Human player LEDs
         self.operator_controller.start().and_(lambda: not self.test_bindings).onTrue(
@@ -311,8 +319,25 @@ class RobotContainer:
             SetElevatorAndArm("algae_low", self.elevator_and_arm, self.drivetrain)
         )
         self.operator_controller.a().and_(lambda: not self.test_bindings).onTrue(
-            SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain)
+            SequentialCommandGroup(
+                SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain),
+                ReZeroTorque(self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelSelf).withTimeout(0.25)
+            )
         )
+
+        # Rezero the arm.
+        self.driver_controller.back().and_(lambda: not self.test_bindings).onTrue(
+            SequentialCommandGroup(
+                runOnce(lambda: self.elevator_and_arm.set_arm_manual(0), self.elevator_and_arm),
+                runOnce(lambda: self.elevator_and_arm.wrist.set_position(0.16), self.elevator_and_arm)
+            # ReZeroTorqueArm(self.elevator_and_arm, self.timer).withInterruptBehavior(InterruptionBehavior.kCancelSelf).withTimeout(0.25)
+            )
+        )
+
+        # Reset all pose based on vision data.
+        # self.driver_controller.back().and_(lambda: not self.test_bindings).onTrue(
+        #     runOnce(lambda: self.drivetrain.select_best_vision_pose((0.00001, 0.00001, 0.00001)))
+        # )
 
         # Manually control the climber
         self.operator_controller.axisGreaterThan(4, 0.2).and_(lambda: not self.test_bindings).onTrue(
@@ -375,7 +400,7 @@ class RobotContainer:
                 runOnce(lambda: self.leds.set_flash_color_rate(10), self.leds),
                 runOnce(lambda: self.leds.set_flash_color_color([0, 255, 0]), self.leds),
                 runOnce(lambda: self.leds.set_state("flash_color"), self.leds),
-                WaitCommand(2),
+                WaitCommand(0.5),
                 runOnce(lambda: self.leds.set_state("gp_held"), self.leds)
             ).ignoringDisable(True)
         ).onFalse(
@@ -385,6 +410,8 @@ class RobotContainer:
                 runOnce(lambda: self.leds.set_state("flash_color"), self.leds),
                 WaitCommand(0.5),
                 runOnce(lambda: self.leds.set_state("default"), self.leds)
+                # runOnce(lambda: self.leds.reset_flames(), self.leds),
+                # runOnce(lambda: self.leds.set_state("flames"), self.leds)
             ).ignoringDisable(True)
         )
 
@@ -569,6 +596,6 @@ class RobotContainer:
         NamedCommands.registerCommand("stow",
                                       AutoSetElevatorAndArm("stow", "stow", self.elevator_and_arm))
         NamedCommands.registerCommand("score", Score(self.elevator_and_arm, self.timer))
-        NamedCommands.registerCommand("collect", Collect(self.elevator_and_arm))
+        NamedCommands.registerCommand("collect", Collect(self.elevator_and_arm).withTimeout(2))
         NamedCommands.registerCommand("start_timer", StartAutoTimer(self.util, self.timer))
         NamedCommands.registerCommand("stop_timer", StopAutoTimer(self.util, self.timer))

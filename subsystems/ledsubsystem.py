@@ -94,8 +94,8 @@ class LEDs(Subsystem):
         self.cooling = 10
         self.sparking = 150
         self.heat = [0] * LEDConstants.strip_length
-        self.flame_color = [255, 0, 0]
-        self.flame_pattern = [AddressableLED.LEDData(255, 0, 0)] * LEDConstants.strip_length
+        self.flame_color = [149, 50, 168]
+        self.flame_pattern = [AddressableLED.LEDData(149, 50, 168)] * LEDConstants.strip_length
 
         # Set up settings for notifiers
         self.notifier_on = False
