@@ -27,7 +27,7 @@ class Score(Command):
 
     def execute(self):
         if self.elevator_and_arm.get_arm_at_target() and not self.locked_in:
-            self.elevator_and_arm.intake.set(0.2)
+            self.elevator_and_arm.intake.set(0.3)
             self.locked_in = True
             self.time_in = self.timer.get()
 
@@ -36,7 +36,7 @@ class Score(Command):
 
     def isFinished(self) -> bool:
         # print(self.elevator_and_arm.get_arm_at_target())
-        return self.timer.get() - self.time_in > 0.5
+        return self.timer.get() - self.time_in > 1
 
     def end(self, interrupted: bool):
         self.elevator_and_arm.intake.set(0)

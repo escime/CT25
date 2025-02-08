@@ -16,7 +16,7 @@ class OIConstants:
 
 class LEDConstants:
     port = 0
-    strip_length = 25
+    strip_length = 28
 
 
 class AutoConstants:
@@ -61,9 +61,9 @@ class ElevatorConstants:
     drum_diameter_m = inchesToMeters(drum_diameter_in)
     state_values = {"stow": 0, "max": 6.5,
                     "L1": 0,
-                    "L2": 0.95,
+                    "L2": 1,
                     "L3": 3.0,
-                    "L4": 6.2,
+                    "L4": 6.1,
                     "algae_high": 4,
                     "algae_low": 2,
                     "net": 6.1}
@@ -95,17 +95,17 @@ class ElevatorConstants:
 class ArmConstants:
     state_values = {"stow": 0,
                     "stage_left": 0.07,
-                    "score_left": 0.12,
+                    "score_left": 0.14,
                     "stage_right": -0.07,
-                    "score_right": -0.12,
+                    "score_right": -0.14,
                     "algae_left": 0.15,
                     "algae_right": -0.15}
     wrist_can_id = 34
     intake_channel = 2
-    score_speed = 0.25
+    score_speed = 0.75
     supply_current_limit = 40
-    use_supply_current_limit = False
-    gearbox_ratio = 30
+    use_supply_current_limit = True
+    gearbox_ratio = 50
     arm_at_target_threshold = 0.01
 
     mm_cruise_velocity = 0.5 # 0.5

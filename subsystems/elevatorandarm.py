@@ -130,7 +130,8 @@ class ElevatorAndArmSubsystem(Subsystem):
 
         wrist_config.current_limits.supply_current_limit = ArmConstants.supply_current_limit
         wrist_config.current_limits.supply_current_limit_enable = ArmConstants.use_supply_current_limit
-        wrist_config.current_limits.stator_current_limit_enable = False
+        wrist_config.current_limits.stator_current_limit = 120
+        wrist_config.current_limits.stator_current_limit_enable = True
         wrist_config.feedback.sensor_to_mechanism_ratio = ArmConstants.gearbox_ratio
 
         wrist_mm_config = wrist_config.motion_magic
@@ -160,7 +161,7 @@ class ElevatorAndArmSubsystem(Subsystem):
         if not status.is_ok():
             print(f"Could not apply configs, error code: {status.name}")
 
-        self.wrist.set_position(0.16)
+        self.wrist.set_position(0.17)
 
         self.wrist_sim = self.wrist.sim_state
         self.arm_sim = SingleJointedArmSim(
@@ -202,7 +203,7 @@ class ElevatorAndArmSubsystem(Subsystem):
                                                     6,
                                                     Color8Bit(Color.kBlue))
 
-        self.set_arm_state("stow")
+        # self.set_arm_state("stow")
 
         self.debug_mode = False
 
@@ -375,4 +376,4 @@ class ReZeroTorqueArm(Command):
         self.elevator_and_arm.set_arm_manual_off()
 
         if not interrupted:
-            self.elevator_and_arm.wrist.set_position(0.16)
+            self.elevator_and_arm.wrist.set_position(0.17)

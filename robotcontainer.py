@@ -152,9 +152,9 @@ class RobotContainer:
             self.drivetrain.apply_request(
                 lambda: (
                     self._drive.with_velocity_x(
-                        -copysign(pow(self.driver_controller.getLeftY(), 2), self.driver_controller.getLeftY()) * self._max_speed * self.elevator_and_arm.get_accel_limit())
-                    .with_velocity_y(-copysign(pow(self.driver_controller.getLeftX(), 2), self.driver_controller.getLeftX()) * self._max_speed * self.elevator_and_arm.get_accel_limit())
-                    .with_rotational_rate(-copysign(pow(self.driver_controller.getRightX(), 2), self.driver_controller.getRightX()) * self._max_angular_rate * self.elevator_and_arm.get_accel_limit())
+                        -copysign(pow(self.driver_controller.getLeftY(), 1), self.driver_controller.getLeftY()) * self._max_speed * self.elevator_and_arm.get_accel_limit())
+                    .with_velocity_y(-copysign(pow(self.driver_controller.getLeftX(), 1), self.driver_controller.getLeftX()) * self._max_speed * self.elevator_and_arm.get_accel_limit())
+                    .with_rotational_rate(-copysign(pow(self.driver_controller.getRightX(), 1), self.driver_controller.getRightX()) * self._max_angular_rate * self.elevator_and_arm.get_accel_limit())
                 )
             )
         )
@@ -329,7 +329,7 @@ class RobotContainer:
         self.driver_controller.back().and_(lambda: not self.test_bindings).onTrue(
             SequentialCommandGroup(
                 runOnce(lambda: self.elevator_and_arm.set_arm_manual(0), self.elevator_and_arm),
-                runOnce(lambda: self.elevator_and_arm.wrist.set_position(0.16), self.elevator_and_arm)
+                runOnce(lambda: self.elevator_and_arm.wrist.set_position(0.17), self.elevator_and_arm)
             # ReZeroTorqueArm(self.elevator_and_arm, self.timer).withInterruptBehavior(InterruptionBehavior.kCancelSelf).withTimeout(0.25)
             )
         )

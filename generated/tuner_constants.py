@@ -17,7 +17,7 @@ class TunerConstants:
         configs.Slot0Configs()
         .with_k_p(100)
         .with_k_i(0)
-        .with_k_d(1.1)  # 0.5
+        .with_k_d(0.7)  # 0.5
         .with_k_s(0.16556)  # 0.1
         .with_k_v(0.11813)  # 2.66
         .with_k_a(0.0026724)  # 0
@@ -30,8 +30,8 @@ class TunerConstants:
         .with_k_p(0.1)
         .with_k_i(0)
         .with_k_d(0)
-        .with_k_s(0.17571)  # 0
-        .with_k_v(0.11998)  # 0.124
+        .with_k_s(0.25)  # 0.087932)  # 0
+        .with_k_v(0.12095)  # 0.124
     )
 
     # The closed-loop output type to use for the steer motors;
@@ -52,7 +52,7 @@ class TunerConstants:
 
     # The stator current at which the wheels start to slip;
     # This needs to be tuned to your individual robot
-    _slip_current: units.ampere = 120.0
+    _slip_current: units.ampere = 99  # 120.0
 
     # Initial configs for the drive and steer motors and the azimuth encoder; these cannot be null.
     # Some configs will be overwritten; check the `with_*_initial_configs()` API documentation.

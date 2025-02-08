@@ -34,7 +34,7 @@
   "eventMarkers": [
     {
       "name": "lift_up",
-      "waypointRelativePos": 0.4599217986314547,
+      "waypointRelativePos": 0.34986595174262725,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",

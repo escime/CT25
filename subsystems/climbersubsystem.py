@@ -27,6 +27,8 @@ class Climber(Subsystem):
 
         self.climber_arm_configs = TalonFXConfiguration()
 
+        self.climber_arm_configs.motor_output.neutral_mode = self.climber_arm_configs.motor_output.neutral_mode.BRAKE
+
         self.climber_arm_configs.current_limits.supply_current_limit = 60
         self.climber_arm_configs.current_limits.supply_current_limit_enable = True
         self.climber_arm_configs.current_limits.stator_current_limit_enable = False
