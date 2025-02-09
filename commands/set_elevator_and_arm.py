@@ -20,13 +20,13 @@ class SetElevatorAndArm(Command):
         if self.setpoint == "stow":
             self.elevator_and_arm.set_accel_limit(1)
         if self.setpoint == "L1":
-            self.elevator_and_arm.set_accel_limit(0.9)
+            self.elevator_and_arm.set_accel_limit(1)
         if self.setpoint == "L2":
-            self.elevator_and_arm.set_accel_limit(0.8)
+            self.elevator_and_arm.set_accel_limit(1)
         if self.setpoint == "L3":
             self.elevator_and_arm.set_accel_limit(0.7)
         if self.setpoint == "L4":
-            self.elevator_and_arm.set_accel_limit(0.6)
+            self.elevator_and_arm.set_accel_limit(0.5)
 
         if self.setpoint != "stow" and self.setpoint != "net":
             if self.setpoint == "L1" or self.setpoint == "L2" or self.setpoint == "L3" or self.setpoint == "L4":

@@ -13,9 +13,16 @@ class ScoreAttempt(Command):
     def initialize(self):
         if "stage" in self.elevator_and_arm.get_arm_state():
             if "left" in self.elevator_and_arm.get_arm_state():
-                arm_target = "score_left"
+                if "L4" in self.elevator_and_arm.get_elevator_state():
+                    arm_target = "score_left_L4"
+                else:
+                    arm_target = "score_left"
             else:
-                arm_target = "score_right"
+                if "L4" in self.elevator_and_arm.get_elevator_state():
+                    arm_target = "score_right_L4"
+                else:
+                    arm_target = "score_right"
+
         elif "score" in self.elevator_and_arm.get_arm_state():
             if "left" in self.elevator_and_arm.get_arm_state():
                 arm_target = "stage_left"

@@ -28,7 +28,7 @@ class AutoAlignmentMultiFeedback(Command):
 
         self.rotate_controller = PIDController(0.1, 0, 0, 0.04)
         self.rotate_controller.enableContinuousInput(-180, 180)
-        self.y_controller = PIDController(0.5, 0, 0, 0.04)
+        self.y_controller = PIDController(0.65, 0, 0, 0.04)
         self.closing_controller = PIDController(0.1, 0, 0, 0.04)
         self.target = [0, 0]
 
@@ -128,8 +128,8 @@ class AutoAlignmentMultiFeedback(Command):
     def get_vector_to_line(self, current_pose, alpha):
         xmin, ymin = self.get_closest_target_coordinates(current_pose, alpha)
 
-        # SmartDashboard.putNumber("Perceived Alignment Error",
-        #                         metersToInches(self.get_distance_to_line(current_pose, alpha)))
+        SmartDashboard.putString("Perceived Alignment Error",
+                                 str(metersToInches(self.get_distance_to_line(current_pose, alpha))) + "in")
         if not self.flipped:
             if ymin > current_pose.y:
                 return -1 * self.get_distance_to_line(current_pose, alpha)

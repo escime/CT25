@@ -177,11 +177,11 @@ class RobotContainer:
             self.drivetrain.apply_request(
                 lambda: (
                     self._drive.with_velocity_x(
-                        -self.driver_controller.getLeftY() * self._max_speed * 0.5)
+                        -self.driver_controller.getLeftY() * self._max_speed * 0.375 * self.elevator_and_arm.get_accel_limit())
                     .with_velocity_y(
-                        -self.driver_controller.getLeftX() * self._max_speed * 0.5)
+                        -self.driver_controller.getLeftX() * self._max_speed * 0.375 * self.elevator_and_arm.get_accel_limit())
                     .with_rotational_rate(
-                        -self.driver_controller.getRightX() * self._max_angular_rate * 0.5)
+                        -self.driver_controller.getRightX() * self._max_angular_rate * 0.375 * self.elevator_and_arm.get_accel_limit())
                 )
             )
         )
@@ -224,7 +224,7 @@ class RobotContainer:
             ScoreAttempt(self.elevator_and_arm)
         )
 
-        # Score Coral
+        # Score Coralbjv
         self.driver_controller.leftTrigger().and_(lambda: not self.test_bindings).and_(
             lambda: not self.util.algae_mode).onTrue(
             Score(self.elevator_and_arm, self.timer)

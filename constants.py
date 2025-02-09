@@ -63,7 +63,7 @@ class ElevatorConstants:
                     "L1": 0,
                     "L2": 1,
                     "L3": 3.0,
-                    "L4": 6.1,
+                    "L4": 5.9,
                     "algae_high": 4,
                     "algae_low": 2,
                     "net": 6.1}
@@ -96,8 +96,10 @@ class ArmConstants:
     state_values = {"stow": 0,
                     "stage_left": 0.07,
                     "score_left": 0.14,
+                    "score_left_L4": 0.08,
                     "stage_right": -0.07,
                     "score_right": -0.14,
+                    "score_right_L4": -0.08,
                     "algae_left": 0.15,
                     "algae_right": -0.15}
     wrist_can_id = 34
@@ -117,7 +119,7 @@ class ArmConstants:
     kv = 0.71
     ka = 0.01
     kp = 110
-    ki = 0
+    ki = 0.001
     kd = 0
 
     arm_weight = lbsToKilograms(10)

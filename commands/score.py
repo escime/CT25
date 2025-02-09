@@ -20,9 +20,15 @@ class Score(Command):
         self.locked_in = False
         if "stage" in self.elevator_and_arm.get_arm_state():
             if "left" in self.elevator_and_arm.get_arm_state():
-                arm_target = "score_left"
+                if "L4" in self.elevator_and_arm.get_elevator_state():
+                    arm_target = "score_left_L4"
+                else:
+                    arm_target = "score_left"
             else:
-                arm_target = "score_right"
+                if "L4" in self.elevator_and_arm.get_elevator_state():
+                    arm_target = "score_right_L4"
+                else:
+                    arm_target = "score_right"
             self.elevator_and_arm.set_arm_state(arm_target)
 
     def execute(self):

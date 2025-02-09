@@ -263,10 +263,10 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         april_tag_field_layout = AprilTagFieldLayout.loadField(AprilTagField.k2025Reefscape)
         cam1 = photonCamera.PhotonCamera("TAG_DETECT_FR")
         cam2 = photonCamera.PhotonCamera("TAG_DETECT_FL")
-        robot_to_cam1 = Transform3d(Translation3d(inchesToMeters(11.831), inchesToMeters(-6.05), inchesToMeters(7.37+0.25)),
-                                    Rotation3d(0, degreesToRadians(10), degreesToRadians(180 + 34.8)))
-        robot_to_cam2 = Transform3d(Translation3d(inchesToMeters(-11.831), inchesToMeters(-6.05), inchesToMeters(7.37+0.25)),
-                                    Rotation3d(0, degreesToRadians(10), degreesToRadians(-34.8)))
+        robot_to_cam1 = Transform3d(Translation3d(inchesToMeters(11.676), inchesToMeters(-6.329), inchesToMeters(7.597)),
+                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(-180 + 26.769)))
+        robot_to_cam2 = Transform3d(Translation3d(inchesToMeters(-11.676), inchesToMeters(-6.329), inchesToMeters(7.597)),
+                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(-26.769)))
 
         photon_pose_cam1 = (
             photonPoseEstimator.PhotonPoseEstimator(april_tag_field_layout,
@@ -347,13 +347,14 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             estimated_pose = self.photon_pose_array[i].update()
             best_target = self.photon_cam_array[i].getLatestResult().getBestTarget()
             if estimated_pose is not None:
-            # if self.photon_cam_array[i].getLatestResult().hasTargets() and self.photon_pose_array[i].update().estimatedPose:
                 estimated_pose = estimated_pose.estimatedPose
-                # if (0 < estimated_pose.x < 17.658 and 0 < estimated_pose.y < 8.131 and 0 <= estimated_pose.z <= 0.05 and
-                #         self.photon_cam_array[i].getLatestResult().getBestTarget().fiducialId in self.used_tags):
                 if best_target is not None:
-                    if (0 < estimated_pose.x < 17.658 and 0 < estimated_pose.y < 8.131 and 0 <= estimated_pose.z <= 0.05 and
-                       best_target.fiducialId in self.used_tags):
+                    SmartDashboard.putString("Estimated Pose", str(estimated_pose))  # TODO Delete this
+
+                    if (0 < estimated_pose.x < 17.658 and 0 < estimated_pose.y < 8.131 and -0.05 <= estimated_pose.z <= 0.05 and
+                       best_target.fiducialId in self.used_tags and
+                            math.sqrt(math.pow(best_target.bestCameraToTarget.x, 2) +
+                                      math.pow(best_target.bestCameraToTarget.y, 2)) < 3):
                         accepted_poses.append(estimated_pose)
                         accepted_cameras.append(self.photon_cam_array[i])
 
@@ -370,7 +371,6 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
 
         if final_pose != Pose3d(0, 0, 0, Rotation3d(0, 0, 0)):
             SmartDashboard.putBoolean("Accepted new pose?", True)
-            # SmartDashboard.putNumberArray()
             self.add_vision_measurement(final_pose.toPose2d(), utils.fpga_to_current_time(final_timestamp), stddevs)
         else:
             SmartDashboard.putBoolean("Accepted new pose?", False)
