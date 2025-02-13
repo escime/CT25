@@ -16,17 +16,30 @@ class LEDs(Subsystem):
         self.state = "default"
 
         # Prepare default pattern
-        self.default_pattern = [AddressableLED.LEDData(149, 50, 168)] * 2
-        for i in range(0, 2):
-            self.default_pattern.append(AddressableLED.LEDData(int(149 * 0.75), int(50 * 0.75), int(168 * 0.75)))
-        for i in range(0, 3):
-            self.default_pattern.append(AddressableLED.LEDData(int(149 * 0.5), int(50 * 0.5), int(168 * 0.5)))
-        for i in range(0, 7):
-            self.default_pattern.append(AddressableLED.LEDData(int(149 * 0.25), int(50 * 0.25), int(168 * 0.25)))
+        self.default_pattern = [AddressableLED.LEDData(0, 0, 0)] * 1
+        for i in range(0, LEDConstants.strip_length - 22):
+            self.default_pattern.append(AddressableLED.LEDData(0, 0, 0))
         for i in range(0, 7):
             self.default_pattern.append(AddressableLED.LEDData(int(149 * 0.1), int(50 * 0.1), int(168 * 0.1)))
-        for i in range(0, LEDConstants.strip_length - 21):
-            self.default_pattern.append(AddressableLED.LEDData(0, 0, 0))
+        for i in range(0, 7):
+            self.default_pattern.append(AddressableLED.LEDData(int(149 * 0.25), int(50 * 0.25), int(168 * 0.25)))
+        for i in range(0, 3):
+            self.default_pattern.append(AddressableLED.LEDData(int(149 * 0.5), int(50 * 0.5), int(168 * 0.5)))
+        for i in range(0, 2):
+            self.default_pattern.append(AddressableLED.LEDData(int(149 * 0.75), int(50 * 0.75), int(168 * 0.75)))
+        for i in range(0, 2):
+            self.default_pattern.append(AddressableLED.LEDData(int(149), int(50), int(168)))
+        # self.default_pattern = [AddressableLED.LEDData(149, 50, 168)] * 2
+        # for i in range(0, 2):
+        #     self.default_pattern.append(AddressableLED.LEDData(int(149 * 0.75), int(50 * 0.75), int(168 * 0.75)))
+        # for i in range(0, 3):
+        #     self.default_pattern.append(AddressableLED.LEDData(int(149 * 0.5), int(50 * 0.5), int(168 * 0.5)))
+        # for i in range(0, 7):
+        #     self.default_pattern.append(AddressableLED.LEDData(int(149 * 0.25), int(50 * 0.25), int(168 * 0.25)))
+        # for i in range(0, 7):
+        #     self.default_pattern.append(AddressableLED.LEDData(int(149 * 0.1), int(50 * 0.1), int(168 * 0.1)))
+        # for i in range(0, LEDConstants.strip_length - 21):
+        #     self.default_pattern.append(AddressableLED.LEDData(0, 0, 0))
 
         # Prepare no-animation light.
         self.no_pattern = [AddressableLED.LEDData(149, 50, 168)] * LEDConstants.strip_length
@@ -177,12 +190,14 @@ class LEDs(Subsystem):
             #     self.display_buffer[i] = Color(self.buffer[i].r, self.buffer[i].g, self.buffer[i].b).hexString()
             # SmartDashboard.putStringArray("LED Display", self.display_buffer)
         else:
-            # self.default()
             if self.state == "default":
-                if self.re_enter_default:
-                    self.buffer = self.no_pattern
-                    self.re_enter_default = False
-                    self.chain.setData(self.buffer)
+                self.default()
+                self.chain.setData(self.buffer)
+            # if self.state == "default":
+            #     if self.re_enter_default:
+            #         self.buffer = self.no_pattern
+            #         self.re_enter_default = False
+            #         self.chain.setData(self.buffer)
             if self.state == "gp_held":
                 if self.re_enter_gp_held:
                     self.buffer = self.gp_held_simple
@@ -193,7 +208,7 @@ class LEDs(Subsystem):
         """Logic for running default animation."""
         if self.timer.get() - 0.05 > self.last_time:
             self.buffer = self.default_pattern
-            self.default_pattern = self.default_pattern[1:] + self.default_pattern[:1]
+            self.default_pattern = [self.default_pattern[-1]] + self.default_pattern[:-1]
             self.last_time = self.timer.get()
 
     def time_variable_default(self) -> None:

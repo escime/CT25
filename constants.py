@@ -59,14 +59,15 @@ class ElevatorConstants:
 
     drum_diameter_in = 2  # 14T sprocket
     drum_diameter_m = inchesToMeters(drum_diameter_in)
-    state_values = {"stow": 0, "max": 6.5,
+    state_values = {"stow": 0, "max": 6.45,
                     "L1": 0,
                     "L2": 1,
                     "L3": 3.0,
-                    "L4": 5.9,
-                    "algae_high": 4,
+                    "L4_scoring": 4.8,
+                    "L4": 6.3,
+                    "algae_high": 4.3,
                     "algae_low": 2,
-                    "net": 6.1}
+                    "net": 6.3}
 
     supply_current_limit = 80
     use_supply_current_limit = True
@@ -81,7 +82,7 @@ class ElevatorConstants:
     ks = 0.1
     kv = 3.11
     ka = 0.04
-    kp = 60
+    kp = 80
     ki = 0
     kd = 0
 
@@ -96,12 +97,12 @@ class ArmConstants:
     state_values = {"stow": 0,
                     "stage_left": 0.07,
                     "score_left": 0.14,
-                    "score_left_L4": 0.08,
+                    "score_left_L4": 0.13,
                     "stage_right": -0.07,
                     "score_right": -0.14,
-                    "score_right_L4": -0.08,
-                    "algae_left": 0.15,
-                    "algae_right": -0.15}
+                    "score_right_L4": -0.13,
+                    "algae_left": 0.17,
+                    "algae_right": -0.17}
     wrist_can_id = 34
     intake_channel = 2
     score_speed = 0.75
@@ -127,8 +128,8 @@ class ArmConstants:
 
 
 class IntakeConstants:
-    intake_state_values = {"stow": 0, "intake_coral": 0.678, "intake_algae": 0.29, "score_coral": 0.07, "score_algae": 0.07, "climbing": 0.3}
-    wheel_speed_values = {"stow": 0, "intake_coral": 12, "intake_algae": -12, "score_coral": -1, "score_algae": -12, "climbing": 0}
+    intake_state_values = {"stow": 0, "stow_algae": 0, "intake_coral": 0.678, "intake_algae": 0.29, "score_coral": 0.07, "score_algae": 0.07, "climbing": 0.3}
+    wheel_speed_values = {"stow": 0, "stow_algae": -0.5, "intake_coral": 12, "intake_algae": -12, "score_coral": -0.5, "score_algae": 12, "climbing": 0}
     wheel_can_id = 30
     arm_can_id = 31
     gearbox_ratio = 12

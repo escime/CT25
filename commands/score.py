@@ -18,7 +18,7 @@ class Score(Command):
     def initialize(self):
         self.time_in = 10000000000000
         self.locked_in = False
-        if "stage" in self.elevator_and_arm.get_arm_state():
+        if "stage" or "score" in self.elevator_and_arm.get_arm_state():
             if "left" in self.elevator_and_arm.get_arm_state():
                 if "L4" in self.elevator_and_arm.get_elevator_state():
                     arm_target = "score_left_L4"
@@ -30,10 +30,13 @@ class Score(Command):
                 else:
                     arm_target = "score_right"
             self.elevator_and_arm.set_arm_state(arm_target)
+            if "L4" in self.elevator_and_arm.get_elevator_state():
+                self.elevator_and_arm.set_elevator_state("L4_scoring")
+                self.elevator_and_arm.intake.set(0.35)
 
     def execute(self):
-        if self.elevator_and_arm.get_arm_at_target() and not self.locked_in:
-            self.elevator_and_arm.intake.set(0.3)
+        if self.elevator_and_arm.get_arm_at_target() and self.elevator_and_arm.get_elevator_at_target() and not self.locked_in:
+            self.elevator_and_arm.intake.set(0.35)
             self.locked_in = True
             self.time_in = self.timer.get()
 

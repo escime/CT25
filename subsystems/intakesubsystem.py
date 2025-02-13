@@ -89,6 +89,8 @@ class Intake(Subsystem):
 
         self.debug_mode = False
 
+        self.set_state("stow")
+
         self.last_time = get_current_time_seconds()
 
     def set_state(self, state: str) -> None:

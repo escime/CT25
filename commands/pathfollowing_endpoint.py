@@ -24,7 +24,7 @@ class PathfollowingEndpointClose(Command):
         self.drive_request.heading_controller.enableContinuousInput(0, -2 * pi)
         self.drive_request.heading_controller.setTolerance(0.05)
 
-        self.addRequirements(drive)
+        # self.addRequirements(drive)
 
     def initialize(self):
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:

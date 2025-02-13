@@ -22,15 +22,16 @@ class ScoreAttempt(Command):
                     arm_target = "score_right_L4"
                 else:
                     arm_target = "score_right"
+            self.elevator_and_arm.set_arm_state(arm_target)
 
         elif "score" in self.elevator_and_arm.get_arm_state():
             if "left" in self.elevator_and_arm.get_arm_state():
                 arm_target = "stage_left"
             else:
                 arm_target = "stage_right"
-        else:
-            arm_target = self.elevator_and_arm.get_arm_state()
-        self.elevator_and_arm.set_arm_state(arm_target)
+            self.elevator_and_arm.set_arm_state(arm_target)
+        # else:
+            # arm_target = self.elevator_and_arm.get_arm_state()
 
     def isFinished(self) -> bool:
         return True

@@ -66,7 +66,7 @@ class AutoAlignmentMultiFeedback(Command):
         rotate_output = self.rotate_controller.calculate(current_heading, theta)
         y_output = self.y_controller.calculate(self.get_vector_to_line(current_pose, self.target[2]), 0)
 
-        if -0.02 < y_output < 0.02:
+        if -0.005 < y_output < 0.005:
             y_output = 0
 
         if self.joystick.a().getAsBoolean():

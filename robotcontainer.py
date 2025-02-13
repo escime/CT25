@@ -10,6 +10,7 @@ from subsystems.ledsubsystem import LEDs
 from subsystems.utilsubsystem import UtilSubsystem
 from subsystems.elevatorandarm import ElevatorAndArmSubsystem, ReZeroTorque, ReZeroTorqueArm
 from wpilib import SmartDashboard, SendableChooser, DriverStation, DataLogManager, Timer, Alert
+from wpimath.filter import SlewRateLimiter
 from pathplannerlib.auto import NamedCommands, PathPlannerAuto, AutoBuilder
 from wpinet import PortForwarder
 
@@ -68,13 +69,13 @@ class RobotContainer:
                 self.alert_logging_enabled.set(True)
             else:
                 SignalLogger.stop()
-            for port in range(5800, 5810):
-                PortForwarder.getInstance().add(port, "10.39.40.11", port)
-            PortForwarder.getInstance().add(1182, "10.39.40.11", 1182)
-            PortForwarder.getInstance().add(1184, "10.39.40.11", 1184)
+            # for port in range(5800, 5810):
+            #     PortForwarder.getInstance().add(port, "10.39.40.11", port)
+            # PortForwarder.getInstance().add(1182, "10.39.40.11", 1182)
+            # PortForwarder.getInstance().add(1184, "10.39.40.11", 1184)
             # for port in range(5800, 5810):
             #     PortForwarder.getInstance().add(port+10, "10.39.40.12", port)
-            self.alert_limelight.set(True)
+            self.alert_limelight.set(False)
         else:
             SignalLogger.stop()
 
@@ -116,7 +117,7 @@ class RobotContainer:
         )
         self._hold_heading.heading_controller.setPID(5, 0, 0)
         self._hold_heading.heading_controller.enableContinuousInput(0, -2 * pi)
-        self._hold_heading.heading_controller.setTolerance(0.1)
+        self._hold_heading.heading_controller.setTolerance(0.1)  # 0.1
 
         # Register commands for PathPlanner. ---------------------------------------------------------------------------
         self.registerCommands()
@@ -147,14 +148,23 @@ class RobotContainer:
         self.m_chooser = AutoBuilder.buildAutoChooser("DoNothing")
         SmartDashboard.putData("Auto Select", self.m_chooser)
 
+        self.drive_filter_x = SlewRateLimiter(1, -1, 0)
+        self.drive_filter_y = SlewRateLimiter(1, -1, 0)
+
     def configure_triggers(self) -> None:
         self.drivetrain.setDefaultCommand(  # Drivetrain will execute this command periodically
             self.drivetrain.apply_request(
                 lambda: (
                     self._drive.with_velocity_x(
-                        -copysign(pow(self.driver_controller.getLeftY(), 1), self.driver_controller.getLeftY()) * self._max_speed * self.elevator_and_arm.get_accel_limit())
-                    .with_velocity_y(-copysign(pow(self.driver_controller.getLeftX(), 1), self.driver_controller.getLeftX()) * self._max_speed * self.elevator_and_arm.get_accel_limit())
-                    .with_rotational_rate(-copysign(pow(self.driver_controller.getRightX(), 1), self.driver_controller.getRightX()) * self._max_angular_rate * self.elevator_and_arm.get_accel_limit())
+                        -copysign(pow(self.drive_filter_x.calculate(self.driver_controller.getLeftY()), 1),
+                                  self.drive_filter_x.calculate(self.driver_controller.getLeftY()))
+                        * self._max_speed * self.elevator_and_arm.get_accel_limit())
+                    .with_velocity_y(-copysign(pow(self.drive_filter_y.calculate(self.driver_controller.getLeftX()), 1),
+                                               self.drive_filter_y.calculate(self.driver_controller.getLeftX()))
+                                     * self._max_speed * self.elevator_and_arm.get_accel_limit())
+                    .with_rotational_rate(-copysign(pow(self.driver_controller.getRightX(), 1),
+                                                    self.driver_controller.getRightX())
+                                          * self._max_angular_rate * self.elevator_and_arm.get_accel_limit())
                 )
             )
         )
@@ -177,11 +187,14 @@ class RobotContainer:
             self.drivetrain.apply_request(
                 lambda: (
                     self._drive.with_velocity_x(
-                        -self.driver_controller.getLeftY() * self._max_speed * 0.375 * self.elevator_and_arm.get_accel_limit())
+                        -self.drive_filter_x.calculate(self.driver_controller.getLeftY())
+                        * self._max_speed * 0.2)
                     .with_velocity_y(
-                        -self.driver_controller.getLeftX() * self._max_speed * 0.375 * self.elevator_and_arm.get_accel_limit())
+                        -self.drive_filter_y.calculate(self.driver_controller.getLeftX())
+                        * self._max_speed * 0.2)
                     .with_rotational_rate(
-                        -self.driver_controller.getRightX() * self._max_angular_rate * 0.375 * self.elevator_and_arm.get_accel_limit())
+                        -self.driver_controller.getRightX()
+                        * self._max_angular_rate * 0.2)
                 )
             )
         )
@@ -192,14 +205,31 @@ class RobotContainer:
         #             self.drivetrain.apply_request(
         #                 lambda: (
         #                     self.drivetrain.drive_clt(
-        #                         self.driver_controller.getLeftY() * self._max_speed * -1 * self.elevator_and_arm.get_accel_limit(),
-        #                         self.driver_controller.getLeftX() * self._max_speed * -1 * self.elevator_and_arm.get_accel_limit(),
+        #                         self.drive_filter_y.calculate(self.driver_controller.getLeftY()) * self._max_speed * -1 * self.elevator_and_arm.get_accel_limit(),
+        #                         self.drive_filter_x.calculate(self.driver_controller.getLeftX()) * self._max_speed * -1 * self.elevator_and_arm.get_accel_limit(),
         #                         self.driver_controller.getRightX() * -1 * self.elevator_and_arm.get_accel_limit()
         #                     )
         #                 )
         #             )
         #         )
         #     )
+
+        # self.driver_controller.rightTrigger().whileTrue(
+        #     SequentialCommandGroup(
+        #         runOnce(lambda: self.drivetrain.reset_clt(), self.drivetrain),
+        #         self.drivetrain.apply_request(
+        #             lambda: (
+        #                 self.drivetrain.drive_clt(
+        #                     self.drive_filter_y.calculate(
+        #                         self.driver_controller.getLeftY()) * self._max_speed * -1 * 0.2,
+        #                     self.drive_filter_x.calculate(
+        #                         self.driver_controller.getLeftX()) * self._max_speed * -1 * 0.2,
+        #                     self.driver_controller.getRightX() * -1 * 0.2
+        #                 )
+        #             )
+        #         )
+        #     )
+        # )
 
         # Reset pose.
         self.driver_controller.y().and_(lambda: not self.test_bindings).onTrue(
@@ -224,11 +254,18 @@ class RobotContainer:
             ScoreAttempt(self.elevator_and_arm)
         )
 
-        # Score Coralbjv
+        # Score Coral
         self.driver_controller.leftTrigger().and_(lambda: not self.test_bindings).and_(
             lambda: not self.util.algae_mode).onTrue(
             Score(self.elevator_and_arm, self.timer)
             .andThen(SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain))
+        )
+
+        # Sideswipe Algae
+        self.driver_controller.leftTrigger().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
+            runOnce(lambda: self.elevator_and_arm.intake.set(1), self.elevator_and_arm)
+        ).onFalse(
+            runOnce(lambda: self.elevator_and_arm.intake.set(0), self.elevator_and_arm)
         )
 
         # Change between CORAL and ALGAE scoring modes.
@@ -321,12 +358,12 @@ class RobotContainer:
         self.operator_controller.a().and_(lambda: not self.test_bindings).onTrue(
             SequentialCommandGroup(
                 SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain),
-                ReZeroTorque(self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelSelf).withTimeout(0.25)
+                ReZeroTorque(self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelSelf).withTimeout(0.4)
             )
         )
 
         # Rezero the arm.
-        self.driver_controller.back().and_(lambda: not self.test_bindings).onTrue(
+        self.operator_controller.back().and_(lambda: not self.test_bindings).onTrue(
             SequentialCommandGroup(
                 runOnce(lambda: self.elevator_and_arm.set_arm_manual(0), self.elevator_and_arm),
                 runOnce(lambda: self.elevator_and_arm.wrist.set_position(0.17), self.elevator_and_arm)
@@ -371,7 +408,7 @@ class RobotContainer:
         self.operator_controller.axisGreaterThan(1, 0.1).and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
             runOnce(lambda: self.intake_arm.set_state("intake_algae"), self.intake_arm)
         ).onFalse(
-            runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
+            runOnce(lambda: self.intake_arm.set_state("stow_algae"), self.intake_arm)
         )
         self.driver_controller.rightBumper().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
             runOnce(lambda: self.intake_arm.set_state("score_coral"), self.intake_arm)
@@ -383,6 +420,10 @@ class RobotContainer:
             runOnce(lambda: self.intake_arm.set_state("score_algae"), self.intake_arm)
         ).onFalse(
             runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
+        )
+
+        self.driver_controller.povDown().and_(lambda: not self.test_bindings).onTrue(
+            runOnce(lambda: self.intake_arm.intake_arm.set_position(0.678), self.intake_arm).ignoringDisable(True)
         )
 
         # Debug Mode Toggle

@@ -19,7 +19,7 @@ class TunerConstants:
         .with_k_i(0)
         .with_k_d(0.2502)  # 0.5
         .with_k_s(0.05)  # 0.1  # 0.16556
-        .with_k_v(0.5)  # 2.66
+        .with_k_v(0.4)  # 2.66
         .with_k_a(0)  # 0
         .with_static_feedforward_sign(signals.StaticFeedforwardSignValue.USE_CLOSED_LOOP_SIGN)
     )
