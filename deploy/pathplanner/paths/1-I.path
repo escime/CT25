@@ -30,7 +30,18 @@
   ],
   "rotationTargets": [],
   "constraintZones": [],
-  "pointTowardsZones": [],
+  "pointTowardsZones": [
+    {
+      "fieldPosition": {
+        "x": 5.0,
+        "y": 4.0
+      },
+      "rotationOffset": 0.0,
+      "minWaypointRelativePos": 0.09090909090909094,
+      "maxWaypointRelativePos": 0.8560606060606054,
+      "name": "Point Towards Zone"
+    }
+  ],
   "eventMarkers": [
     {
       "name": "lift_up",
@@ -39,7 +50,7 @@
       "command": {
         "type": "named",
         "data": {
-          "name": "L4_right"
+          "name": "L2_right"
         }
       }
     }

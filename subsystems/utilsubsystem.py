@@ -91,8 +91,8 @@ class UtilSubsystem(Subsystem):
         ]
 
         self.feeder_sides_red = [
-            [16.667, 7.245, 55],
-            [16.639, 0.758, 125]
+            [17.5, 8.5, 55],
+            [17.5, 0, 125]
         ]
         self.feeder_sides_blue = [
             [0.683, 7.245, 305],

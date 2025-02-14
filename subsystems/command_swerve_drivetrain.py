@@ -263,26 +263,35 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         april_tag_field_layout = AprilTagFieldLayout.loadField(AprilTagField.k2025Reefscape)
         cam1 = photonCamera.PhotonCamera("TAG_DETECT_FR")
         cam2 = photonCamera.PhotonCamera("TAG_DETECT_FL")
+        cam3 = photonCamera.PhotonCamera("TAG_DETECT_INTAKE")
         robot_to_cam1 = Transform3d(Translation3d(inchesToMeters(-11.676),inchesToMeters(-6.329),  inchesToMeters(7.597)),
                                     Rotation3d(0, degreesToRadians(-10), degreesToRadians(180 - 26.769)))
         robot_to_cam2 = Transform3d(Translation3d(inchesToMeters(11.676), inchesToMeters(-6.329), inchesToMeters(7.597)),
                                     Rotation3d(0, degreesToRadians(-10), degreesToRadians(26.769)))
+        robot_to_cam3 = Transform3d(Translation3d(inchesToMeters(11.676), inchesToMeters(6.329), inchesToMeters(7.597)),
+                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(90 + 26.769)))
 
         photon_pose_cam1 = (
             photonPoseEstimator.PhotonPoseEstimator(april_tag_field_layout,
-                                                    photonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY,
+                                                    photonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                                                     cam1,
                                                     robot_to_cam1))
         photon_pose_cam2 = (
             photonPoseEstimator.PhotonPoseEstimator(april_tag_field_layout,
-                                                    photonPoseEstimator.PoseStrategy.LOWEST_AMBIGUITY,
+                                                    photonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                                                     cam2,
                                                     robot_to_cam2))
 
-        self.photon_cam_array = [cam1, cam2]
-        self.photon_pose_array = [photon_pose_cam1, photon_pose_cam2]
+        photon_pose_cam3 = (
+            photonPoseEstimator.PhotonPoseEstimator(april_tag_field_layout,
+                                                    photonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                                                    cam3,
+                                                    robot_to_cam3))
 
-        self.used_tags = [ 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22]
+        self.photon_cam_array = [cam1, cam2, cam3]
+        self.photon_pose_array = [photon_pose_cam1, photon_pose_cam2, photon_pose_cam3]
+
+        self.used_tags = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
 
         if utils.is_simulation():
             self.vision_sim = VisionSystemSim("main")
@@ -295,8 +304,10 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             camera_prop.setLatencyStdDev(0.01)
             cam1_sim = PhotonCameraSim(cam1, camera_prop)
             cam2_sim = PhotonCameraSim(cam2, camera_prop)
+            cam3_sim = PhotonCameraSim(cam3, camera_prop)
             self.vision_sim.addCamera(cam1_sim, robot_to_cam1)
             self.vision_sim.addCamera(cam2_sim, robot_to_cam2)
+            self.vision_sim.addCamera(cam3_sim, robot_to_cam3)
 
         # SmartDashboard.putData("Swerve Drive", SwerveDriveSendable(self))
 
@@ -333,34 +344,39 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
 
         # Update Photonvision cameras.
         if self.photon_cam_array[0].isConnected(): # and not utils.is_simulation():
-            self.select_best_vision_pose((1, 1, 999999999))
+            self.select_best_vision_pose((0.5, 0.5, 999999999))
 
         if utils.is_simulation():
             self.vision_sim.update(self.get_pose())
 
     def select_best_vision_pose(self, stddevs: (float, float, float)) -> None:
         accepted_poses = []
-        accepted_cameras = []
-        final_pose = Pose3d(0, 0, 0, Rotation3d(0, 0, 0))
-        final_timestamp = 0
+        # accepted_cameras = []
+        accepted_targets = []
+        # final_pose = Pose3d(0, 0, 0, Rotation3d(0, 0, 0))
+        # final_timestamp = 0
         for i in range(0, len(self.photon_cam_array)):
             estimated_pose = self.photon_pose_array[i].update()
-            best_target = self.photon_cam_array[i].getLatestResult().getBestTarget()
+            best_target_yeehaw = self.photon_cam_array[i].getLatestResult()
+            best_target = best_target_yeehaw.getBestTarget()
             if estimated_pose is not None:
                 estimated_pose = estimated_pose.estimatedPose
                 if best_target is not None:
-                    # SmartDashboard.putString("Estimated Pose", str(estimated_pose))  # TODO Delete this
-
+                    SmartDashboard.putString("Estimated Pose", str(estimated_pose))  # TODO Delete this
                     if (0 < estimated_pose.x < 17.658 and 0 < estimated_pose.y < 8.131 and -0.03 <= estimated_pose.z <= 0.03 and
                        best_target.fiducialId in self.used_tags and
                             math.sqrt(math.pow(best_target.bestCameraToTarget.x, 2) +
-                                      math.pow(best_target.bestCameraToTarget.y, 2)) < 4):
+                                      math.pow(best_target.bestCameraToTarget.y, 2)) < 10):
                         accepted_poses.append(estimated_pose)
-                        accepted_cameras.append(self.photon_cam_array[i])
+                        # accepted_cameras.append(self.photon_cam_array[i])
+                        accepted_targets.append(best_target_yeehaw)
 
         if accepted_poses:
+            SmartDashboard.putBoolean("Accepted new pose?", True)
             for i in range(0, len(accepted_poses)):
-                self.add_vision_measurement(accepted_poses[i].toPose2d(), utils.fpga_to_current_time(accepted_cameras[i].getLatestResult().getTimestampSeconds()), stddevs)
+                self.add_vision_measurement(accepted_poses[i].toPose2d(), utils.fpga_to_current_time(accepted_targets[i].getTimestampSeconds()), stddevs)
+        else:
+            SmartDashboard.putBoolean("Accepted new pose?", False)
 
         # if accepted_poses:
         #     min_ambiguity = 3940
@@ -385,9 +401,9 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         elif tags == "blue_reef":
             self.used_tags = [17, 18, 19, 20, 21, 22]
         elif tags == "border":
-            self.used_tags = [1, 2, 3, 13, 12, 16]
+            self.used_tags = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
         else:
-            self.used_tags = [6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22]
+            self.used_tags = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
 
     def set_lookahead(self, on: bool) -> None:
         self.lookahead_active = on
@@ -580,7 +596,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
                 self.target_direction = self.get_pose().rotation()
             self.re_entered_clt = False
         else:
-            self.target_direction = Rotation2d(self.target_direction.radians() + turn_amount * degreesToRadians(4))
+            self.target_direction = Rotation2d(self.target_direction.radians() + turn_amount * degreesToRadians(3))
 
         return (self.clt_request
                 .with_velocity_x(x_speed)

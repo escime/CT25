@@ -343,7 +343,7 @@ class ReZeroTorque(Command):
         self.start_time = 0
 
     def initialize(self):
-        self.elevator_and_arm.lift_main.set_control(self.elevator_and_arm.lift_main_torque.with_output(10))
+        self.elevator_and_arm.lift_main.set_control(self.elevator_and_arm.lift_main_torque.with_output(-15))
 
     def isFinished(self) -> bool:
         return False

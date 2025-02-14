@@ -268,7 +268,7 @@ class LEDs(Subsystem):
         """Run the rainbow shift animation."""
         if self.timer.get() - 0.02 > self.last_time:
             self.buffer = self.rainbow_pattern
-            self.rainbow_pattern = self.rainbow_pattern[1:] + self.rainbow_pattern[:1]
+            self.rainbow_pattern = [self.rainbow_pattern[-1]] + self.rainbow_pattern[:-1]
             self.last_time = self.timer.get()
 
     def timer_lights(self) -> None:

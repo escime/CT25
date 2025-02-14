@@ -1,4 +1,4 @@
-from commands2 import Command, CommandScheduler, TimedCommandRobot
+from commands2 import Command, CommandScheduler, TimedCommandRobot, cmd
 from robotcontainer import RobotContainer
 from wpilib import run, RobotBase, SmartDashboard
 from phoenix6 import SignalLogger, utils
@@ -80,6 +80,8 @@ class Robot(TimedCommandRobot):
         teleop mode."""
         if self.m_autonomous_command:
             self.m_autonomous_command.cancel()
+        cmd.runOnce(lambda: self.m_robotcontainer.drivetrain.reset_clt(),
+                    self.m_robotcontainer.drivetrain).schedule()
         elasticlib.select_tab("Teleoperated")
         elasticlib.send_notification(self.teleop_notification)
         self.m_robotcontainer.leds.set_state("default")

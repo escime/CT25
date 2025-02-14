@@ -69,9 +69,11 @@ class AutoAlignmentMultiFeedback(Command):
         if -0.005 < y_output < 0.005:
             y_output = 0
 
-        if self.joystick.a().getAsBoolean():
-            y_output = self.joystick.getLeftX() * 0.25
-            rotate_output = 0
+        # if self.joystick.rightTrigger().getAsBoolean():
+        #     y_output = self.joystick.getLeftX() * 0.25
+        #     if not self.flipped:
+        #         y_output *= -1
+        #     rotate_output = 0
 
         self.drive.apply_request(lambda: (self.forward_request
                                           .with_velocity_x(x_move * TunerConstants.speed_at_12_volts * 0.35)

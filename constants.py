@@ -128,8 +128,8 @@ class ArmConstants:
 
 
 class IntakeConstants:
-    intake_state_values = {"stow": 0, "stow_algae": 0, "intake_coral": 0.678, "intake_algae": 0.29, "score_coral": 0.07, "score_algae": 0.07, "climbing": 0.3}
-    wheel_speed_values = {"stow": 0, "stow_algae": -0.5, "intake_coral": 12, "intake_algae": -12, "score_coral": -0.5, "score_algae": 12, "climbing": 0}
+    intake_state_values = {"stow": 0, "stow_algae": 0, "intake_coral": 0.678, "intake_algae": 0.29, "score_coral": 0.1, "score_algae": 0.07, "climbing": 0.3}
+    wheel_speed_values = {"stow": 0, "stow_algae": -1.5, "intake_coral": 12, "intake_algae": -12, "score_coral": -0.375, "score_algae": 12, "climbing": 0}
     wheel_can_id = 30
     arm_can_id = 31
     gearbox_ratio = 12
