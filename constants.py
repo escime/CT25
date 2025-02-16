@@ -113,8 +113,8 @@ class ArmConstants:
     gearbox_ratio = 50
     arm_at_target_threshold = 0.01
 
-    mm_cruise_velocity = 1 # was 0.5 for testing
-    mm_acceleration = 1 # 5
+    mm_cruise_velocity = 2 # was 0.5 for testing
+    mm_acceleration = 1.5 # 5
     mm_jerk = 100
 
     kg = 0.25

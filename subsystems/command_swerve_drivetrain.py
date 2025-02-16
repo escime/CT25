@@ -285,8 +285,8 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
                                                     cam3,
                                                     robot_to_cam3))
 
-        self.photon_cam_array = [cam1, cam2, cam3]
-        self.photon_pose_array = [photon_pose_cam1, photon_pose_cam2, photon_pose_cam3]
+        self.photon_cam_array = [cam1, cam2]
+        self.photon_pose_array = [photon_pose_cam1, photon_pose_cam2]
 
         self.used_tags = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
 
@@ -342,7 +342,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
 
         # Update Photonvision cameras.
         if self.photon_cam_array[0].isConnected(): # and not utils.is_simulation():
-            self.select_best_vision_pose((0.5, 0.5, 9999999999999999999))
+            self.select_best_vision_pose((0.4, 0.4, 9999999999999999999))
 
         if utils.is_simulation():
             self.vision_sim.update(self.get_pose())

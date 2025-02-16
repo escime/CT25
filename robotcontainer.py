@@ -668,13 +668,18 @@ class RobotContainer:
                                       AutoSetElevatorAndArm("L3", "right", self.elevator_and_arm))
         NamedCommands.registerCommand("L4_right",
                                       AutoSetElevatorAndArm("L4", "right", self.elevator_and_arm))
+        NamedCommands.registerCommand("score_attempt", ScoreAttempt(self.elevator_and_arm))
         NamedCommands.registerCommand("stow",
                                       AutoSetElevatorAndArm("stow", "stow", self.elevator_and_arm))
         NamedCommands.registerCommand("score", Score(self.elevator_and_arm, self.timer))
-        NamedCommands.registerCommand("collect", Collect(self.elevator_and_arm).withTimeout(2))
+        NamedCommands.registerCommand("collect", Collect(self.elevator_and_arm))  # .withTimeout(2))
         NamedCommands.registerCommand("start_timer", StartAutoTimer(self.util, self.timer))
         NamedCommands.registerCommand("stop_timer", StopAutoTimer(self.util, self.timer))
         NamedCommands.registerCommand("reset_heading", runOnce(lambda: self.drivetrain.reset_clt(),
                                                                self.drivetrain))
         NamedCommands.registerCommand("set_rotation_-90", SetRotation(self.drivetrain, -90))
         NamedCommands.registerCommand("set_rotation_90", SetRotation(self.drivetrain, 90))
+        NamedCommands.registerCommand("start_collecting", runOnce(lambda: self.elevator_and_arm.intake.set(-1),
+                                                                  self.elevator_and_arm))
+        NamedCommands.registerCommand("stop_collecting", runOnce(lambda: self.elevator_and_arm.intake.set(0),
+                                                                 self.elevator_and_arm))
