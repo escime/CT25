@@ -32,6 +32,12 @@ class Score(Command):
             self.elevator_and_arm.set_arm_state(arm_target)
             if "L4" in self.elevator_and_arm.get_elevator_state():
                 self.elevator_and_arm.set_elevator_state("L4_scoring")
+                self.elevator_and_arm.intake.set(0.6)
+            elif "L3" in self.elevator_and_arm.get_elevator_state():
+                self.elevator_and_arm.set_elevator_state("L3_scoring")
+                self.elevator_and_arm.intake.set(0.35)
+            elif "L2" in self.elevator_and_arm.get_elevator_state():
+                self.elevator_and_arm.set_elevator_state("L2_scoring")
                 self.elevator_and_arm.intake.set(0.35)
 
     def execute(self):

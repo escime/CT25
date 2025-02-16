@@ -45,10 +45,14 @@ class UtilSubsystem(Subsystem):
                 [12.810, 3.838, 60, "Red J Normal"],
             ]],
             [13.388, 3.482, [
-                [13.340, 3.822, 300, "Red K Flipped"],
-                [13.637, 4.007, 300, "Red L Flipped"],
-                [12.786, 3.565, 300, "Red K Normal"],
-                [13.083, 3.709, 300, "Red L Normal"],
+                # [13.340, 3.822, 300, "Red K Flipped"],
+                # [13.637, 4.007, 300, "Red L Flipped"],
+                # [12.786, 3.565, 300, "Red K Normal"],
+                # [13.083, 3.709, 300, "Red L Normal"],
+                [13.304, 3.909, 300, "Red K Flipped"],
+                [13.633, 3.976, 300, "Red L Flipped"],
+                [12.737, 3.641 , 300, "Red K Normal"],
+                [13.177, 3.551, 300, "Red L Normal"],
             ]]
         ]
         self.scoring_sides_blue = [

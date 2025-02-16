@@ -18,8 +18,8 @@ class TunerConstants:
         .with_k_p(20.375)  # 100
         .with_k_i(0)
         .with_k_d(0.2502)  # 0.5
-        .with_k_s(0.05)  # 0.1  # 0.16556
-        .with_k_v(0.4)  # 2.66
+        .with_k_s(0.1)  # 0.1  # 0.16556
+        .with_k_v(0)  # 2.66
         .with_k_a(0)  # 0
         .with_static_feedforward_sign(signals.StaticFeedforwardSignValue.USE_CLOSED_LOOP_SIGN)
     )
@@ -31,7 +31,7 @@ class TunerConstants:
         .with_k_i(0)
         .with_k_d(0)
         .with_k_s(0.1)  # 0
-        .with_k_v(0.11994)  # 0.124
+        .with_k_v(0.09)  # 0.124
     )
 
     # The closed-loop output type to use for the steer motors;
@@ -81,7 +81,7 @@ class TunerConstants:
 
     _drive_gear_ratio = 6.746031746031747
     _steer_gear_ratio = 21.428571428571427
-    _wheel_radius: units.meter = inchesToMeters(2)
+    _wheel_radius: units.meter = inchesToMeters(3.82) / 2
 
     _invert_left_side = False
     _invert_right_side = True
@@ -142,7 +142,7 @@ class TunerConstants:
     _front_right_drive_motor_id = 13
     _front_right_steer_motor_id = 14
     _front_right_encoder_id = 15
-    _front_right_encoder_offset: units.rotation = 0.197998046875
+    _front_right_encoder_offset: units.rotation = -0.46923828125
     _front_right_steer_motor_inverted = True
     _front_right_encoder_inverted = False
 

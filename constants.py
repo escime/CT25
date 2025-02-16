@@ -61,7 +61,9 @@ class ElevatorConstants:
     drum_diameter_m = inchesToMeters(drum_diameter_in)
     state_values = {"stow": 0, "max": 6.45,
                     "L1": 0,
+                    "L2_scoring": 0.5,
                     "L2": 1,
+                    "L3_scoring": 2.3,
                     "L3": 3.0,
                     "L4_scoring": 4.8,
                     "L4": 6.3,
@@ -74,8 +76,8 @@ class ElevatorConstants:
 
     gearbox_ratio = 4
 
-    mm_cruise_velocity = 7 #  23  # rot/s
-    mm_acceleration = 15 # 100 # rot/s^2
+    mm_cruise_velocity = 10 #  23  # rot/s  # was 7 for testing
+    mm_acceleration = 20 # 100 # rot/s^2  # was 15 for testing
     mm_jerk = 1000  # rot/s^3
 
     kg = 0.33
@@ -111,7 +113,7 @@ class ArmConstants:
     gearbox_ratio = 50
     arm_at_target_threshold = 0.01
 
-    mm_cruise_velocity = 0.5 # 0.5
+    mm_cruise_velocity = 1 # was 0.5 for testing
     mm_acceleration = 1 # 5
     mm_jerk = 100
 
@@ -128,8 +130,8 @@ class ArmConstants:
 
 
 class IntakeConstants:
-    intake_state_values = {"stow": 0, "stow_algae": 0, "intake_coral": 0.678, "intake_algae": 0.29, "score_coral": 0.1, "score_algae": 0.07, "climbing": 0.3}
-    wheel_speed_values = {"stow": 0, "stow_algae": -1.5, "intake_coral": 12, "intake_algae": -12, "score_coral": -0.375, "score_algae": 12, "climbing": 0}
+    intake_state_values = {"stow": 0, "stow_algae": 0, "intake_coral": 0.73, "intake_algae": 0.29, "score_coral": 0.15, "score_algae": 0.07, "climbing": 0.3}
+    wheel_speed_values = {"stow": 0, "stow_algae": -1.5, "intake_coral": 12, "intake_algae": -12, "score_coral": 0, "score_algae": 12, "climbing": 0}
     wheel_can_id = 30
     arm_can_id = 31
     gearbox_ratio = 12

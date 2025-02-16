@@ -5,10 +5,11 @@ from commands2 import Command, button, SequentialCommandGroup, ParallelCommandGr
 
 from constants import OIConstants
 from subsystems.climbersubsystem import Climber
-from subsystems.intakesubsystem import Intake
+from subsystems.intakesubsystem import Intake, ScoreCoral
 from subsystems.ledsubsystem import LEDs
 from subsystems.utilsubsystem import UtilSubsystem
-from subsystems.elevatorandarm import ElevatorAndArmSubsystem, ReZeroTorque, ReZeroTorqueArm
+from subsystems.elevatorandarm import ElevatorAndArmSubsystem, ReZeroTorque, ReZeroTorqueArm, TimeoutClaw
+from subsystems.command_swerve_drivetrain import ResetCLT, SetRotation
 from wpilib import SmartDashboard, SendableChooser, DriverStation, DataLogManager, Timer, Alert
 from wpimath.filter import SlewRateLimiter
 from pathplannerlib.auto import NamedCommands, PathPlannerAuto, AutoBuilder
@@ -261,7 +262,10 @@ class RobotContainer:
                 SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain)
                 .andThen(Collect(self.elevator_and_arm)))
         ).onFalse(
-            runOnce(lambda: self.drivetrain.reset_clt(), self.drivetrain)
+            SequentialCommandGroup(
+                ResetCLT(self.drivetrain),
+                TimeoutClaw(self.elevator_and_arm, self.timer)
+            )
         )
 
         # Toggle scoring state
@@ -301,7 +305,7 @@ class RobotContainer:
                 #     runOnce(lambda: self.leds.set_state("flash_color"), self.leds)
                 # ).ignoringDisable(True),
                 Collect(self.elevator_and_arm)
-            )
+            ).andThen(runOnce(lambda: self.elevator_and_arm.intake.set(0), self.elevator_and_arm))
         )
         # ).onFalse(
         #     runOnce(lambda: self.leds.set_state("default"), self.leds).ignoringDisable(True)
@@ -407,10 +411,17 @@ class RobotContainer:
                 runOnce(lambda: self.intake_arm.set_state("climbing"), self.intake_arm),
                 runOnce(lambda: self.leds.set_state("rainbow"), self.leds),
                 run(lambda: self.climber_arm.set_climber_manual(self.operator_controller.getRightX() * -1 * 12),
-                    self.climber_arm)
+                self.climber_arm)
             )
         ).onFalse(
             runOnce(lambda: self.climber_arm.set_climber_manual(0), self.climber_arm)
+        )
+
+        self.driver_controller.povUp().and_(lambda: not self.test_bindings).toggleOnTrue(
+            self.drivetrain.apply_request(lambda: self._brake)
+        )
+        self.driver_controller.povRight().and_(lambda: not self.test_bindings).onTrue(
+            runOnce(lambda: self.elevator_and_arm.lift_main.set_position(0), self.elevator_and_arm)
         )
         
         # Intake controls.
@@ -426,7 +437,7 @@ class RobotContainer:
             runOnce(lambda: self.intake_arm.set_state("stow_algae"), self.intake_arm)
         )
         self.driver_controller.rightBumper().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
-            runOnce(lambda: self.intake_arm.set_state("score_coral"), self.intake_arm)
+            ScoreCoral(self.intake_arm)
         ).onFalse(
             runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm)
         )
@@ -438,7 +449,7 @@ class RobotContainer:
         )
 
         self.driver_controller.povDown().and_(lambda: not self.test_bindings).onTrue(
-            runOnce(lambda: self.intake_arm.intake_arm.set_position(0.678), self.intake_arm).ignoringDisable(True)
+            runOnce(lambda: self.intake_arm.intake_arm.set_position(0.75), self.intake_arm).ignoringDisable(True)
         )
 
         # Debug Mode Toggle
@@ -647,10 +658,14 @@ class RobotContainer:
                                       ))
         NamedCommands.registerCommand("L4_left",
                                       AutoSetElevatorAndArm("L4", "left", self.elevator_and_arm))
+        NamedCommands.registerCommand("L3_left",
+                                      AutoSetElevatorAndArm("L3", "left", self.elevator_and_arm))
         NamedCommands.registerCommand("L2_left",
                                       AutoSetElevatorAndArm("L2", "left", self.elevator_and_arm))
         NamedCommands.registerCommand("L2_right",
                                       AutoSetElevatorAndArm("L2", "right", self.elevator_and_arm))
+        NamedCommands.registerCommand("L3_right",
+                                      AutoSetElevatorAndArm("L3", "right", self.elevator_and_arm))
         NamedCommands.registerCommand("L4_right",
                                       AutoSetElevatorAndArm("L4", "right", self.elevator_and_arm))
         NamedCommands.registerCommand("stow",
@@ -661,3 +676,5 @@ class RobotContainer:
         NamedCommands.registerCommand("stop_timer", StopAutoTimer(self.util, self.timer))
         NamedCommands.registerCommand("reset_heading", runOnce(lambda: self.drivetrain.reset_clt(),
                                                                self.drivetrain))
+        NamedCommands.registerCommand("set_rotation_-90", SetRotation(self.drivetrain, -90))
+        NamedCommands.registerCommand("set_rotation_90", SetRotation(self.drivetrain, 90))

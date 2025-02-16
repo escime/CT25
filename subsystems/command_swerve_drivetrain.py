@@ -149,9 +149,6 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         if utils.is_simulation():
             self._start_sim_thread()
 
-        self.target_lateral_offset = -1
-        self.visible_tag = -1
-
         self.pathplanner_rotation_overridden = False
         self.configure_pathplanner()
 
@@ -186,7 +183,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         )
         self.clt_request.heading_controller.setPID(5, 0, 0)
         self.clt_request.heading_controller.enableContinuousInput(0, -2 * math.pi)
-        self.clt_request.heading_controller.setTolerance(15)
+        self.clt_request.heading_controller.setTolerance(0.1)
         self.re_entered_clt = True
         self.target_direction = Rotation2d(0)
 
@@ -268,7 +265,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
                                     Rotation3d(0, degreesToRadians(-10), degreesToRadians(180 - 26.769)))
         robot_to_cam2 = Transform3d(Translation3d(inchesToMeters(11.676), inchesToMeters(-6.329), inchesToMeters(7.597)),
                                     Rotation3d(0, degreesToRadians(-10), degreesToRadians(26.769)))
-        robot_to_cam3 = Transform3d(Translation3d(inchesToMeters(11.676), inchesToMeters(6.329), inchesToMeters(7.597)),
+        robot_to_cam3 = Transform3d(Translation3d(inchesToMeters(6.329), inchesToMeters(11.676), inchesToMeters(7.597)),
                                     Rotation3d(0, degreesToRadians(-10), degreesToRadians(90 + 26.769)))
 
         photon_pose_cam1 = (
@@ -294,6 +291,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         self.used_tags = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
 
         if utils.is_simulation():
+            alert_photonvision_enabled.set(True)
             self.vision_sim = VisionSystemSim("main")
             self.vision_sim.addAprilTags(AprilTagFieldLayout.loadField(AprilTagField.k2025Reefscape))
             camera_prop = SimCameraProperties()
@@ -344,7 +342,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
 
         # Update Photonvision cameras.
         if self.photon_cam_array[0].isConnected(): # and not utils.is_simulation():
-            self.select_best_vision_pose((0.5, 0.5, 999999999))
+            self.select_best_vision_pose((0.5, 0.5, 9999999999999999999))
 
         if utils.is_simulation():
             self.vision_sim.update(self.get_pose())
@@ -362,7 +360,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             if estimated_pose is not None:
                 estimated_pose = estimated_pose.estimatedPose
                 if best_target is not None:
-                    SmartDashboard.putString("Estimated Pose", str(estimated_pose))  # TODO Delete this
+                    # SmartDashboard.putString("Estimated Pose", str(estimated_pose))  # TODO Delete this
                     if (0 < estimated_pose.x < 17.658 and 0 < estimated_pose.y < 8.131 and -0.03 <= estimated_pose.z <= 0.03 and
                        best_target.fiducialId in self.used_tags and
                             math.sqrt(math.pow(best_target.bestCameraToTarget.x, 2) +
@@ -372,11 +370,11 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
                         accepted_targets.append(best_target_yeehaw)
 
         if accepted_poses:
-            SmartDashboard.putBoolean("Accepted new pose?", True)
+            # SmartDashboard.putBoolean("Accepted new pose?", True)
             for i in range(0, len(accepted_poses)):
                 self.add_vision_measurement(accepted_poses[i].toPose2d(), utils.fpga_to_current_time(accepted_targets[i].getTimestampSeconds()), stddevs)
-        else:
-            SmartDashboard.putBoolean("Accepted new pose?", False)
+        # else:
+        #     SmartDashboard.putBoolean("Accepted new pose?", False)
 
         # if accepted_poses:
         #     min_ambiguity = 3940
@@ -497,6 +495,9 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
     def get_pose(self) -> Pose2d:
         """Returns the robot pose."""
         return self.get_state().pose
+
+    def set_rotation(self, angle: float) -> None:
+        self.reset_pose(Pose2d(self.get_pose().translation(), Rotation2d.fromDegrees(angle)))
 
     def configure_pathplanner(self) -> None:
         """Configures all pathplanner settings."""
@@ -636,3 +637,30 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
     #     builder.addDoubleProperty("Back Right Angle", self.drive.get_state().module_states[3].angle.radians, self.drive.set_nothing)
     #     builder.addDoubleProperty("Back Right Velocity", self.drive.get_speed_callable_3, self.drive.set_nothing)
     #     builder.addDoubleProperty("Robot Angle", self.drive.get_pose().rotation().radians, self.drive.set_nothing)
+
+
+class ResetCLT(Command):
+
+    def __init__(self, drivetrain: CommandSwerveDrivetrain):
+        super().__init__()
+        self.drive = drivetrain
+
+    def initialize(self):
+        self.drive.reset_clt()
+
+    def isFinished(self) -> bool:
+        return True
+
+
+class SetRotation(Command):
+
+    def __init__(self, drivetrain: CommandSwerveDrivetrain, rotation: float):
+        super().__init__()
+        self.drive = drivetrain
+        self.rotation = rotation
+
+    def initialize(self):
+        self.drive.set_rotation(self.rotation)
+
+    def isFinished(self) -> bool:
+        return True

@@ -1,5 +1,5 @@
 import phoenix6.utils
-from commands2 import Subsystem
+from commands2 import Subsystem, Command
 from constants import IntakeConstants
 
 from phoenix6.hardware import TalonFX
@@ -108,7 +108,7 @@ class Intake(Subsystem):
         return self.intake_arm.get_position(True).value_as_double
 
     def get_at_target(self) -> bool:
-        if self.state_values[self.state] - 0.1 < self.get_position() <= self.state_values[self.state] + 0.1:
+        if self.state_values[self.state] - 0.025 < self.get_position() <= self.state_values[self.state] + 0.025:
             return True
         else:
             return False
@@ -162,3 +162,18 @@ class Intake(Subsystem):
         if self.debug_mode:
             SmartDashboard.putNumber("Intake Position", self.intake_arm.get_position().value_as_double)
             SmartDashboard.putString("Intake State", self.get_state())
+
+
+class ScoreCoral(Command):
+    def __init__(self, intake: Intake):
+        super().__init__()
+        self.intake = intake
+
+    def initialize(self):
+        self.intake.set_state("score_coral")
+
+    def isFinished(self) -> bool:
+        return self.intake.get_at_target()
+
+    def end(self, interrupted: bool):
+        self.intake.intake.set(-0.375)

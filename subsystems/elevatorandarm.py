@@ -343,7 +343,7 @@ class ReZeroTorque(Command):
         self.start_time = 0
 
     def initialize(self):
-        self.elevator_and_arm.lift_main.set_control(self.elevator_and_arm.lift_main_torque.with_output(-15))
+        self.elevator_and_arm.lift_main.set_control(self.elevator_and_arm.lift_main_torque.with_output(-40))
 
     def isFinished(self) -> bool:
         return False
@@ -377,3 +377,24 @@ class ReZeroTorqueArm(Command):
 
         if not interrupted:
             self.elevator_and_arm.wrist.set_position(0.17)
+
+
+class TimeoutClaw(Command):
+
+    def __init__(self, elevator_and_arm: ElevatorAndArmSubsystem, timer: Timer):
+        super().__init__()
+        self.elevator_and_arm = elevator_and_arm
+        self.timer = timer
+        self.start_time = 1000000
+
+        self.addRequirements(elevator_and_arm)
+
+    def initialize(self):
+        self.start_time = self.timer.get()
+        self.elevator_and_arm.intake.set(-1)
+
+    def isFinished(self) -> bool:
+        return self.timer.get() - self.start_time > 1
+
+    def end(self, interrupted: bool):
+        self.elevator_and_arm.intake.set(0)

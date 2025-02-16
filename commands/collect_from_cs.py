@@ -24,5 +24,5 @@ class Collect(Command):
     def isFinished(self) -> bool:
         return all(self.collection_buffer)
 
-    def end(self, interrupted: bool):
-        self.elevator_and_arm.intake.set(0)
+    # def end(self, interrupted: bool):
+    #     self.elevator_and_arm.intake.set(0)
