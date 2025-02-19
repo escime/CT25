@@ -260,13 +260,13 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         april_tag_field_layout = AprilTagFieldLayout.loadField(AprilTagField.k2025Reefscape)
         cam1 = photonCamera.PhotonCamera("TAG_DETECT_FR")
         cam2 = photonCamera.PhotonCamera("TAG_DETECT_FL")
-        cam3 = photonCamera.PhotonCamera("TAG_DETECT_INTAKE")
-        robot_to_cam1 = Transform3d(Translation3d(inchesToMeters(-11.676),inchesToMeters(-6.329),  inchesToMeters(7.597)),
-                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(180 - 26.769)))
-        robot_to_cam2 = Transform3d(Translation3d(inchesToMeters(11.676), inchesToMeters(-6.329), inchesToMeters(7.597)),
-                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(26.769)))
+        self.cam3 = photonCamera.PhotonCamera("TAG_DETECT_INTAKE")
+        robot_to_cam1 = Transform3d(Translation3d(inchesToMeters(-11.75481),inchesToMeters(-6.92277),  inchesToMeters(7.597)),
+                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(191)))
+        robot_to_cam2 = Transform3d(Translation3d(inchesToMeters(11.75481), inchesToMeters(-6.92277), inchesToMeters(7.597)),
+                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(349)))
         robot_to_cam3 = Transform3d(Translation3d(inchesToMeters(6.329), inchesToMeters(11.676), inchesToMeters(7.597)),
-                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(90 + 26.769)))
+                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(90 + 25)))  # 26.769
 
         photon_pose_cam1 = (
             photonPoseEstimator.PhotonPoseEstimator(april_tag_field_layout,
@@ -279,10 +279,10 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
                                                     cam2,
                                                     robot_to_cam2))
 
-        photon_pose_cam3 = (
+        self.photon_pose_cam3 = (
             photonPoseEstimator.PhotonPoseEstimator(april_tag_field_layout,
                                                     photonPoseEstimator.PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                                                    cam3,
+                                                    self.cam3,
                                                     robot_to_cam3))
 
         self.photon_cam_array = [cam1, cam2]
@@ -302,7 +302,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             camera_prop.setLatencyStdDev(0.01)
             cam1_sim = PhotonCameraSim(cam1, camera_prop)
             cam2_sim = PhotonCameraSim(cam2, camera_prop)
-            cam3_sim = PhotonCameraSim(cam3, camera_prop)
+            cam3_sim = PhotonCameraSim(self.cam3, camera_prop)
             self.vision_sim.addCamera(cam1_sim, robot_to_cam1)
             self.vision_sim.addCamera(cam2_sim, robot_to_cam2)
             self.vision_sim.addCamera(cam3_sim, robot_to_cam3)
@@ -364,7 +364,8 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
                     if (0 < estimated_pose.x < 17.658 and 0 < estimated_pose.y < 8.131 and -0.03 <= estimated_pose.z <= 0.03 and
                        best_target.fiducialId in self.used_tags and
                             math.sqrt(math.pow(best_target.bestCameraToTarget.x, 2) +
-                                      math.pow(best_target.bestCameraToTarget.y, 2)) < 10):
+                                      math.pow(best_target.bestCameraToTarget.y, 2)) < 7):
+                    # and abs(estimated_pose.toPose2d().rotation().degrees() - self.get_pose().rotation().degrees()) < 1):
                         accepted_poses.append(estimated_pose)
                         # accepted_cameras.append(self.photon_cam_array[i])
                         accepted_targets.append(best_target_yeehaw)
@@ -402,6 +403,9 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             self.used_tags = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
         else:
             self.used_tags = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
+
+    def set_lockout_tag(self, tag: int) -> None:
+        self.used_tags = [tag]
 
     def set_lookahead(self, on: bool) -> None:
         self.lookahead_active = on

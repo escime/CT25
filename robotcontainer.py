@@ -38,6 +38,7 @@ from commands.score_attempt import ScoreAttempt
 from commands.wheel_radius_calculator import WheelRadiusCalculator
 from commands.start_auto_timer import StartAutoTimer
 from commands.stop_auto_timer import StopAutoTimer
+from commands.coral_station_simple import CoralStationSimple
 
 
 class RobotContainer:
@@ -153,22 +154,22 @@ class RobotContainer:
         self.drive_filter_y = SlewRateLimiter(3, -3, 0)
 
     def configure_triggers(self) -> None:
-        # self.drivetrain.setDefaultCommand(  # Drivetrain will execute this command periodically
-        #     self.drivetrain.apply_request(
-        #         lambda: (
-        #             self._drive.with_velocity_x(
-        #                 -copysign(pow(self.drive_filter_x.calculate(self.driver_controller.getLeftY()), 1),
-        #                           self.drive_filter_x.calculate(self.driver_controller.getLeftY()))
-        #                 * self._max_speed * self.elevator_and_arm.get_accel_limit())
-        #             .with_velocity_y(-copysign(pow(self.drive_filter_y.calculate(self.driver_controller.getLeftX()), 1),
-        #                                        self.drive_filter_y.calculate(self.driver_controller.getLeftX()))
-        #                              * self._max_speed * self.elevator_and_arm.get_accel_limit())
-        #             .with_rotational_rate(-copysign(pow(self.driver_controller.getRightX(), 1),
-        #                                             self.driver_controller.getRightX())
-        #                                   * self._max_angular_rate * self.elevator_and_arm.get_accel_limit())
-        #         )
-        #     )
-        # )
+        self.drivetrain.setDefaultCommand(  # Drivetrain will execute this command periodically
+            self.drivetrain.apply_request(
+                lambda: (
+                    self._drive.with_velocity_x(
+                        -copysign(pow(self.drive_filter_x.calculate(self.driver_controller.getLeftY()), 1),
+                                  self.drive_filter_x.calculate(self.driver_controller.getLeftY()))
+                        * self._max_speed * self.elevator_and_arm.get_accel_limit())
+                    .with_velocity_y(-copysign(pow(self.drive_filter_y.calculate(self.driver_controller.getLeftX()), 1),
+                                               self.drive_filter_y.calculate(self.driver_controller.getLeftX()))
+                                     * self._max_speed * self.elevator_and_arm.get_accel_limit())
+                    .with_rotational_rate(-copysign(pow(self.driver_controller.getRightX(), 1),
+                                                    self.driver_controller.getRightX())
+                                          * self._max_angular_rate * self.elevator_and_arm.get_accel_limit())
+                )
+            )
+        )
 
         # self.drivetrain.setDefaultCommand(  # Drivetrain will execute this command periodically
         #     self.drivetrain.apply_request(
@@ -184,56 +185,56 @@ class RobotContainer:
         # )
 
         # Slow mode
-        # (self.driver_controller.rightTrigger().and_(lambda: not self.driver_controller.x().getAsBoolean())
-        # .and_(lambda: not self.driver_controller.b().getAsBoolean()).whileTrue(
-        #     self.drivetrain.apply_request(
-        #         lambda: (
-        #             self._drive.with_velocity_x(
-        #                 -self.drive_filter_x.calculate(self.driver_controller.getLeftY())
-        #                 * self._max_speed * 0.2)
-        #             .with_velocity_y(
-        #                 -self.drive_filter_y.calculate(self.driver_controller.getLeftX())
-        #                 * self._max_speed * 0.2)
-        #             .with_rotational_rate(
-        #                 -self.driver_controller.getRightX()
-        #                 * self._max_angular_rate * 0.2)
+        (self.driver_controller.rightTrigger().and_(lambda: not self.driver_controller.x().getAsBoolean())
+        .and_(lambda: not self.driver_controller.b().getAsBoolean()).whileTrue(
+            self.drivetrain.apply_request(
+                lambda: (
+                    self._drive.with_velocity_x(
+                        -self.drive_filter_x.calculate(self.driver_controller.getLeftY())
+                        * self._max_speed * 0.4)
+                    .with_velocity_y(
+                        -self.drive_filter_y.calculate(self.driver_controller.getLeftX())
+                        * self._max_speed * 0.4)
+                    .with_rotational_rate(
+                        -self.driver_controller.getRightX()
+                        * self._max_angular_rate * 0.4)
+                )
+            )
+        ))
+
+        # self.drivetrain.setDefaultCommand(
+        #     SequentialCommandGroup(
+        #             # runOnce(lambda: self.drivetrain.reset_clt(), self.drivetrain),
+        #             self.drivetrain.apply_request(
+        #                 lambda: (
+        #                     self.drivetrain.drive_clt(
+        #                         self.drive_filter_y.calculate(self.driver_controller.getLeftY()) * self._max_speed * -1 * self.elevator_and_arm.get_accel_limit(),
+        #                         self.drive_filter_x.calculate(self.driver_controller.getLeftX()) * self._max_speed * -1 * self.elevator_and_arm.get_accel_limit(),
+        #                         self.driver_controller.getRightX() * -1 * self.elevator_and_arm.get_accel_limit()
+        #                     )
+        #                 )
+        #             )
         #         )
         #     )
-        # ))
-
-        self.drivetrain.setDefaultCommand(
-            SequentialCommandGroup(
-                    # runOnce(lambda: self.drivetrain.reset_clt(), self.drivetrain),
-                    self.drivetrain.apply_request(
-                        lambda: (
-                            self.drivetrain.drive_clt(
-                                self.drive_filter_y.calculate(self.driver_controller.getLeftY()) * self._max_speed * -1 * self.elevator_and_arm.get_accel_limit(),
-                                self.drive_filter_x.calculate(self.driver_controller.getLeftX()) * self._max_speed * -1 * self.elevator_and_arm.get_accel_limit(),
-                                self.driver_controller.getRightX() * -1 * self.elevator_and_arm.get_accel_limit()
-                            )
-                        )
-                    )
-                )
-            )
 
         # (self.driver_controller.rightTrigger().and_(lambda: not self.driver_controller.x().getAsBoolean())
         # .and_(lambda: not self.driver_controller.b().getAsBoolean()).whileTrue(
-        self.driver_controller.rightTrigger().and_(lambda: not self.test_bindings).whileTrue(
-            SequentialCommandGroup(
-                # runOnce(lambda: self.drivetrain.reset_clt(), self.drivetrain),
-                self.drivetrain.apply_request(
-                    lambda: (
-                        self.drivetrain.drive_clt(
-                            self.drive_filter_y.calculate(
-                                self.driver_controller.getLeftY()) * self._max_speed * -1 * 0.2,
-                            self.drive_filter_x.calculate(
-                                self.driver_controller.getLeftX()) * self._max_speed * -1 * 0.2,
-                            self.driver_controller.getRightX() * -1 * 0.2
-                        )
-                    )
-                )
-            )
-        )
+        # self.driver_controller.rightTrigger().and_(lambda: not self.test_bindings).whileTrue(
+        #     SequentialCommandGroup(
+        #         # runOnce(lambda: self.drivetrain.reset_clt(), self.drivetrain),
+        #         self.drivetrain.apply_request(
+        #             lambda: (
+        #                 self.drivetrain.drive_clt(
+        #                     self.drive_filter_y.calculate(
+        #                         self.driver_controller.getLeftY()) * self._max_speed * -1 * 0.2,
+        #                     self.drive_filter_x.calculate(
+        #                         self.driver_controller.getLeftX()) * self._max_speed * -1 * 0.2,
+        #                     self.driver_controller.getRightX() * -1 * 0.2
+        #                 )
+        #             )
+        #         )
+        #     )
+        # )
 
         # Reset pose.
         self.driver_controller.y().and_(lambda: not self.test_bindings).onTrue(
@@ -258,7 +259,7 @@ class RobotContainer:
         # Auto selecting auto alignment for Coral Stations.
         self.driver_controller.a().and_(lambda: not self.test_bindings).whileTrue(
             ParallelDeadlineGroup(
-                CoralStationAlignment(self.drivetrain, self.util, self.driver_controller),
+                CoralStationSimple(self.drivetrain, self.util, self.driver_controller),
                 SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain)
                 .andThen(Collect(self.elevator_and_arm)))
         ).onFalse(
@@ -305,8 +306,8 @@ class RobotContainer:
                 #     runOnce(lambda: self.leds.set_state("flash_color"), self.leds)
                 # ).ignoringDisable(True),
                 Collect(self.elevator_and_arm)
-            ).andThen(runOnce(lambda: self.elevator_and_arm.intake.set(0), self.elevator_and_arm))
-        )
+            )
+        ).onFalse(runOnce(lambda: self.elevator_and_arm.intake.set(0), self.elevator_and_arm))
         # ).onFalse(
         #     runOnce(lambda: self.leds.set_state("default"), self.leds).ignoringDisable(True)
         # )
@@ -356,10 +357,10 @@ class RobotContainer:
         self.operator_controller.rightBumper().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
             SetElevatorAndArm("L4", self.elevator_and_arm, self.drivetrain)
         )
-        self.operator_controller.y().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
+        self.operator_controller.x().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
             SetElevatorAndArm("L3", self.elevator_and_arm, self.drivetrain)
         )
-        self.operator_controller.x().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
+        self.operator_controller.y().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
             SetElevatorAndArm("L2", self.elevator_and_arm, self.drivetrain)
         )
         self.operator_controller.b().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(

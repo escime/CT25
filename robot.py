@@ -68,6 +68,8 @@ class Robot(TimedCommandRobot):
         self.m_autonomous_command = self.m_robotcontainer.get_autonomous_command()
         elasticlib.select_tab("Autonomous")
         elasticlib.send_notification(self.auto_notification)
+        # self.m_robotcontainer.drivetrain.photon_cam_array.remove(self.m_robotcontainer.drivetrain.cam3)
+        # self.m_robotcontainer.drivetrain.photon_pose_array.remove(self.m_robotcontainer.drivetrain.photon_pose_cam3)
 
         if self.m_autonomous_command is not None:
             self.m_autonomous_command.schedule()
@@ -82,6 +84,10 @@ class Robot(TimedCommandRobot):
             self.m_autonomous_command.cancel()
         cmd.runOnce(lambda: self.m_robotcontainer.drivetrain.reset_clt(),
                     self.m_robotcontainer.drivetrain).schedule()
+        # if self.m_robotcontainer.drivetrain.photon_pose_cam3 not in self.m_robotcontainer.drivetrain.photon_pose_array:
+        #     self.m_robotcontainer.drivetrain.photon_cam_array.append(self.m_robotcontainer.drivetrain.cam3)
+        # if self.m_robotcontainer.drivetrain.cam3 not in self.m_robotcontainer.drivetrain.photon_cam_array:
+        #     self.m_robotcontainer.drivetrain.photon_pose_array.append(self.m_robotcontainer.drivetrain.photon_pose_cam3)
         elasticlib.select_tab("Teleoperated")
         elasticlib.send_notification(self.teleop_notification)
         self.m_robotcontainer.leds.set_state("default")

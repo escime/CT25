@@ -31,6 +31,7 @@ class AutoAlignmentMultiFeedback(Command):
         self.y_controller = PIDController(0.65, 0.01, 0, 0.04)
         # self.closing_controller = PIDController(0.1, 0, 0, 0.04)
         self.target = [0, 0]
+        self.lockout_tag = 0
 
         # self.addRequirements(self.elevator)
         # self.addRequirements(self.arm)
@@ -44,6 +45,8 @@ class AutoAlignmentMultiFeedback(Command):
         # self.arm.set_state(self.util.scoring_setpoints[self.util.scoring_setpoint])
 
     def execute(self):
+        self.drive.set_lockout_tag(self.lockout_tag)
+        SmartDashboard.putNumberArray("Used Tags", self.drive.used_tags)
         x_move = self.joystick.getLeftY() * -1
 
         current_pose = self.drive.get_pose()
@@ -161,23 +164,24 @@ class AutoAlignmentMultiFeedback(Command):
             if c < mini:
                 mini = c
                 mini_target = [i[0], i[1], i[2]]
+                self.lockout_tag = i[3]
 
         if self.side == "left":
             if self.check_to_use():
-                SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][0][-1])
+                # SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][0][-1])
                 self.flipped = True
                 return mini_target[2][0]
             else:
-                SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][2][-1])
+                # SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][2][-1])
                 self.flipped = False
                 return mini_target[2][2]
         else:
             if self.check_to_use():
-                SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][1][-1])
+                # SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][1][-1])
                 self.flipped = True
                 return mini_target[2][1]
             else:
-                SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][3][-1])
+                # SmartDashboard.putString("Auto Scoring Setpoint", mini_target[2][3][-1])
                 self.flipped = False
                 return mini_target[2][3]
 

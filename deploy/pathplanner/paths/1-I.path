@@ -32,12 +32,12 @@
     },
     {
       "anchor": {
-        "x": 5.6,
-        "y": 4.83
+        "x": 5.514221938775511,
+        "y": 4.849521683673469
       },
       "prevControl": {
-        "x": 5.776762164987554,
-        "y": 5.0067912244114865
+        "x": 5.690984103763065,
+        "y": 5.026312908084956
       },
       "nextControl": null,
       "isLocked": false,
@@ -55,14 +55,14 @@
       "command": {
         "type": "named",
         "data": {
-          "name": "L2_right"
+          "name": "L4_right"
         }
       }
     }
   ],
   "globalConstraints": {
     "maxVelocity": 2.0,
-    "maxAcceleration": 1.0,
+    "maxAcceleration": 2.5,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
