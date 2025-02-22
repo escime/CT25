@@ -66,10 +66,10 @@ class ElevatorConstants:
                     "L3_scoring": 2.3,
                     "L3": 3.0,
                     "L4_scoring": 4.8,
-                    "L4": 6.3,
+                    "L4": 6.4,
                     "algae_high": 4.3,
                     "algae_low": 2,
-                    "net": 6.3}
+                    "net": 6.4}
 
     supply_current_limit = 80
     use_supply_current_limit = True
@@ -99,12 +99,12 @@ class ArmConstants:
     state_values = {"stow": 0,
                     "stage_left": 0.07,
                     "score_left": 0.14,
-                    "score_left_L4": 0.13,
+                    "score_left_L4": 0.14,
                     "stage_right": -0.07,
                     "score_right": -0.14,
-                    "score_right_L4": -0.13,
-                    "algae_left": 0.17,
-                    "algae_right": -0.17}
+                    "score_right_L4": -0.14,
+                    "algae_left": 0.20,
+                    "algae_right": -0.20}
     wrist_can_id = 34
     intake_channel = 2
     score_speed = 0.75
@@ -130,7 +130,7 @@ class ArmConstants:
 
 
 class IntakeConstants:
-    intake_state_values = {"stow": 0, "stow_algae": 0, "intake_coral": 0.73, "intake_algae": 0.29, "score_coral": 0.15, "score_algae": 0.07, "climbing": 0.3}
+    intake_state_values = {"stow": 0.1, "stow_algae": 0, "intake_coral": 0.73, "intake_algae": 0.29, "score_coral": 0.15, "score_algae": 0.07, "climbing": 0.3}
     wheel_speed_values = {"stow": 0, "stow_algae": -1.5, "intake_coral": 12, "intake_algae": -12, "score_coral": 0, "score_algae": 12, "climbing": 0}
     wheel_can_id = 30
     arm_can_id = 31

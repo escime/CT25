@@ -159,8 +159,8 @@ class LEDs(Subsystem):
         #         self.time_default_pattern.append(AddressableLED.LEDData(0, 0, 0))
 
     def periodic(self) -> None:
-        if self.state != "default" and self.state != "gp_held":
-            self.re_enter_gp_held = True
+        if self.state != "default":
+            # self.re_enter_gp_held = True
             self.re_enter_default = True
             if self.state == "flash_color":
                 self.flash_color()
@@ -180,8 +180,8 @@ class LEDs(Subsystem):
             #     self.time_variable_default()
 
             if self.notifier_on:
-                self.buffer = self.buffer[:-5]
-                for i in range(0, 5):
+                self.buffer = self.buffer[:-7]
+                for i in range(0, 7):
                     self.buffer.append(AddressableLED.LEDData(self.priority_notifier[0], self.priority_notifier[1],
                                                               self.priority_notifier[2]))
 
@@ -192,17 +192,22 @@ class LEDs(Subsystem):
         else:
             if self.state == "default":
                 self.default()
+                if self.notifier_on:
+                    self.buffer = self.buffer[:-7]
+                    for i in range(0, 7):
+                        self.buffer.append(AddressableLED.LEDData(self.priority_notifier[0], self.priority_notifier[1],
+                                                                  self.priority_notifier[2]))
                 self.chain.setData(self.buffer)
             # if self.state == "default":
             #     if self.re_enter_default:
             #         self.buffer = self.no_pattern
             #         self.re_enter_default = False
             #         self.chain.setData(self.buffer)
-            if self.state == "gp_held":
-                if self.re_enter_gp_held:
-                    self.buffer = self.gp_held_simple
-                    self.re_enter_gp_held = False
-                    self.chain.setData(self.buffer)
+            # if self.state == "gp_held":
+            #     if self.re_enter_gp_held:
+            #         self.buffer = self.gp_held_simple
+            #         self.re_enter_gp_held = False
+            #         self.chain.setData(self.buffer)
 
     def default(self) -> None:
         """Logic for running default animation."""

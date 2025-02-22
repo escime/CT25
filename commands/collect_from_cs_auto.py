@@ -3,7 +3,7 @@ from commands2 import Command
 from subsystems.elevatorandarm import ElevatorAndArmSubsystem
 
 
-class Collect(Command):
+class CollectAuto(Command):
     def __init__(self, elevator_and_arm: ElevatorAndArmSubsystem):
         super().__init__()
         self.elevator_and_arm = elevator_and_arm
@@ -17,7 +17,7 @@ class Collect(Command):
         self.collection_buffer = [False] * 2
 
     def execute(self):
-        if not self.elevator_and_arm.intake_sensor_left.get() and not self.elevator_and_arm.intake_sensor_right.get():
+        if not self.elevator_and_arm.intake_sensor_left.get() or not self.elevator_and_arm.intake_sensor_right.get():
             self.collection_buffer[0] = True
         self.collection_buffer = self.collection_buffer[1:] + self.collection_buffer[:1]
 

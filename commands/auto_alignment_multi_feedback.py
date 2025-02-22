@@ -28,7 +28,7 @@ class AutoAlignmentMultiFeedback(Command):
 
         self.rotate_controller = PIDController(0.1, 0, 0, 0.04)
         self.rotate_controller.enableContinuousInput(-180, 180)
-        self.y_controller = PIDController(0.65, 0.01, 0, 0.04)
+        self.y_controller = PIDController(0.65, 0.05, 0, 0.04)
         # self.closing_controller = PIDController(0.1, 0, 0, 0.04)
         self.target = [0, 0]
         self.lockout_tag = 0

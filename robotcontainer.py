@@ -10,7 +10,7 @@ from subsystems.ledsubsystem import LEDs
 from subsystems.utilsubsystem import UtilSubsystem
 from subsystems.elevatorandarm import ElevatorAndArmSubsystem, ReZeroTorque, ReZeroTorqueArm, TimeoutClaw
 from subsystems.command_swerve_drivetrain import ResetCLT, SetRotation
-from wpilib import SmartDashboard, SendableChooser, DriverStation, DataLogManager, Timer, Alert
+from wpilib import SmartDashboard, SendableChooser, DriverStation, DataLogManager, Timer, Alert, Joystick
 from wpimath.filter import SlewRateLimiter
 from pathplannerlib.auto import NamedCommands, PathPlannerAuto, AutoBuilder
 from wpinet import PortForwarder
@@ -39,6 +39,7 @@ from commands.wheel_radius_calculator import WheelRadiusCalculator
 from commands.start_auto_timer import StartAutoTimer
 from commands.stop_auto_timer import StopAutoTimer
 from commands.coral_station_simple import CoralStationSimple
+from commands.collect_from_cs_auto import CollectAuto
 
 
 class RobotContainer:
@@ -201,6 +202,18 @@ class RobotContainer:
                 )
             )
         ))
+
+        button.Trigger(lambda: DriverStation.isTeleop() and self.drivetrain.tag_seen).onTrue(
+            SequentialCommandGroup(
+                runOnce(lambda: self.driver_controller.setRumble(Joystick.RumbleType.kBothRumble, 1)).ignoringDisable(False),
+                runOnce(lambda: self.leds.set_notifier([0, 0, 255]), self.leds)
+            )
+        ).onFalse(
+            SequentialCommandGroup(
+                runOnce(lambda: self.driver_controller.setRumble(Joystick.RumbleType.kBothRumble, 0)).ignoringDisable(True),
+                runOnce(lambda: self.leds.set_notifier([-1, -1, -1]), self.leds)
+            )
+        )
 
         # self.drivetrain.setDefaultCommand(
         #     SequentialCommandGroup(
@@ -673,7 +686,7 @@ class RobotContainer:
         NamedCommands.registerCommand("stow",
                                       AutoSetElevatorAndArm("stow", "stow", self.elevator_and_arm))
         NamedCommands.registerCommand("score", Score(self.elevator_and_arm, self.timer))
-        NamedCommands.registerCommand("collect", Collect(self.elevator_and_arm))  # .withTimeout(2))
+        NamedCommands.registerCommand("collect", CollectAuto(self.elevator_and_arm))  # .withTimeout(2))
         NamedCommands.registerCommand("start_timer", StartAutoTimer(self.util, self.timer))
         NamedCommands.registerCommand("stop_timer", StopAutoTimer(self.util, self.timer))
         NamedCommands.registerCommand("reset_heading", runOnce(lambda: self.drivetrain.reset_clt(),

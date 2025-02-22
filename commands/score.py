@@ -32,7 +32,7 @@ class Score(Command):
             self.elevator_and_arm.set_arm_state(arm_target)
             if "L4" in self.elevator_and_arm.get_elevator_state():
                 self.elevator_and_arm.set_elevator_state("L4_scoring")
-                self.elevator_and_arm.intake.set(0.6)
+                self.elevator_and_arm.intake.set(0.8)
             elif "L3" in self.elevator_and_arm.get_elevator_state():
                 self.elevator_and_arm.set_elevator_state("L3_scoring")
                 self.elevator_and_arm.intake.set(0.35)
@@ -46,12 +46,12 @@ class Score(Command):
             self.locked_in = True
             self.time_in = self.timer.get()
 
-        if self.locked_in and self.timer.get() - self.time_in > 0.25:
+        if self.locked_in and self.timer.get() - self.time_in > 0.1:
             self.elevator_and_arm.set_arm_state("stow")
 
     def isFinished(self) -> bool:
         # print(self.elevator_and_arm.get_arm_at_target())
-        return self.timer.get() - self.time_in > 1
+        return self.timer.get() - self.time_in > 0.2
 
     def end(self, interrupted: bool):
         self.elevator_and_arm.intake.set(0)
