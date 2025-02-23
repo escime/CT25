@@ -161,7 +161,7 @@ class ElevatorAndArmSubsystem(Subsystem):
         if not status.is_ok():
             print(f"Could not apply configs, error code: {status.name}")
 
-        self.wrist.set_position(0.17)
+        self.wrist.set_position(0.175)
 
         self.wrist_sim = self.wrist.sim_state
         self.arm_sim = SingleJointedArmSim(
@@ -376,7 +376,7 @@ class ReZeroTorqueArm(Command):
         self.elevator_and_arm.set_arm_manual_off()
 
         if not interrupted:
-            self.elevator_and_arm.wrist.set_position(0.17)
+            self.elevator_and_arm.wrist.set_position(0.175)
 
 
 class TimeoutClaw(Command):

@@ -40,7 +40,7 @@ class SetElevatorAndArm(Command):
                         self.arm_target += "left"
                     else:
                         self.arm_target += "right"
-                if self.drive.get_pose().x < 13:
+                elif self.drive.get_pose().x < 13:
                     if -90 < self.drive.get_pose().rotation().degrees() < 90:
                         self.arm_target += "right"
                     else:
@@ -51,7 +51,7 @@ class SetElevatorAndArm(Command):
                         self.arm_target += "left"
                     else:
                         self.arm_target += "right"
-                if self.drive.get_pose().x < 4:
+                elif self.drive.get_pose().x < 4:
                     if -90 < self.drive.get_pose().rotation().degrees() < 90:
                         self.arm_target += "right"
                     else:

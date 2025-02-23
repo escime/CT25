@@ -18,10 +18,6 @@ class CoralStationSimple(Command):
         self.util = util
         self.flipped = False
 
-        self.forward_request = (swerve.requests.RobotCentric()
-                                .with_drive_request_type(swerve.SwerveModule.DriveRequestType.VELOCITY)
-                                .with_velocity_x(0))
-
         self.drive_request = (swerve.requests.FieldCentricFacingAngle()
                               .with_drive_request_type(swerve.SwerveModule.DriveRequestType.VELOCITY))
 
@@ -49,7 +45,7 @@ class CoralStationSimple(Command):
                                           .with_target_direction(self.heading))).schedule()
 
     def end(self, interrupted: bool):
-        self.drive.apply_request(lambda: self.forward_request).withTimeout(0.02).schedule()
+        self.drive.apply_request(lambda: self.drive_request).withTimeout(0.01).schedule()
         self.drive.set_used_tags("all")
         # self.arm.set_state("stow")
 

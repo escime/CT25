@@ -382,10 +382,10 @@ class RobotContainer:
         self.operator_controller.rightBumper().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
             SetElevatorAndArm("net", self.elevator_and_arm, self.drivetrain)
         )
-        self.operator_controller.y().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
+        self.operator_controller.x().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
             SetElevatorAndArm("algae_high", self.elevator_and_arm, self.drivetrain)
         )
-        self.operator_controller.b().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
+        self.operator_controller.yb().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
             SetElevatorAndArm("algae_low", self.elevator_and_arm, self.drivetrain)
         )
         self.operator_controller.a().and_(lambda: not self.test_bindings).onTrue(
@@ -399,7 +399,7 @@ class RobotContainer:
         self.operator_controller.back().and_(lambda: not self.test_bindings).onTrue(
             SequentialCommandGroup(
                 runOnce(lambda: self.elevator_and_arm.set_arm_manual(0), self.elevator_and_arm),
-                runOnce(lambda: self.elevator_and_arm.wrist.set_position(0.17), self.elevator_and_arm)
+                runOnce(lambda: self.elevator_and_arm.wrist.set_position(0.175), self.elevator_and_arm)
             # ReZeroTorqueArm(self.elevator_and_arm, self.timer).withInterruptBehavior(InterruptionBehavior.kCancelSelf).withTimeout(0.25)
             )
         )
@@ -697,3 +697,4 @@ class RobotContainer:
                                                                   self.elevator_and_arm))
         NamedCommands.registerCommand("stop_collecting", runOnce(lambda: self.elevator_and_arm.intake.set(0),
                                                                  self.elevator_and_arm))
+        NamedCommands.registerCommand("floor_L1", ScoreCoral(self.intake_arm).withTimeout(1))
