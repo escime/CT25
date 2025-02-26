@@ -323,6 +323,7 @@ class ElevatorAndArmSubsystem(Subsystem):
             self.arm_root.setPosition(self.root, self.elevator_m2d.getLength())
             self.arm_m2d.setAngle(degrees(self.arm_sim.getAngle()) + 90 + 55)
             SmartDashboard.putData("Elevator M2D", self.lift_m2d)
+            SmartDashboard.putString("Lift Motor Position", str(self.lift_main.get_position()))
         # else:
         #     self.elevator_m2d.setLength(self.lift_main.get_position().value_as_double * pi *
         #                                 ElevatorConstants.drum_diameter_in)
@@ -339,11 +340,9 @@ class ReZeroTorque(Command):
     def __init__(self, elevator_and_arm: ElevatorAndArmSubsystem):
         super().__init__()
         self.elevator_and_arm = elevator_and_arm
-        self.current_limit = 10
-        self.start_time = 0
 
     def initialize(self):
-        self.elevator_and_arm.lift_main.set_control(self.elevator_and_arm.lift_main_torque.with_output(-40))
+        self.elevator_and_arm.set_elevator_manual(0.1 * -1 * 12)
 
     def isFinished(self) -> bool:
         return False

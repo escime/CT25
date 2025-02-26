@@ -263,9 +263,9 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         cam2 = photonCamera.PhotonCamera("TAG_DETECT_FL")
         # self.cam3 = photonCamera.PhotonCamera("TAG_DETECT_INTAKE")
         robot_to_cam1 = Transform3d(Translation3d(inchesToMeters(-11.75481),inchesToMeters(-6.92277),  inchesToMeters(7.597)),
-                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(188)))
+                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(190)))
         robot_to_cam2 = Transform3d(Translation3d(inchesToMeters(11.75481), inchesToMeters(-6.92277), inchesToMeters(7.597)),
-                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(359)))
+                                    Rotation3d(0, degreesToRadians(-10), degreesToRadians(-10)))  # 359 not 352 when last functional
         # robot_to_cam3 = Transform3d(Translation3d(inchesToMeters(6.329), inchesToMeters(11.676), inchesToMeters(7.597)),
         #                             Rotation3d(0, degreesToRadians(-10), degreesToRadians(90 + 25)))  # 26.769
 

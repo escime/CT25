@@ -9,7 +9,7 @@ from phoenix6.status_code import StatusCode
 from phoenix6.signals import InvertedValue
 from phoenix6.utils import get_current_time_seconds, is_simulation
 
-from wpilib import Mechanism2d, Color8Bit, Color, SmartDashboard, DigitalInput, PWMVictorSPX
+from wpilib import Mechanism2d, Color8Bit, Color, SmartDashboard, DigitalInput, PWMVictorSPX, PWMTalonFX
 from wpilib.simulation import SingleJointedArmSim
 from wpimath.system.plant import DCMotor
 from wpimath.units import inchesToMeters, lbsToKilograms, radiansToRotations
@@ -54,7 +54,7 @@ class Intake(Subsystem):
         self.intake_arm_slot0_configs.k_i = IntakeConstants.ki
         self.intake_arm_slot0_configs.k_d = IntakeConstants.kd
 
-        self.intake = PWMVictorSPX(1)
+        self.intake = PWMTalonFX(1)
         self.intake_speed_values = IntakeConstants.wheel_speed_values
         self.intake.set(self.intake_speed_values[self.state])
 
@@ -176,4 +176,4 @@ class ScoreCoral(Command):
         return self.intake.get_at_target()
 
     def end(self, interrupted: bool):
-        self.intake.intake.set(-0.375)
+        self.intake.intake.set(0.2)

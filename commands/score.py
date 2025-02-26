@@ -18,7 +18,7 @@ class Score(Command):
     def initialize(self):
         self.time_in = 10000000000000
         self.locked_in = False
-        if "stage" or "score" in self.elevator_and_arm.get_arm_state():
+        if "stage" or "score" in self.elevator_and_arm.get_arm_state() and "manual" not in self.elevator_and_arm.get_elevator_state():
             if "left" in self.elevator_and_arm.get_arm_state():
                 if "L4" in self.elevator_and_arm.get_elevator_state():
                     arm_target = "score_left_L4"

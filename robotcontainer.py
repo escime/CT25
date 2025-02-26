@@ -273,7 +273,7 @@ class RobotContainer:
         self.driver_controller.a().and_(lambda: not self.test_bindings).whileTrue(
             ParallelDeadlineGroup(
                 CoralStationSimple(self.drivetrain, self.util, self.driver_controller),
-                SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain)
+                SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain).withTimeout(1.5)
                 .andThen(Collect(self.elevator_and_arm)))
         ).onFalse(
             SequentialCommandGroup(
@@ -291,12 +291,13 @@ class RobotContainer:
         self.driver_controller.leftTrigger().and_(lambda: not self.test_bindings).and_(
             lambda: not self.util.algae_mode).onTrue(
             Score(self.elevator_and_arm, self.timer)
-            .andThen(SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain))
+            .andThen(SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain).withTimeout(1.5))
+            .andThen(ReZeroTorque(self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelSelf).withTimeout(0.1))
         )
 
         # Sideswipe Algae
         self.driver_controller.leftTrigger().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
-            runOnce(lambda: self.elevator_and_arm.intake.set(1), self.elevator_and_arm)
+            runOnce(lambda: self.elevator_and_arm.intake.set(-1), self.elevator_and_arm)
         ).onFalse(
             runOnce(lambda: self.elevator_and_arm.intake.set(0), self.elevator_and_arm)
         )
@@ -312,7 +313,7 @@ class RobotContainer:
         # Intake coral
         self.operator_controller.leftBumper().and_(lambda: not self.test_bindings).whileTrue(
             SequentialCommandGroup(
-                SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain),
+                # SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain),
                 # SequentialCommandGroup(
                 #     runOnce(lambda: self.leds.set_flash_color_rate(15), self.leds),
                 #     runOnce(lambda: self.leds.set_flash_color_color([255, 255, 255]), self.leds),
@@ -346,24 +347,24 @@ class RobotContainer:
 
         # Manually control the elevator.
         self.operator_controller.povUp().whileTrue(
-            run(lambda: self.elevator_and_arm.set_elevator_manual(0.25 * 12), self.elevator_and_arm)
+            run(lambda: self.elevator_and_arm.set_elevator_manual(0.25 * 12), self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         ).onFalse(
-            runOnce(lambda: self.elevator_and_arm.set_elevator_manual_off(), self.elevator_and_arm)
+            runOnce(lambda: self.elevator_and_arm.set_elevator_manual_off(), self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         )
         self.operator_controller.povDown().whileTrue(
-            run(lambda: self.elevator_and_arm.set_elevator_manual(0.1 * -1 * 12), self.elevator_and_arm)
+            run(lambda: self.elevator_and_arm.set_elevator_manual(0.1 * -1 * 12), self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         ).onFalse(
-            runOnce(lambda: self.elevator_and_arm.set_elevator_manual_off(), self.elevator_and_arm)
+            runOnce(lambda: self.elevator_and_arm.set_elevator_manual_off(), self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         )
         self.operator_controller.povLeft().whileTrue(
-            run(lambda: self.elevator_and_arm.set_arm_manual(0.1 * 12), self.elevator_and_arm)
+            run(lambda: self.elevator_and_arm.set_arm_manual(0.1 * 12), self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         ).onFalse(
-            runOnce(lambda: self.elevator_and_arm.set_arm_manual_off(), self.elevator_and_arm)
+            runOnce(lambda: self.elevator_and_arm.set_arm_manual_off(), self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         )
         self.operator_controller.povRight().whileTrue(
-            run(lambda: self.elevator_and_arm.set_arm_manual(0.1 * -1 * 12), self.elevator_and_arm)
+            run(lambda: self.elevator_and_arm.set_arm_manual(0.1 * -1 * 12), self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         ).onFalse(
-            runOnce(lambda: self.elevator_and_arm.set_arm_manual_off(), self.elevator_and_arm)
+            runOnce(lambda: self.elevator_and_arm.set_arm_manual_off(), self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)
         )
 
         # Set the Elevator and Arm.
@@ -385,13 +386,13 @@ class RobotContainer:
         self.operator_controller.x().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
             SetElevatorAndArm("algae_high", self.elevator_and_arm, self.drivetrain)
         )
-        self.operator_controller.yb().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
+        self.operator_controller.y().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
             SetElevatorAndArm("algae_low", self.elevator_and_arm, self.drivetrain)
         )
         self.operator_controller.a().and_(lambda: not self.test_bindings).onTrue(
             SequentialCommandGroup(
-                SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain),
-                ReZeroTorque(self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelSelf).withTimeout(0.4)
+                SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain).withTimeout(1.5),
+                ReZeroTorque(self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelSelf).withTimeout(0.1)
             )
         )
 
@@ -686,7 +687,7 @@ class RobotContainer:
         NamedCommands.registerCommand("stow",
                                       AutoSetElevatorAndArm("stow", "stow", self.elevator_and_arm))
         NamedCommands.registerCommand("score", Score(self.elevator_and_arm, self.timer))
-        NamedCommands.registerCommand("collect", CollectAuto(self.elevator_and_arm))  # .withTimeout(2))
+        NamedCommands.registerCommand("collect", CollectAuto(self.elevator_and_arm).withTimeout(0.1))  # .withTimeout(2))
         NamedCommands.registerCommand("start_timer", StartAutoTimer(self.util, self.timer))
         NamedCommands.registerCommand("stop_timer", StopAutoTimer(self.util, self.timer))
         NamedCommands.registerCommand("reset_heading", runOnce(lambda: self.drivetrain.reset_clt(),
