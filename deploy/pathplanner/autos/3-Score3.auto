@@ -13,7 +13,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "1-I"
+            "pathName": "3-F"
           }
         },
         {
@@ -31,7 +31,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "I-CS4"
+            "pathName": "F-CS1"
           }
         },
         {
@@ -43,7 +43,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CS4-L"
+            "pathName": "CS1-C"
           }
         },
         {
@@ -61,7 +61,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "L-CS4"
+            "pathName": "C-CS1"
           }
         },
         {
@@ -73,7 +73,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CS4-K"
+            "pathName": "CS1-D"
           }
         },
         {

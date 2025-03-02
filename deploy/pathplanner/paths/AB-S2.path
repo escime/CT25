@@ -3,50 +3,59 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.4771683673469393,
-        "y": 4.924139030612245
+        "x": 3.193622448979592,
+        "y": 4.02
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.5716149531998793,
-        "y": 6.250867421242092
+        "x": 2.174744768272399,
+        "y": 3.8365193530248476
       },
       "isLocked": false,
-      "linkedName": "L"
+      "linkedName": "AB"
     },
     {
       "anchor": {
-        "x": 1.4251913265306124,
-        "y": 7.326817602040816
+        "x": 0.8580994897959183,
+        "y": 4.02
       },
       "prevControl": {
-        "x": 1.9815924691473914,
-        "y": 6.63314440239378
+        "x": 1.6113650377484339,
+        "y": 3.86326351178306
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "CS4"
+      "linkedName": "S2"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.0941644562334218,
+      "rotationDegrees": -90.0
+    },
+    {
+      "waypointRelativePos": 0.4389920424403177,
+      "rotationDegrees": 90.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "drop_down",
-      "waypointRelativePos": 0.0,
+      "name": "floor_drop",
+      "waypointRelativePos": 0.1342281879194636,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
         "data": {
-          "name": "stow"
+          "name": "floor_intake"
         }
       }
     }
   ],
   "globalConstraints": {
-    "maxVelocity": 4.0,
-    "maxAcceleration": 3.5,
+    "maxVelocity": 2.0,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -54,13 +63,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -145.0
+    "rotation": 90.0
   },
   "reversed": false,
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 119.99999999999999
+    "rotation": -90.0
   },
   "useDefaultConstraints": false
 }

@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.6978191550033745,
-        "y": 5.04519902054069
+        "x": 6.677418986660604,
+        "y": 5.195834946722891
       },
       "isLocked": false,
       "linkedName": "1"
@@ -20,31 +20,36 @@
         "y": 5.222608418367347
       },
       "prevControl": {
-        "x": 5.924683558144709,
-        "y": 5.430868599413169
+        "x": 5.918535232511397,
+        "y": 5.422146205202115
       },
       "nextControl": {
-        "x": 5.35887315449524,
-        "y": 4.679185817922624
+        "x": 5.435317951039067,
+        "y": 4.78196729887928
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.514221938775511,
-        "y": 4.85
+        "x": 5.5291454081632665,
+        "y": 4.8719068877551015
       },
       "prevControl": {
-        "x": 5.6988493895971555,
-        "y": 5.1822659103462
+        "x": 5.704449522853131,
+        "y": 5.179329982218298
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "I"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.3527851458885945,
+      "rotationDegrees": -160.0
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
@@ -56,6 +61,28 @@
         "type": "named",
         "data": {
           "name": "L4_right"
+        }
+      }
+    },
+    {
+      "name": "stop_intake",
+      "waypointRelativePos": 1.95,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "stop_collecting"
+        }
+      }
+    },
+    {
+      "name": "score_try",
+      "waypointRelativePos": 1.98,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "score_attempt"
         }
       }
     }

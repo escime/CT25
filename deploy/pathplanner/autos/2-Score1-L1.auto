@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "start_timer"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2-H-L1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "floor_L1"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "floor_stow"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stop_timer"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "reset_heading"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

@@ -19,6 +19,18 @@
         {
           "type": "named",
           "data": {
+            "name": "score_attempt"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "score"
           }
         },
@@ -49,49 +61,37 @@
         {
           "type": "named",
           "data": {
-            "name": "score"
+            "name": "stop_collecting"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "start_collecting"
+            "name": "score_attempt"
           }
         },
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "L-CS4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "collect"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "CS4-K"
+            "waitTime": 0.25
           }
         },
         {
           "type": "named",
           "data": {
             "name": "score"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stop_timer"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "stow"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stop_timer"
           }
         },
         {

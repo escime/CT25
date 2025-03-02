@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.6467889224119678,
-        "y": 7.211082968073263
+        "x": 1.5826738716039197,
+        "y": 7.132654660166642
       },
       "isLocked": false,
       "linkedName": "CS4"
     },
     {
       "anchor": {
-        "x": 3.7010204081632656,
-        "y": 5.021141581632652
+        "x": 3.775637755102041,
+        "y": 5.065911989795918
       },
       "prevControl": {
-        "x": 2.6182962893321715,
-        "y": 6.217821959652506
+        "x": 2.634653371265304,
+        "y": 6.441295772597201
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,7 +30,7 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.652519893899204,
+      "waypointRelativePos": 0.6591511936339521,
       "rotationDegrees": 130.0
     }
   ],
@@ -45,6 +45,28 @@
         "type": "named",
         "data": {
           "name": "L4_left"
+        }
+      }
+    },
+    {
+      "name": "stop_intake",
+      "waypointRelativePos": 0.95,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "stop_collecting"
+        }
+      }
+    },
+    {
+      "name": "score_try",
+      "waypointRelativePos": 0.98,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "score_attempt"
         }
       }
     }

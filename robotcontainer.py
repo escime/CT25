@@ -698,4 +698,6 @@ class RobotContainer:
                                                                   self.elevator_and_arm))
         NamedCommands.registerCommand("stop_collecting", runOnce(lambda: self.elevator_and_arm.intake.set(0),
                                                                  self.elevator_and_arm))
-        NamedCommands.registerCommand("floor_L1", ScoreCoral(self.intake_arm).withTimeout(1))
+        NamedCommands.registerCommand("floor_L1", ScoreCoral(self.intake_arm).withTimeout(2))
+        NamedCommands.registerCommand("floor_stow", runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm))
+        NamedCommands.registerCommand("floor_intake", runOnce(lambda: self.intake_arm.set_state("intake_coral"), self.intake_arm))

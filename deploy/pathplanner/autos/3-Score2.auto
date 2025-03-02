@@ -13,7 +13,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "1-I"
+            "pathName": "3-F"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "score_attempt"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
           }
         },
         {
@@ -31,7 +43,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "I-CS4"
+            "pathName": "F-CS1"
           }
         },
         {
@@ -43,55 +55,43 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CS4-L"
+            "pathName": "CS1-C"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stop_collecting"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "score_attempt"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
           }
         },
         {
           "type": "named",
           "data": {
             "name": "score"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "start_collecting"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "L-CS4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "collect"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "CS4-K"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "score"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "stop_timer"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "stow"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stop_timer"
           }
         },
         {

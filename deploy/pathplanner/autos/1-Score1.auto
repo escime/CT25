@@ -1,0 +1,61 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "start_timer"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "1-I"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "score_attempt"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.25
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "score"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stow"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "stop_timer"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "reset_heading"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
