@@ -687,7 +687,7 @@ class RobotContainer:
         NamedCommands.registerCommand("stow",
                                       AutoSetElevatorAndArm("stow", "stow", self.elevator_and_arm))
         NamedCommands.registerCommand("score", Score(self.elevator_and_arm, self.timer))
-        NamedCommands.registerCommand("collect", CollectAuto(self.elevator_and_arm).withTimeout(0.1))  # .withTimeout(2))
+        NamedCommands.registerCommand("collect", CollectAuto(self.elevator_and_arm).withTimeout(10))  # .withTimeout(2))
         NamedCommands.registerCommand("start_timer", StartAutoTimer(self.util, self.timer))
         NamedCommands.registerCommand("stop_timer", StopAutoTimer(self.util, self.timer))
         NamedCommands.registerCommand("reset_heading", runOnce(lambda: self.drivetrain.reset_clt(),

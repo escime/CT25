@@ -254,18 +254,24 @@ class ElevatorAndArmSubsystem(Subsystem):
         return self.wrist.get_position(True).value_as_double
 
     def get_elevator_at_target(self) -> bool:
-        if (self.elevator_state_values[self.elevator_state] - ElevatorConstants.elevator_at_target_threshold < self.get_elevator_position() <=
-                self.elevator_state_values[self.elevator_state] + ElevatorConstants.elevator_at_target_threshold):
-            return True
+        if "manual" not in self.get_elevator_state():
+            if (self.elevator_state_values[self.elevator_state] - ElevatorConstants.elevator_at_target_threshold < self.get_elevator_position() <=
+                    self.elevator_state_values[self.elevator_state] + ElevatorConstants.elevator_at_target_threshold):
+                return True
+            else:
+                return False
         else:
-            return False
+            return True
 
     def get_arm_at_target(self) -> bool:
-        if (self.arm_state_values[self.arm_state] - ArmConstants.arm_at_target_threshold < self.get_arm_position() <=
-                self.arm_state_values[self.arm_state] + ArmConstants.arm_at_target_threshold):
-            return True
+        if "manual" not in self.get_arm_state():
+            if (self.arm_state_values[self.arm_state] - ArmConstants.arm_at_target_threshold < self.get_arm_position() <=
+                    self.arm_state_values[self.arm_state] + ArmConstants.arm_at_target_threshold):
+                return True
+            else:
+                return False
         else:
-            return False
+            return True
 
     def get_forward_limit_triggered(self) -> bool:
         if self.lift_main.get_position().value_as_double > ElevatorConstants.elevator_upper_limit:

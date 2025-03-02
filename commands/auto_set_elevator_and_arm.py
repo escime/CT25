@@ -27,12 +27,13 @@ class AutoSetElevatorAndArm(Command):
                 self.arm_target = "stow"
 
             self.elevator_and_arm.set_elevator_state(self.setpoint)
-            if self.elevator_and_arm.get_arm_state() != "stow":
-                self.elevator_and_arm.set_arm_state("stow")
+            # if self.elevator_and_arm.get_arm_state() != "stow":
+            #     self.elevator_and_arm.set_arm_state("stow")
+            self.elevator_and_arm.set_arm_state(self.arm_target)
 
     def isFinished(self) -> bool:
         return self.elevator_and_arm.get_elevator_at_target()
 
-    def end(self, interrupted: bool):
-        if not interrupted:
-            self.elevator_and_arm.set_arm_state(self.arm_target)
+    # def end(self, interrupted: bool):
+    #     if not interrupted:
+    #         self.elevator_and_arm.set_arm_state(self.arm_target)
