@@ -40,6 +40,8 @@ from commands.start_auto_timer import StartAutoTimer
 from commands.stop_auto_timer import StopAutoTimer
 from commands.coral_station_simple import CoralStationSimple
 from commands.collect_from_cs_auto import CollectAuto
+from commands.swap_arm import SwapArm
+from commands.auto_score import AutoScore
 
 
 class RobotContainer:
@@ -288,19 +290,18 @@ class RobotContainer:
         )
 
         # Score Coral
-        self.driver_controller.leftTrigger().and_(lambda: not self.test_bindings).and_(
-            lambda: not self.util.algae_mode).onTrue(
-            Score(self.elevator_and_arm, self.timer)
-            .andThen(SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain).withTimeout(1.5))
-            .andThen(ReZeroTorque(self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelSelf).withTimeout(0.1))
+        self.driver_controller.leftTrigger().and_(lambda: not self.test_bindings).onTrue(
+            Score(self.elevator_and_arm, self.drivetrain, self.util, self.timer)
+            # .andThen(SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain).withTimeout(1.5))
+            # .andThen(ReZeroTorque(self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelSelf).withTimeout(0.1))
         )
 
         # Sideswipe Algae
-        self.driver_controller.leftTrigger().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
-            runOnce(lambda: self.elevator_and_arm.intake.set(-1), self.elevator_and_arm)
-        ).onFalse(
-            runOnce(lambda: self.elevator_and_arm.intake.set(0), self.elevator_and_arm)
-        )
+        # self.driver_controller.leftTrigger().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
+        #     runOnce(lambda: self.elevator_and_arm.intake.set(-1), self.elevator_and_arm)
+        # ).onFalse(
+        #     runOnce(lambda: self.elevator_and_arm.intake.set(0), self.elevator_and_arm)
+        # )
 
         # Change between CORAL and ALGAE scoring modes.
         self.operator_controller.rightTrigger(0.1).and_(lambda: not self.test_bindings).onTrue(
@@ -321,7 +322,7 @@ class RobotContainer:
                 # ).ignoringDisable(True),
                 Collect(self.elevator_and_arm)
             )
-        ).onFalse(runOnce(lambda: self.elevator_and_arm.intake.set(0), self.elevator_and_arm))
+        ).onFalse(runOnce(lambda: self.elevator_and_arm.intake.set(-0.1), self.elevator_and_arm))
         # ).onFalse(
         #     runOnce(lambda: self.leds.set_state("default"), self.leds).ignoringDisable(True)
         # )
@@ -377,12 +378,15 @@ class RobotContainer:
         self.operator_controller.y().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
             SetElevatorAndArm("L2", self.elevator_and_arm, self.drivetrain)
         )
-        self.operator_controller.b().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
-            SetElevatorAndArm("L1", self.elevator_and_arm, self.drivetrain)
+        # self.operator_controller.b().and_(lambda: not self.test_bindings).and_(lambda: not self.util.algae_mode).onTrue(
+        #     SetElevatorAndArm("L1", self.elevator_and_arm, self.drivetrain)
+        # )
+        self.operator_controller.b().and_(lambda: not self.test_bindings).onTrue(
+            SwapArm(self.elevator_and_arm)
         )
-        self.operator_controller.rightBumper().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
-            SetElevatorAndArm("net", self.elevator_and_arm, self.drivetrain)
-        )
+        # self.operator_controller.rightBumper().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
+        #     SetElevatorAndArm("net", self.elevator_and_arm, self.drivetrain)
+        # )
         self.operator_controller.x().and_(lambda: not self.test_bindings).and_(lambda: self.util.algae_mode).onTrue(
             SetElevatorAndArm("algae_high", self.elevator_and_arm, self.drivetrain)
         )
@@ -686,7 +690,7 @@ class RobotContainer:
         NamedCommands.registerCommand("score_attempt", ScoreAttempt(self.elevator_and_arm))
         NamedCommands.registerCommand("stow",
                                       AutoSetElevatorAndArm("stow", "stow", self.elevator_and_arm))
-        NamedCommands.registerCommand("score", Score(self.elevator_and_arm, self.timer))
+        NamedCommands.registerCommand("score", AutoScore(self.elevator_and_arm, self.timer))
         NamedCommands.registerCommand("collect", CollectAuto(self.elevator_and_arm).withTimeout(10))  # .withTimeout(2))
         NamedCommands.registerCommand("start_timer", StartAutoTimer(self.util, self.timer))
         NamedCommands.registerCommand("stop_timer", StopAutoTimer(self.util, self.timer))
@@ -698,6 +702,6 @@ class RobotContainer:
                                                                   self.elevator_and_arm))
         NamedCommands.registerCommand("stop_collecting", runOnce(lambda: self.elevator_and_arm.intake.set(0),
                                                                  self.elevator_and_arm))
-        NamedCommands.registerCommand("floor_L1", ScoreCoral(self.intake_arm).withTimeout(2))
+        NamedCommands.registerCommand("floor_L1", ScoreCoral(self.intake_arm).withTimeout(1.5))
         NamedCommands.registerCommand("floor_stow", runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm))
         NamedCommands.registerCommand("floor_intake", runOnce(lambda: self.intake_arm.set_state("intake_coral"), self.intake_arm))

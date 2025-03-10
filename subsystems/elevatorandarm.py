@@ -402,4 +402,4 @@ class TimeoutClaw(Command):
         return self.timer.get() - self.start_time > 1
 
     def end(self, interrupted: bool):
-        self.elevator_and_arm.intake.set(0)
+        self.elevator_and_arm.intake.set(-0.1)

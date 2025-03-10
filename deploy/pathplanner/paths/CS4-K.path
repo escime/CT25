@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.5826738716039197,
-        "y": 7.132654660166642
+        "x": 1.674650866133947,
+        "y": 7.310387808953488
       },
       "isLocked": false,
       "linkedName": "CS4"
     },
     {
       "anchor": {
-        "x": 3.775637755102041,
-        "y": 5.065911989795918
+        "x": 3.7428384186766035,
+        "y": 5.060772223207973
       },
       "prevControl": {
-        "x": 2.634653371265304,
-        "y": 6.441295772597201
+        "x": 2.8460045118921746,
+        "y": 5.757117379719323
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,7 +31,7 @@
   "rotationTargets": [
     {
       "waypointRelativePos": 0.6591511936339521,
-      "rotationDegrees": 130.0
+      "rotationDegrees": 110.0
     }
   ],
   "constraintZones": [],
@@ -61,7 +61,7 @@
     },
     {
       "name": "score_try",
-      "waypointRelativePos": 0.98,
+      "waypointRelativePos": 0.96,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",

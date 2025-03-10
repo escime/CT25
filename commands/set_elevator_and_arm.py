@@ -17,8 +17,12 @@ class SetElevatorAndArm(Command):
         self.addRequirements(elevator_and_arm)
 
     def initialize(self):
+        if "algae" in self.setpoint:
+            self.elevator_and_arm.intake.set(-1)
+
         if self.setpoint == "stow":
             self.elevator_and_arm.set_accel_limit(1)
+            self.elevator_and_arm.intake.set(-0.1)
         if self.setpoint == "L1":
             self.elevator_and_arm.set_accel_limit(1)
         if self.setpoint == "L2":
