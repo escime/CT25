@@ -209,11 +209,17 @@ class ElevatorAndArmSubsystem(Subsystem):
 
     def set_elevator_state(self, state: str) -> None:
         self.elevator_state = state
-        self.lift_main.set_control(self.lift_main_mm.with_position(self.elevator_state_values[state]).with_slot(0))
+        try:
+            self.lift_main.set_control(self.lift_main_mm.with_position(self.elevator_state_values[state]).with_slot(0))
+        except KeyError:
+            print("Elevator exception occurred with state " + state)
 
     def set_arm_state(self, state: str) -> None:
         self.arm_state = state
-        self.wrist.set_control(self.wrist_mm.with_position(self.arm_state_values[state]).with_slot(0))
+        try:
+            self.wrist.set_control(self.wrist_mm.with_position(self.arm_state_values[state]).with_slot(0))
+        except KeyError:
+            print("Arm exception occurred with state " + state)
         # print("Attempted and failed to set the arm state. Good job!")
 
     def set_elevator_manual(self, voltage: float) -> None:
