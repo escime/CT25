@@ -9,7 +9,7 @@ from phoenix6.status_code import StatusCode
 from phoenix6.signals import InvertedValue
 from phoenix6.utils import get_current_time_seconds, is_simulation
 
-from wpilib import Mechanism2d, Color8Bit, Color, SmartDashboard, DigitalInput
+from wpilib import Mechanism2d, Color8Bit, Color, SmartDashboard, DigitalInput, PWMTalonFX
 from wpilib.simulation import SingleJointedArmSim
 from wpimath.system.plant import DCMotor
 from wpimath.units import inchesToMeters, lbsToKilograms, radiansToRotations
@@ -66,12 +66,17 @@ class Climber(Subsystem):
 
         self.climber_arm_volts = VoltageOut(0, True)
 
+        self.spin_wheels = PWMTalonFX(3)
+
         self.debug_mode = False
 
         self.last_time = get_current_time_seconds()
 
     def get_position(self) -> float:
         return self.climber_arm.get_position(True).value_as_double
+
+    def set_wheel_spin(self, voltage: float) -> None:
+        self.spin_wheels.set(voltage)
 
     def set_voltage_direct(self, output: float):
         self.climber_arm.set_control(self.climber_arm_volts.with_output(output))

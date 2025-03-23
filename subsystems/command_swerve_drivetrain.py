@@ -289,14 +289,14 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         self.photon_cam_array = [cam1, cam2]
         self.photon_pose_array = [photon_pose_cam1, photon_pose_cam2]
 
-        self.used_tags = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
+        self.used_tags = [6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22]
 
         self.tag_seen = False
 
         if utils.is_simulation():
             alert_photonvision_enabled.set(True)
             self.vision_sim = VisionSystemSim("main")
-            self.vision_sim.addAprilTags(AprilTagFieldLayout.loadField(AprilTagField.k2025ReefscapeWelded))
+            self.vision_sim.addAprilTags(AprilTagFieldLayout.loadField(AprilTagField.k2025ReefscapeAndyMark))
             camera_prop = SimCameraProperties()
             camera_prop.setCalibrationFromFOV(1280, 800, Rotation2d.fromDegrees(75))
             camera_prop.setCalibError(0.01, 0.01)
@@ -345,7 +345,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
 
         # Update Photonvision cameras.
         if self.photon_cam_array[0].isConnected(): # and not utils.is_simulation():
-            self.select_best_vision_pose((0.4, 0.4, 9999999999999999999))
+            self.select_best_vision_pose((0.2, 0.2, 9999999999999999999))
 
         if utils.is_simulation():
             self.vision_sim.update(self.get_pose())
@@ -382,13 +382,13 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
                         accepted_targets.append(best_target_yeehaw)
 
         if accepted_poses:
-            # SmartDashboard.putBoolean("Accepted new pose?", True)
+            SmartDashboard.putBoolean("Accepted new pose?", True)
             self.tag_seen = True
             for i in range(0, len(accepted_poses)):
                 self.add_vision_measurement(accepted_poses[i].toPose2d(), utils.fpga_to_current_time(accepted_targets[i].getTimestampSeconds()), stddevs)
         else:
             self.tag_seen = False
-        #     SmartDashboard.putBoolean("Accepted new pose?", False)
+            SmartDashboard.putBoolean("Accepted new pose?", False)
 
         # if accepted_poses:
         #     min_ambiguity = 3940
@@ -413,9 +413,9 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         elif tags == "blue_reef":
             self.used_tags = [17, 18, 19, 20, 21, 22]
         elif tags == "border":
-            self.used_tags = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
+            self.used_tags = [6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22]
         else:
-            self.used_tags = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
+            self.used_tags = [6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22]
 
     def set_lockout_tag(self, tag: int) -> None:
         self.used_tags = [tag]

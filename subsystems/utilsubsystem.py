@@ -10,6 +10,8 @@ class UtilSubsystem(Subsystem):
 
         self.auto_start_time = 0
 
+        self.algae_height = "algae_low"
+
         self.scoring_location = 0
         self.algae_mode = False
         # FORMAT: X, Y, ANGLE, LOCATION NAME, APRILTAG FOR SERVOING
@@ -192,6 +194,9 @@ class UtilSubsystem(Subsystem):
     def change_algae_mode(self, algae_mode_enabled: bool) -> None:
         self.algae_mode = algae_mode_enabled
         SmartDashboard.putBoolean("Algae Mode?", algae_mode_enabled)
+
+    def get_algae_mode(self) -> bool:
+        return self.algae_mode
 
     # def periodic(self) -> None:
     #     SmartDashboard.putString("Scoring Setpoint", self.scoring_setpoints[self.scoring_setpoint])

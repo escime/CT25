@@ -74,13 +74,13 @@ class Score(Command):
 
     def end(self, interrupted: bool):
         self.elevator_and_arm.intake.set(0)
-        if self.util.algae_mode:
-            SetElevatorAndArm(self.get_algae_height(), self.elevator_and_arm, self.drive).schedule()
-        else:
-            SequentialCommandGroup(
-                SetElevatorAndArm("stow", self.elevator_and_arm, self.drive).withTimeout(1.5),
-                ReZeroTorque(self.elevator_and_arm).withInterruptBehavior(InterruptionBehavior.kCancelSelf).withTimeout(0.1)
-            ).schedule()
+        # if self.util.algae_mode:
+        #     SetElevatorAndArm(self.get_algae_height(), self.elevator_and_arm, self.drive).schedule()
+        # else:
+        #     SequentialCommandGroup(
+        #         SetElevatorAndArm("stow", self.elevator_and_arm, self.drive).withTimeout(1.5),
+        #         ReZeroTorque(self.elevator_and_arm).withTimeout(0.1)
+        #     ).schedule()
 
     def get_algae_height(self) -> str:
         pose = [self.drive.get_pose().x, self.drive.get_pose().y]

@@ -353,6 +353,8 @@ class ReZeroTorque(Command):
         super().__init__()
         self.elevator_and_arm = elevator_and_arm
 
+        self.addRequirements(self.elevator_and_arm)
+
     def initialize(self):
         self.elevator_and_arm.set_elevator_manual(0.1 * -1 * 12)
 

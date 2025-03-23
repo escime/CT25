@@ -23,6 +23,8 @@ class SwapArm(Command):
             else:
                 arm_target = self.elevator_and_arm.get_arm_state()[:-5] + "left"
             self.elevator_and_arm.set_arm_state(arm_target)
+        # elif "stow" in self.elevator_and_arm.get_arm_state():
+        #     self.elevator_and_arm.set_arm_state("stage_right_L4")
 
 
     def isFinished(self) -> bool:

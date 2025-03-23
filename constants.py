@@ -66,7 +66,7 @@ class ElevatorConstants:
                     "L3_scoring": 2.3,
                     "L3": 3.25,
                     "L4_scoring": 4.8,
-                    "L4": 6.4,
+                    "L4": 6.3,
                     "algae_high": 4.3,
                     "algae_low": 2,
                     "net": 6.4}
@@ -84,7 +84,7 @@ class ElevatorConstants:
     ks = 0.1
     kv = 3.11
     ka = 0.04
-    kp = 80
+    kp = 100 # 80
     ki = 0
     kd = 0
 
@@ -136,8 +136,8 @@ class IntakeConstants:
     arm_can_id = 31
     gearbox_ratio = 12
 
-    mm_cruise_velocity = 2
-    mm_acceleration = 10
+    mm_cruise_velocity = 5  # 2
+    mm_acceleration = 5  # 10
     mm_jerk = 100
 
     kg = 1.25
