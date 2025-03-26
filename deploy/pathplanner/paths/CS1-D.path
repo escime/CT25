@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.292637586650652,
-        "y": 0.9860630194756266
+        "x": 2.344410388138619,
+        "y": 0.9115003464822548
       },
       "isLocked": false,
       "linkedName": "CS1"
     },
     {
       "anchor": {
-        "x": 3.7532525510204082,
-        "y": 2.9766262755102035
+        "x": 3.78,
+        "y": 2.942
       },
       "prevControl": {
-        "x": 3.43469485140091,
-        "y": 2.7621803941706506
+        "x": 3.4522147764777777,
+        "y": 2.7643904523559346
       },
       "nextControl": null,
       "isLocked": false,
@@ -39,7 +39,7 @@
   "eventMarkers": [
     {
       "name": "lift_up",
-      "waypointRelativePos": 0.19966442953020094,
+      "waypointRelativePos": 0.18,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
@@ -61,7 +61,7 @@
     },
     {
       "name": "score_try",
-      "waypointRelativePos": 0.96,
+      "waypointRelativePos": 0.97,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",

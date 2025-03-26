@@ -66,8 +66,8 @@ class ElevatorConstants:
                     "L3_scoring": 2.3,
                     "L3": 3.25,
                     "L4_scoring": 4.8,
-                    "L4": 6.3,
-                    "algae_high": 4.3,
+                    "L4": 6.55,
+                    "algae_high": 4.5,
                     "algae_low": 2,
                     "net": 6.4}
 
