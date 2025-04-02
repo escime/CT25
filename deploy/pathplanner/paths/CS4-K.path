@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.674650866133947,
-        "y": 7.310387808953488
+        "x": 1.8646618025297497,
+        "y": 7.213367751033484
       },
       "isLocked": false,
       "linkedName": "CS4"
     },
     {
       "anchor": {
-        "x": 3.7428384186766035,
+        "x": 3.78,
         "y": 5.060772223207973
       },
       "prevControl": {
-        "x": 2.8460045118921746,
-        "y": 5.757117379719323
+        "x": 3.5968337126281886,
+        "y": 5.230919545168758
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,8 +30,8 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.6591511936339521,
-      "rotationDegrees": 110.0
+      "waypointRelativePos": 0.3872679045092842,
+      "rotationDegrees": 119.99999999999999
     }
   ],
   "constraintZones": [],
@@ -39,7 +39,7 @@
   "eventMarkers": [
     {
       "name": "lift_up",
-      "waypointRelativePos": 0.3552278820375335,
+      "waypointRelativePos": 0.34228187919463016,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",

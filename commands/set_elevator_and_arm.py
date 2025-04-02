@@ -2,6 +2,7 @@ from commands2 import Command, WrapperCommand
 from wpilib import DriverStation
 from subsystems.elevatorandarm import ElevatorAndArmSubsystem
 from subsystems.command_swerve_drivetrain import CommandSwerveDrivetrain
+from phoenix6.utils import get_current_time_seconds
 
 
 class SetElevatorAndArm(Command):
@@ -14,9 +15,13 @@ class SetElevatorAndArm(Command):
         self.wait_for = "none"
         self.arm_target = "none"
 
+        self.start_time = 0
+
         self.addRequirements(elevator_and_arm)
 
     def initialize(self):
+        self.start_time = get_current_time_seconds()
+
         if "algae" in self.setpoint:
             self.elevator_and_arm.intake.set(-1)
 
@@ -68,7 +73,7 @@ class SetElevatorAndArm(Command):
             self.elevator_and_arm.set_arm_state("stow")
 
     def isFinished(self) -> bool:
-        return self.elevator_and_arm.get_elevator_at_target()
+        return self.elevator_and_arm.get_elevator_at_target() or get_current_time_seconds() - self.start_time > 2
 
     def end(self, interrupted: bool):
         if not interrupted:
