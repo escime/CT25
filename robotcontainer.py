@@ -424,8 +424,8 @@ class RobotContainer:
             SequentialCommandGroup(
                 runOnce(lambda: self.intake_arm.set_state("climbing"), self.intake_arm),
                 runOnce(lambda: self.leds.set_state("rainbow"), self.leds),
-                runOnce(lambda: self.climber_arm.set_wheel_spin(-10), self.climber_arm),
-                run(lambda: self.climber_arm.set_climber_manual(-1 * 12),
+                runOnce(lambda: self.climber_arm.set_wheel_spin(0), self.climber_arm),
+                run(lambda: self.climber_arm.set_climber_manual(1 * 12),
                     self.climber_arm)
             )
         ).onFalse(
@@ -435,8 +435,8 @@ class RobotContainer:
             SequentialCommandGroup(
                 runOnce(lambda: self.intake_arm.set_state("climbing"), self.intake_arm),
                 runOnce(lambda: self.leds.set_state("rainbow"), self.leds),
-                runOnce(lambda: self.climber_arm.set_wheel_spin(0), self.climber_arm),
-                run(lambda: self.climber_arm.set_climber_manual(1 * 12),
+                runOnce(lambda: self.climber_arm.set_wheel_spin(-10), self.climber_arm),
+                run(lambda: self.climber_arm.set_climber_manual(-1 * 12),
                 self.climber_arm)
             )
         ).onFalse(
