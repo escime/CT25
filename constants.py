@@ -90,7 +90,7 @@ class ElevatorConstants:
 
     elevator_angle_degrees = 90
 
-    elevator_at_target_threshold = 0.02
+    elevator_at_target_threshold = 0.04
     elevator_upper_limit = max_height_in / (drum_diameter_in * pi)
     elevator_lower_limit = 0 / (drum_diameter_in * pi)
 

@@ -43,6 +43,7 @@ from commands.collect_from_cs_auto import CollectAuto
 from commands.swap_arm import SwapArm
 from commands.auto_score import AutoScore
 from commands.get_algae_height import GetAlgaeHeight
+from commands.pathfollowing_endpoint import PathfollowingEndpointClose
 
 
 class RobotContainer:
@@ -632,6 +633,10 @@ class RobotContainer:
     def enable_test_bindings(self, enabled: bool) -> None:
         self.test_bindings = enabled
 
+    def check_endpoint_closed(self) -> bool:
+        return self.drivetrain.endpoint[0] - 0.02 < self.drivetrain.get_pose().x < self.drivetrain.endpoint[0] + 0.02 and self.drivetrain.endpoint[
+            1] - 0.02 < self.drivetrain.get_pose().y < self.drivetrain.endpoint[1] + 0.02
+
     def registerCommands(self):
         NamedCommands.registerCommand("rainbow_leds", runOnce(lambda: self.leds.set_state("rainbow"),
                                                               self.leds))
@@ -712,3 +717,9 @@ class RobotContainer:
         NamedCommands.registerCommand("floor_L1", ScoreCoral(self.intake_arm).withTimeout(1.5))
         NamedCommands.registerCommand("floor_stow", runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm))
         NamedCommands.registerCommand("floor_intake", runOnce(lambda: self.intake_arm.set_state("intake_coral"), self.intake_arm))
+        NamedCommands.registerCommand("close_j",
+                                      SequentialCommandGroup(
+                                          PathfollowingEndpointClose(self.drivetrain, [7.133, 5.223, -120]),
+                                          self.drivetrain.apply_request(self.drivetrain.saved_request)
+                                      ).onlyWhile(lambda: self.check_endpoint_closed())
+                                      )

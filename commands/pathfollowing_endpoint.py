@@ -43,17 +43,23 @@ class PathfollowingEndpointClose(Command):
         x_output = self.x_controller.calculate(current_pose.x, self.endpoint[0])
         y_output = self.y_controller.calculate(current_pose.y, self.endpoint[1])
 
-        self.drive.apply_request(lambda: (self.drive_request
-                                          .with_velocity_x(-1 * x_output * TunerConstants.speed_at_12_volts)
-                                          .with_velocity_y(-1 * y_output * TunerConstants.speed_at_12_volts)
-                                          .with_target_direction(self.endpoint[2]))).schedule()
+        # self.drive.apply_request(lambda: (self.drive_request
+        #                                   .with_velocity_x(-1 * x_output * TunerConstants.speed_at_12_volts)
+        #                                   .with_velocity_y(-1 * y_output * TunerConstants.speed_at_12_volts)
+        #                                   .with_target_direction(self.endpoint[2]))).schedule()
+
+        self.drive.saved_request = (self.drive_request.with_velocity_x(-1 * x_output * TunerConstants.speed_at_12_volts)
+                                    .with_velocity_y(-1 * y_output * TunerConstants.speed_at_12_volts)
+                                    .with_target_direction(self.endpoint[2]))
+        self.drive.endpoint = [self.endpoint[0], self.endpoint[1]]
 
     def isFinished(self) -> bool:
-        if self.endpoint[0] - 0.05 < self.drive.get_pose().x < self.endpoint[0] + 0.05 and self.endpoint[1] - 0.05 < self.drive.get_pose().y < self.endpoint[1] + 0.05:
-            print("PATH CLOSING COMPLETE")
-            return True
-        else:
-            return False
+        # if self.endpoint[0] - 0.05 < self.drive.get_pose().x < self.endpoint[0] + 0.05 and self.endpoint[1] - 0.05 < self.drive.get_pose().y < self.endpoint[1] + 0.05:
+        #     print("PATH CLOSING COMPLETE")
+        #     return True
+        # else:
+        #     return False
+        return True
 
-    def end(self, interrupted: bool):
-        self.drive.apply_request(lambda: self.drive_request.with_velocity_x(0).with_velocity_y(0)).withTimeout(0.02).schedule()
+    # def end(self, interrupted: bool):
+    #     self.drive.apply_request(lambda: self.drive_request.with_velocity_x(0).with_velocity_y(0)).withTimeout(0.02).schedule()

@@ -13,7 +13,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "1-I"
+            "pathName": "1-J"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "close_j"
           }
         },
         {

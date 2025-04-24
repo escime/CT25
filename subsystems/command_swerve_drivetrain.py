@@ -187,6 +187,10 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         self.re_entered_clt = True
         self.target_direction = Rotation2d(0)
 
+        # Configure "request saving" method
+        self.saved_request = None
+        self.endpoint = [0, 0]
+
         # Configure persistent alerts.
         alert_photonvision_enabled = Alert("PhotonVision Simulation Enabled", Alert.AlertType.kWarning)
 
