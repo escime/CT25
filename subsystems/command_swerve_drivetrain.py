@@ -349,8 +349,9 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
 
         # Update Photonvision cameras.
         if self.photon_cam_array[0].isConnected(): # and not utils.is_simulation():
-            self.select_best_vision_pose((0.2, 0.2, 9999999999999999999))
-            # self.select_best_vision_pose((1.5, 1.5, 9999999999999999999))
+            # self.select_best_vision_pose((0.2, 0.2, 9999999999999999999))
+            # TODO Suppress for testing
+            self.select_best_vision_pose((5, 5, 9999999999999999999))
 
         if utils.is_simulation():
             self.vision_sim.update(self.get_pose())

@@ -1,5 +1,5 @@
 import phoenix6.utils
-from commands2 import Subsystem
+from commands2 import Subsystem, Command
 from constants import ClimberConstants
 
 from phoenix6.hardware import TalonFX
@@ -24,6 +24,8 @@ class Climber(Subsystem):
 
         self.climber_arm = TalonFX(ClimberConstants.climber_can_id, "rio")
         self.climber_arm.set_position(0)
+
+        self.deployed = False
 
         self.climber_arm_configs = TalonFXConfiguration()
 
@@ -58,8 +60,8 @@ class Climber(Subsystem):
             self.climber_arm_gear_ratio,
             SingleJointedArmSim.estimateMOI(inchesToMeters(20), lbsToKilograms(10)),
             inchesToMeters(20),
-            -0.1,
-            pi + 0.1,
+            -10,
+            pi + 10,
             True,
             1
         )
@@ -122,3 +124,33 @@ class Climber(Subsystem):
 
         if self.debug_mode:
             SmartDashboard.putNumber("Climber Position", self.climber_arm.get_position().value_as_double)
+
+
+class ClimberDeploy(Command):
+
+    def __init__(self, climber: Climber):
+        super().__init__()
+        self.climber = climber
+
+        self.addRequirements(climber)
+
+    def initialize(self):
+        if self.climber.deployed is False:
+            self.climber.set_wheel_spin(-10)
+            self.climber.set_climber_manual(-12)
+        else:
+            self.climber.set_wheel_spin(0)
+            self.climber.set_climber_manual(12)
+
+    def isFinished(self) -> bool:
+        if not self.climber.deployed:
+            return self.climber.climber_arm.get_position().value_as_double <= -1
+        else:
+            return self.climber.climber_arm.get_position().value_as_double >= 0
+
+    def end(self, interrupted: bool):
+        self.climber.set_climber_manual(0)
+        if not interrupted and not self.climber.deployed:
+            self.climber.deployed = True
+        elif not interrupted and self.climber.deployed:
+            self.climber.deployed = False

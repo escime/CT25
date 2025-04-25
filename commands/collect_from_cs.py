@@ -21,8 +21,8 @@ class Collect(Command):
             self.collection_buffer[0] = True
         self.collection_buffer = self.collection_buffer[1:] + self.collection_buffer[:1]
 
-    def isFinished(self) -> bool:
-        return all(self.collection_buffer)
+    # def isFinished(self) -> bool:
+    #     return all(self.collection_buffer)
 
     # def end(self, interrupted: bool):
     #     self.elevator_and_arm.intake.set(0)

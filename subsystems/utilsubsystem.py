@@ -14,6 +14,9 @@ class UtilSubsystem(Subsystem):
 
         self.scoring_location = 0
         self.algae_mode = False
+
+        self.robot_mode = 4
+
         # FORMAT: X, Y, ANGLE, LOCATION NAME, APRILTAG FOR SERVOING
         self.scoring_sides_red = [
             [13.766, 4.031, [
@@ -194,6 +197,14 @@ class UtilSubsystem(Subsystem):
     def change_algae_mode(self, algae_mode_enabled: bool) -> None:
         self.algae_mode = algae_mode_enabled
         SmartDashboard.putBoolean("Algae Mode?", algae_mode_enabled)
+
+    def toggle_algae_mode(self) -> None:
+        self.algae_mode = not self.algae_mode
+        SmartDashboard.putBoolean("Algae Mode?", self.algae_mode)
+
+    def change_robot_mode(self, mode: int) -> None:
+        self.robot_mode = mode
+        SmartDashboard.putString("Robot Mode", "L" + str(mode))
 
     def get_algae_mode(self) -> bool:
         return self.algae_mode
