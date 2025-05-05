@@ -68,7 +68,7 @@ class ElevatorConstants:
                     "L4_scoring": 4.8,
                     "L4": 6.55,
                     "algae_high": 4.5,
-                    "algae_low": 2,
+                    "algae_low": 2.6,
                     "net": 6.4}
 
     supply_current_limit = 80
@@ -103,8 +103,8 @@ class ArmConstants:
                     "stage_right": -0.07,
                     "score_right": -0.14,
                     "score_right_L4": -0.155,  # -0.14
-                    "algae_left": 0.20,
-                    "algae_right": -0.20}
+                    "algae_left": 0.22,
+                    "algae_right": -0.22}
     wrist_can_id = 34
     intake_channel = 2
     score_speed = 0.75

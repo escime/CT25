@@ -23,7 +23,7 @@ class SetElevatorAndArm(Command):
         self.start_time = get_current_time_seconds()
 
         if "algae" in self.setpoint:
-            self.elevator_and_arm.intake.set(1)
+            self.elevator_and_arm.intake.set(-1)
 
         if self.setpoint == "stow":
             self.elevator_and_arm.set_accel_limit(1)

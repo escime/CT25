@@ -290,7 +290,7 @@ class RobotContainer:
                 TimeoutClaw(self.elevator_and_arm, self.timer)
             )
         ).whileTrue(
-            SequentialCommandGroup(
+            ParallelCommandGroup(
                 CoralStationSimple(self.drivetrain, self.util, self.driver_controller),
                 Collect(self.elevator_and_arm)
             )
@@ -350,11 +350,12 @@ class RobotContainer:
             SequentialCommandGroup(
                 runOnce(lambda: self.elevator_and_arm.set_elevator_state("algae_low"), self.elevator_and_arm),
                 runOnce(lambda: self.elevator_and_arm.set_arm_state("algae_left"), self.elevator_and_arm),
-                ConditionalCommand(
-                    self.drivetrain.pathfind_to_pose([7.171, 5.991, 0]),
-                    self.drivetrain.pathfind_to_pose([9.932, 1.910, 180]),
-                    lambda: DriverStation.getAlliance() == DriverStation.Alliance.kBlue
-                ),
+                # ConditionalCommand(
+                #     self.drivetrain.pathfind_to_pose([7.171, 5.991, 0]),
+                #     self.drivetrain.pathfind_to_pose([9.932, 1.910, 180]),
+                #     lambda: DriverStation.getAlliance() == DriverStation.Alliance.kBlue
+                # ),
+                WaitCommand(1),
                 ThrowAlgae(self.elevator_and_arm),
                 SetElevatorAndArm("stow", self.elevator_and_arm, self.drivetrain).withTimeout(1.5),
                 ReZeroTorque(self.elevator_and_arm).withTimeout(0.1)
@@ -434,7 +435,7 @@ class RobotContainer:
         #     SwapArm(self.elevator_and_arm)
         # )
 
-        # Manually control the climber
+        # Control the climber
         self.driver_controller.y().and_(lambda: not self.test_bindings).onTrue(
             SequentialCommandGroup(
                 runOnce(lambda: self.intake_arm.set_state("climbing"), self.intake_arm),
@@ -449,7 +450,7 @@ class RobotContainer:
                 runOnce(lambda: self.intake_arm.intake_arm.set_position(0.75), self.intake_arm).ignoringDisable(True),
                 runOnce(lambda: self.elevator_and_arm.set_arm_manual(0), self.elevator_and_arm),
                 runOnce(lambda: self.elevator_and_arm.wrist.set_position(0.175), self.elevator_and_arm)
-            )
+            ).ignoringDisable(True)
         )
 
         # Coral acquired light
@@ -468,8 +469,6 @@ class RobotContainer:
                 runOnce(lambda: self.leds.set_state("flash_color"), self.leds),
                 WaitCommand(0.5),
                 runOnce(lambda: self.leds.set_state("default"), self.leds)
-                # runOnce(lambda: self.leds.reset_flames(), self.leds),
-                # runOnce(lambda: self.leds.set_state("flames"), self.leds)
             ).ignoringDisable(True)
         )
 
@@ -626,6 +625,18 @@ class RobotContainer:
         NamedCommands.registerCommand("close_j",
                                       SequentialCommandGroup(
                                           PathfollowingEndpointClose(self.drivetrain, [7.133, 5.223, -120]),
-                                          self.drivetrain.apply_request(self.drivetrain.saved_request)
-                                      ).onlyWhile(lambda: self.check_endpoint_closed())
+                                          self.drivetrain.apply_request(lambda: self.drivetrain.saved_request)
+                                      ).onlyWhile(lambda: self.check_endpoint_closed()).withTimeout(1)
+                                      )
+        NamedCommands.registerCommand("close_k",
+                                      SequentialCommandGroup(
+                                          PathfollowingEndpointClose(self.drivetrain, [3.780, 5.061, 120]),
+                                          self.drivetrain.apply_request(lambda: self.drivetrain.saved_request)
+                                      ).onlyWhile(lambda: self.check_endpoint_closed()).withTimeout(1)
+                                      )
+        NamedCommands.registerCommand("close_l",
+                                      SequentialCommandGroup(
+                                          PathfollowingEndpointClose(self.drivetrain, [3.477, 4.924, 120]),
+                                          self.drivetrain.apply_request(lambda: self.drivetrain.saved_request)
+                                      ).onlyWhile(lambda: self.check_endpoint_closed()).withTimeout(1)
                                       )

@@ -37,7 +37,6 @@ class PathfollowingEndpointClose(Command):
 
         print("PATH CLOSING ENGAGED")
 
-    def execute(self):
         current_pose = self.drive.get_pose()
 
         x_output = self.x_controller.calculate(current_pose.x, self.endpoint[0])

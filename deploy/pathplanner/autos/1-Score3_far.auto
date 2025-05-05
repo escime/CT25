@@ -19,6 +19,12 @@
         {
           "type": "named",
           "data": {
+            "name": "close_j"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "score"
           }
         },
@@ -49,6 +55,12 @@
         {
           "type": "named",
           "data": {
+            "name": "close_l"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "score"
           }
         },
@@ -74,6 +86,12 @@
           "type": "path",
           "data": {
             "pathName": "CS4-K"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "close_k"
           }
         },
         {
