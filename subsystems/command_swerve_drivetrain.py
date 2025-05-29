@@ -5,7 +5,7 @@ from phoenix6 import swerve, units, utils, SignalLogger
 from typing import Callable, overload
 from wpilib import DriverStation, Notifier, RobotController, SmartDashboard, Alert, getDeployDirectory
 from wpilib.sysid import SysIdRoutineLog
-from wpimath.geometry import Rotation2d, Pose2d, Transform3d, Translation3d, Rotation3d, Pose3d
+from wpimath.geometry import Rotation2d, Pose2d, Transform3d, Translation3d, Rotation3d, Pose3d, Transform2d
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.config import PIDConstants, RobotConfig
 from pathplannerlib.path import PathConstraints
@@ -14,6 +14,7 @@ from constants import AutoConstants
 from wpimath.units import degreesToRadians, inchesToMeters
 from robotpy_apriltag import AprilTagFieldLayout, AprilTagField
 from photonlibpy import photonCamera, photonPoseEstimator
+from helpers.questnav import QuestNav
 if utils.is_simulation():
     from photonlibpy.simulation import VisionSystemSim, SimCameraProperties, PhotonCameraSim
 # from wpiutil import Sendable, SendableBuilder
@@ -314,6 +315,9 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             self.vision_sim.addCamera(cam2_sim, robot_to_cam2)
             # self.vision_sim.addCamera(cam3_sim, robot_to_cam3)
 
+        self.questnav = QuestNav()
+        self.quest_to_robot = Transform2d(0, 0, Rotation2d().fromDegrees(0))
+
         # SmartDashboard.putData("Swerve Drive", SwerveDriveSendable(self))
 
     def apply_request(self, request: Callable[[], swerve.requests.SwerveRequest]) -> Command:
@@ -354,6 +358,19 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
 
         if utils.is_simulation():
             self.vision_sim.update(self.get_pose())
+
+        self.quest_periodic()
+
+    def quest_periodic(self) -> None:
+        self.questnav.cleanup_responses()
+        self.questnav.process_heartbeat()
+
+        quest_pose = self.questnav.get_pose()
+        robot_pose = quest_pose.transformBy(self.quest_to_robot.inverse())
+
+        if self.questnav.get_connected() and self.questnav.get_tracking_status():
+            self.add_vision_measurement(robot_pose, utils.fpga_to_current_time(self.questnav.get_timestamp()),
+                                        (0.02, 0.02, 0.035))
 
     def select_best_vision_pose(self, stddevs: (float, float, float)) -> None:
         accepted_poses = []
@@ -604,9 +621,11 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
             self.reset_pose(Pose2d(14.337, 4.020, Rotation2d.fromDegrees(180)))
             self.set_operator_perspective_forward(Rotation2d.fromDegrees(180))
+            self.questnav.set_pose(Pose2d(14.337, 4.020, Rotation2d.fromDegrees(180)).transformBy(self.quest_to_robot))
         else:
             self.reset_pose(Pose2d(3.273, 4.020, Rotation2d.fromDegrees(0)))
             self.set_operator_perspective_forward(Rotation2d.fromDegrees(0))
+            self.questnav.set_pose(Pose2d(3.273, 4.020, Rotation2d.fromDegrees(0)).transformBy(self.quest_to_robot))
 
     def reset_clt(self) -> None:
         self.re_entered_clt = True
