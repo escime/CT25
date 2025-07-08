@@ -316,7 +316,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             # self.vision_sim.addCamera(cam3_sim, robot_to_cam3)
 
         self.questnav = QuestNav()
-        self.quest_to_robot = Transform2d(0, 0, Rotation2d().fromDegrees(0))
+        self.quest_to_robot = Transform2d(inchesToMeters(12.5+0.55), 0, Rotation2d().fromDegrees(0))
 
         # SmartDashboard.putData("Swerve Drive", SwerveDriveSendable(self))
 
@@ -351,26 +351,28 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         if self.lookahead_active:
             self.vel_acc_periodic()
 
-        # Update Photonvision cameras.
-        if self.photon_cam_array[0].isConnected(): # and not utils.is_simulation():
+        # Update PhotonVision cameras in real-life scenarios.
+        if self.photon_cam_array[0].isConnected() and not utils.is_simulation():
             self.select_best_vision_pose((0.2, 0.2, 9999999999999999999))
-            # self.select_best_vision_pose((1.5, 1.5, 9999999999999999999))
 
+        # If in simulation, update PhotonVision for sim.
         if utils.is_simulation():
             self.vision_sim.update(self.get_pose())
+            self.select_best_vision_pose((1.5, 1.5, 9999999999999999999))
 
+        # Import pose from QuestNav.
         self.quest_periodic()
 
     def quest_periodic(self) -> None:
         self.questnav.cleanup_responses()
         self.questnav.process_heartbeat()
 
-        quest_pose = self.questnav.get_pose()
-        robot_pose = quest_pose.transformBy(self.quest_to_robot.inverse())
-
         if self.questnav.get_connected() and self.questnav.get_tracking_status():
-            self.add_vision_measurement(robot_pose, utils.fpga_to_current_time(self.questnav.get_timestamp()),
-                                        (0.02, 0.02, 0.035))
+            robot_pose = self.questnav.get_pose().transformBy(self.quest_to_robot.inverse())
+            SmartDashboard.putString("QuestNav Robot Pose", str(robot_pose))
+            if 0 < robot_pose.x < 17.658 and 0 < robot_pose.y < 8.131:
+                self.add_vision_measurement(robot_pose, utils.fpga_to_current_time(self.questnav.get_timestamp()),
+                                            (0.02, 0.02, 0.035))
 
     def select_best_vision_pose(self, stddevs: (float, float, float)) -> None:
         accepted_poses = []

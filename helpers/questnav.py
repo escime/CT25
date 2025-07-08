@@ -24,7 +24,7 @@ class QuestNav:
 
         self.quest_mosi = self.nt4Table.getIntegerTopic("mosi").publish()
 
-        self.quest_timestamp = self.nt4Table.getFloatArrayTopic("timestamp").subscribe([-1.0])
+        self.quest_timestamp = self.nt4Table.getDoubleArrayTopic("timestamp").subscribe([-1.0])
 
         self.quest_position = self.nt4Table.getFloatArrayTopic("position").subscribe([-1.0, -1.0, -1.0])
 
