@@ -3,9 +3,9 @@ import math
 from commands2 import Command, Subsystem, sysid
 from phoenix6 import swerve, units, utils, SignalLogger
 from typing import Callable, overload
-from wpilib import DriverStation, Notifier, RobotController, SmartDashboard, Alert, getDeployDirectory
+from wpilib import DriverStation, Notifier, RobotController, SmartDashboard, Alert
 from wpilib.sysid import SysIdRoutineLog
-from wpimath.geometry import Rotation2d, Pose2d, Transform3d, Translation3d, Rotation3d, Pose3d, Transform2d
+from wpimath.geometry import Rotation2d, Pose2d, Transform3d, Translation3d, Rotation3d, Transform2d
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.config import PIDConstants, RobotConfig
 from pathplannerlib.path import PathConstraints
@@ -14,7 +14,7 @@ from constants import AutoConstants
 from wpimath.units import degreesToRadians, inchesToMeters
 from robotpy_apriltag import AprilTagFieldLayout, AprilTagField
 from photonlibpy import photonCamera, photonPoseEstimator
-from helpers.questnav import QuestNav
+from helpers.questnav.questnav2 import QuestNav
 if utils.is_simulation():
     from photonlibpy.simulation import VisionSystemSim, SimCameraProperties, PhotonCameraSim
 # from wpiutil import Sendable, SendableBuilder
@@ -364,15 +364,23 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
         self.quest_periodic()
 
     def quest_periodic(self) -> None:
-        self.questnav.cleanup_responses()
-        self.questnav.process_heartbeat()
+        self.questnav.command_periodic()
+        quest_pose = self.questnav.get_pose().transformBy(self.quest_to_robot)
 
-        if self.questnav.get_connected() and self.questnav.get_tracking_status():
-            robot_pose = self.questnav.get_pose().transformBy(self.quest_to_robot.inverse())
-            SmartDashboard.putString("QuestNav Robot Pose", str(robot_pose))
-            if 0 < robot_pose.x < 17.658 and 0 < robot_pose.y < 8.131:
-                self.add_vision_measurement(robot_pose, utils.fpga_to_current_time(self.questnav.get_timestamp()),
-                                            (0.02, 0.02, 0.035))
+        if 0 < quest_pose.x < 17.658 and 0 < quest_pose.y < 8.131:
+            self.add_vision_measurement(quest_pose,
+                                        self.questnav.get_data_timestamp(),
+                                        (0.02, 0.02, 0.035))
+
+        # self.questnav.cleanup_responses()
+        # self.questnav.process_heartbeat()
+        #
+        # if self.questnav.get_connected() and self.questnav.get_tracking_status():
+        #     robot_pose = self.questnav.get_pose().transformBy(self.quest_to_robot.inverse())
+        #     SmartDashboard.putString("QuestNav Robot Pose", str(robot_pose))
+        #     if 0 < robot_pose.x < 17.658 and 0 < robot_pose.y < 8.131:
+        #         self.add_vision_measurement(robot_pose, utils.fpga_to_current_time(self.questnav.get_timestamp()),
+        #                                     (0.02, 0.02, 0.035))
 
     def select_best_vision_pose(self, stddevs: (float, float, float)) -> None:
         accepted_poses = []

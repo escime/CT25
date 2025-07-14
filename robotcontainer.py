@@ -717,9 +717,9 @@ class RobotContainer:
         NamedCommands.registerCommand("floor_L1", ScoreCoral(self.intake_arm).withTimeout(1.5))
         NamedCommands.registerCommand("floor_stow", runOnce(lambda: self.intake_arm.set_state("stow"), self.intake_arm))
         NamedCommands.registerCommand("floor_intake", runOnce(lambda: self.intake_arm.set_state("intake_coral"), self.intake_arm))
-        NamedCommands.registerCommand("close_j",
-                                      SequentialCommandGroup(
-                                          PathfollowingEndpointClose(self.drivetrain, [7.133, 5.223, -120]),
-                                          self.drivetrain.apply_request(self.drivetrain.saved_request)
-                                      ).onlyWhile(lambda: self.check_endpoint_closed())
-                                      )
+        # NamedCommands.registerCommand("close_j",
+        #                               SequentialCommandGroup(
+        #                                   PathfollowingEndpointClose(self.drivetrain, [7.133, 5.223, -120]),
+        #                                   self.drivetrain.apply_request(self.drivetrain.saved_request)
+        #                               ).onlyWhile(lambda: self.check_endpoint_closed())
+        #                               )

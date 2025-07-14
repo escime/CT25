@@ -17,11 +17,8 @@ class QuestNav:
                    "PING": 3}
 
         self.nt4instance = NetworkTableInstance.getDefault()
-
         self.nt4Table = self.nt4instance.getTable("questnav")
-
-        self.quest_miso = self.nt4Table.getIntegerTopic("miso").subscribe(-1)
-
+        self.quest_miso = self.nt4Table.getIntegerTopic("miso").subscribe(0)
         self.quest_mosi = self.nt4Table.getIntegerTopic("mosi").publish()
 
         self.quest_timestamp = self.nt4Table.getDoubleArrayTopic("timestamp").subscribe([-1.0])

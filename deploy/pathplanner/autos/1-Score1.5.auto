@@ -19,12 +19,6 @@
         {
           "type": "named",
           "data": {
-            "name": "close_j"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "score"
           }
         },
