@@ -1,5 +1,5 @@
-from wpimath.geometry import Pose2d
-from wpilib import Timer
+from wpimath.geometry import Pose2d, Translation2d, Rotation2d
+from wpilib import Timer, SmartDashboard
 from ntcore import NetworkTableInstance
 import helpers.questnav.protos.generated.commands_pb2 as cpb2
 import helpers.questnav.protos.generated.geometry2d_pb2 as gpb2
@@ -19,7 +19,7 @@ class QuestNav:
         self.nt4_instance = NetworkTableInstance.getDefault()
         self.quest_nav_table = self.nt4_instance.getTable("QuestNav")
 
-        # Mock Protobuf instances (these would be actual generated classes)
+        # Protobuf instances
         self.command_response_proto = cpb2.ProtobufQuestNavCommandResponse()
         self.command_proto = cpb2.ProtobufQuestNavCommand()
         self.pose2d_proto = gpb2.ProtobufPose2d()
@@ -29,13 +29,13 @@ class QuestNav:
         # Subscribers and Publishers using RawTopic for protobuf data
         # Data is sent/received as JSON strings in this mock implementation
         self.response_topic = self.quest_nav_table.getRawTopic("response")
-        self.response_subscriber = self.response_topic.subscribe("raw", b"")  # Subscribe to raw bytes (empty default)
+        self.response_subscriber = self.response_topic.subscribe("proto:questnav.protos.commands.ProtobufQuestNavCommandResponse", b"")  # Subscribe to raw bytes (empty default)
 
         self.frame_data_topic = self.quest_nav_table.getRawTopic("frameData")
-        self.frame_data_subscriber = self.frame_data_topic.subscribe("raw", b"")
+        self.frame_data_subscriber = self.frame_data_topic.subscribe("proto:questnav.protos.data.ProtobufQuestNavFrameData", b"")
 
         self.device_data_topic = self.quest_nav_table.getRawTopic("deviceData")
-        self.device_data_subscriber = self.device_data_topic.subscribe("raw", b"")
+        self.device_data_subscriber = self.device_data_topic.subscribe("proto:questnav.protos.data.ProtobufQuestNavDeviceData", b"")
 
         self.request_topic = self.quest_nav_table.getRawTopic("request")
         self.request_publisher = self.request_topic.publish("raw")
@@ -56,21 +56,26 @@ class QuestNav:
         Args:
             pose: The field relative position of the Quest
         """
-        self.cached_proto_pose.clear()
-        self.pose2d_proto.pack(self.cached_proto_pose, pose)
+        # self.cached_proto_pose.Clear()
+        # self.pose2d_proto.Pack(self.cached_proto_pose, pose)
+        # pose_proto = gpb2.ProtobufPose2d()
+        # pose_proto.translation.x = pose.translation().x
+        # pose_proto.translation.y = pose.translation().y
+        # pose_proto.rotation.value = pose.rotation().radians()
 
-        self.cached_command_request.clear()
+        # self.pose2d_proto.CopyFrom(pose_proto)
+
+        self.cached_command_request.Clear()
         self.last_sent_request_id += 1
 
-        request_to_send = (
-            self.cached_command_request
-            .setType(cpb2.QuestNavCommandType.POSE_RESET)
-            .setCommandId(self.last_sent_request_id)
-            .setPoseResetPayload(self.cached_pose_reset_payload.clear().setTargetPose(self.cached_proto_pose))
-        )
+        self.cached_command_request.type = cpb2.QuestNavCommandType.POSE_RESET
+        self.cached_command_request.command_id = self.last_sent_request_id
+        payload = self.cached_command_request.pose_reset_payload
+        payload.target_pose.translation.x = pose.translation().x
+        payload.target_pose.translation.y = pose.translation().y
+        payload.target_pose.rotation.value = pose.rotation().radians()
 
-        # In this mock, we convert the mock protobuf object to a JSON string (bytes)
-        self.request_publisher.set(request_to_send.to_json_string().encode('utf-8'))
+        self.request_publisher.set(self.cached_command_request.SerializeToString())
 
     def get_battery_percent(self) -> int:
         """
@@ -80,10 +85,13 @@ class QuestNav:
             The battery percentage as an int, or -1 if no data is available
         """
         raw_data = self.device_data_subscriber.get()
-        if raw_data:
-            latest_device_data = dpb2.ProtobufQuestNavDeviceData.from_json_string(raw_data.decode('utf-8'))
-            return latest_device_data.getBatteryPercent()
-        return -1
+        if not raw_data:
+            return -1
+        try:
+            latest_device_data = dpb2.ProtobufQuestNavDeviceData.FromString(raw_data)
+            return latest_device_data.battery_percent
+        except Exception as e:
+            return -1
 
     def is_tracking(self) -> bool:
         """
@@ -93,10 +101,15 @@ class QuestNav:
             Boolean indicating if the Quest is currently tracking (true) or not (false)
         """
         raw_data = self.device_data_subscriber.get()
-        if raw_data:
-            latest_device_data = dpb2.ProtobufQuestNavDeviceData.from_json_string(raw_data.decode('utf-8'))
-            return latest_device_data.getCurrentlyTracking()
-        return False
+        if not raw_data:
+            return False
+        try:
+            # Assuming raw_data is binary Protobuf, not JSON
+            latest_device_data = dpb2.ProtobufQuestNavDeviceData.FromString(raw_data)
+            # Then check a specific field for tracking state
+            return bool(latest_device_data.currently_tracking)  # Or whatever field represents tracking
+        except Exception as e:
+            return False
 
     def get_frame_count(self) -> int:
         """
@@ -106,10 +119,13 @@ class QuestNav:
             The frame count value
         """
         raw_data = self.frame_data_subscriber.get()
-        if raw_data:
-            latest_frame_data = dpb2.ProtobufQuestNavFrameData.from_json_string(raw_data.decode('utf-8'))
-            return latest_frame_data.getFrameCount()
-        return -1
+        if not raw_data:
+            return -1
+        try:
+            latest_frame_data = dpb2.ProtobufQuestNavFrameData.FromString(raw_data)
+            return latest_frame_data.frame_count
+        except Exception as e:
+            return -1
 
     def get_tracking_lost_counter(self) -> int:
         """
@@ -119,10 +135,15 @@ class QuestNav:
             The tracking lost counter value
         """
         raw_data = self.device_data_subscriber.get()
-        if raw_data:
-            latest_device_data = dpb2.ProtobufQuestNavDeviceData.from_json_string(raw_data.decode('utf-8'))
-            return latest_device_data.getTrackingLostCounter()
-        return -1
+        if not raw_data:
+            return -1
+        try:
+            # Assuming raw_data is binary Protobuf, not JSON
+            latest_device_data = dpb2.ProtobufQuestNavDeviceData.FromString(raw_data)
+            # Then check a specific field for tracking state
+            return latest_device_data.tracking_lost_counter  # Or whatever field represents tracking
+        except Exception as e:
+            return -1
 
     def is_connected(self) -> bool:
         """
@@ -170,10 +191,13 @@ class QuestNav:
             The timestamp as a double value
         """
         raw_data = self.frame_data_subscriber.get()
-        if raw_data:
-            latest_frame_data = dpb2.ProtobufQuestNavFrameData.from_json_string(raw_data.decode('utf-8'))
-            return latest_frame_data.getTimestamp()
-        return -1.0
+        if not raw_data:
+            return -1
+        try:
+            latest_frame_data = dpb2.ProtobufQuestNavFrameData.FromString(raw_data)
+            return latest_frame_data.timestamp
+        except Exception as e:
+            return -1
 
     def get_data_timestamp(self) -> float:
         """
@@ -200,10 +224,18 @@ class QuestNav:
             Pose2d representing the Quest's location on the field
         """
         raw_data = self.frame_data_subscriber.get()
-        if raw_data:
-            latest_frame_data = dpb2.ProtobufQuestNavFrameData.from_json_string(raw_data.decode('utf-8'))
-            return self.pose2d_proto.unpack(latest_frame_data.getPose2D())
-        return Pose2d(-100, -100, -100)  # Return kZero if no data available
+        if not raw_data:
+            return Pose2d(-100, -100, -100)
+        try:
+            latest_frame_data = dpb2.ProtobufQuestNavFrameData.FromString(raw_data)
+            # return self.pose2d_proto.unpack(latest_frame_data.pose2d)
+            # print(str(latest_frame_data.pose2d.translation))
+            xval = float(str(latest_frame_data.pose2d.translation)[3:str(latest_frame_data.pose2d.translation).index("\n")])
+            yval = float(str(latest_frame_data.pose2d.translation)[str(latest_frame_data.pose2d.translation).index("\n") + 3:-1])
+            rot = float(str(latest_frame_data.pose2d.rotation)[7:-1])
+            return Pose2d(Translation2d(xval, yval), Rotation2d(rot))
+        except Exception as e:
+            return Pose2d(-100, -100, -100)  # Return kZero if no data available
 
     def command_periodic(self):
         """Cleans up QuestNav responses after processing on the headset."""
@@ -211,16 +243,16 @@ class QuestNav:
         if not raw_response:
             return
 
-        latest_command_response = cpb2.ProtobufQuestNavCommandResponse.from_json_string(raw_response.decode('utf-8'))
+        latest_command_response = cpb2.ProtobufQuestNavCommandResponse.FromString(raw_response)
 
         # if we don't have data or for some reason the response we got isn't for the command we sent,
         # skip for this loop
-        if latest_command_response.getCommandId() != self.last_sent_request_id:
+        if latest_command_response.command_id != self.last_sent_request_id:
             return
 
-        if self.last_processed_response_id != latest_command_response.getCommandId():
-            if not latest_command_response.getSuccess():
-                print(f"ERROR: QuestNav command failed!\n{latest_command_response.getErrorMessage()}")
+        if self.last_processed_response_id != latest_command_response.command_id:
+            if not latest_command_response.success:
+                print(f"ERROR: QuestNav command failed!\n{latest_command_response.error_message}")
             # don't double process
-            self.last_processed_response_id = latest_command_response.getCommandId()
+            self.last_processed_response_id = latest_command_response.command_id
 

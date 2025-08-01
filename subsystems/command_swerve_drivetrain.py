@@ -3,7 +3,7 @@ import math
 from commands2 import Command, Subsystem, sysid
 from phoenix6 import swerve, units, utils, SignalLogger
 from typing import Callable, overload
-from wpilib import DriverStation, Notifier, RobotController, SmartDashboard, Alert
+from wpilib import DriverStation, Notifier, RobotController, SmartDashboard, Alert, Field2d
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.geometry import Rotation2d, Pose2d, Transform3d, Translation3d, Rotation3d, Transform2d
 from pathplannerlib.auto import AutoBuilder
@@ -316,7 +316,9 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             # self.vision_sim.addCamera(cam3_sim, robot_to_cam3)
 
         self.questnav = QuestNav()
-        self.quest_to_robot = Transform2d(inchesToMeters(12.5+0.55), 0, Rotation2d().fromDegrees(0))
+        self.quest_to_robot = Transform2d(inchesToMeters(-12.5-0.55), 0, Rotation2d().fromDegrees(0))
+        # self.quest_to_robot = Transform2d(inchesToMeters(4), 0, Rotation2d().fromDegrees(0))
+        self.quest_field = Field2d()
 
         # SmartDashboard.putData("Swerve Drive", SwerveDriveSendable(self))
 
@@ -352,8 +354,8 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
             self.vel_acc_periodic()
 
         # Update PhotonVision cameras in real-life scenarios.
-        if self.photon_cam_array[0].isConnected() and not utils.is_simulation():
-            self.select_best_vision_pose((0.2, 0.2, 9999999999999999999))
+        # if self.photon_cam_array[0].isConnected() and not utils.is_simulation():
+        #     self.select_best_vision_pose((0.2, 0.2, 9999999999999999999))
 
         # If in simulation, update PhotonVision for sim.
         if utils.is_simulation():
@@ -365,22 +367,24 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
 
     def quest_periodic(self) -> None:
         self.questnav.command_periodic()
+        SmartDashboard.putBoolean("QUEST_CONNECTED", self.questnav.is_connected())
+        SmartDashboard.putBoolean("QUEST_TRACKING", self.questnav.is_tracking())
         quest_pose = self.questnav.get_pose().transformBy(self.quest_to_robot)
 
-        if 0 < quest_pose.x < 17.658 and 0 < quest_pose.y < 8.131:
+        SmartDashboard.putString("QUEST_POSE", str(quest_pose))
+        self.quest_field.setRobotPose(quest_pose)
+        SmartDashboard.putData("QUEST_FIELD", self.quest_field)
+        if 0 < quest_pose.x < 17.658 and 0 < quest_pose.y < 8.131 and self.questnav.is_connected():
+            SmartDashboard.putBoolean("QUEST_POSE_ACCEPTED", True)
+            # print("Quest Timestamp: " + str(self.questnav.get_app_timestamp()))
+            # print("System Timestamp: " + str(utils.get_system_time_seconds()))
+            # if abs(self.questnav.get_data_timestamp() - utils.get_current_time_seconds()) < 5:
+            #     print("Timestamp in correct epoch.")
             self.add_vision_measurement(quest_pose,
-                                        self.questnav.get_data_timestamp(),
+                                        utils.fpga_to_current_time(self.questnav.get_data_timestamp()),
                                         (0.02, 0.02, 0.035))
-
-        # self.questnav.cleanup_responses()
-        # self.questnav.process_heartbeat()
-        #
-        # if self.questnav.get_connected() and self.questnav.get_tracking_status():
-        #     robot_pose = self.questnav.get_pose().transformBy(self.quest_to_robot.inverse())
-        #     SmartDashboard.putString("QuestNav Robot Pose", str(robot_pose))
-        #     if 0 < robot_pose.x < 17.658 and 0 < robot_pose.y < 8.131:
-        #         self.add_vision_measurement(robot_pose, utils.fpga_to_current_time(self.questnav.get_timestamp()),
-        #                                     (0.02, 0.02, 0.035))
+        else:
+            SmartDashboard.putBoolean("QUEST_POSE_ACCEPTED", False)
 
     def select_best_vision_pose(self, stddevs: (float, float, float)) -> None:
         accepted_poses = []
@@ -398,6 +402,7 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
                         if k is not None:
                             if k.fiducialId in self.used_tags:
                                 best_target = k
+
             if estimated_pose is not None:
                 estimated_pose = estimated_pose.estimatedPose
                 if best_target is not None:
@@ -548,11 +553,16 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
     def set_rotation(self, angle: float) -> None:
         self.reset_pose(Pose2d(self.get_pose().translation(), Rotation2d.fromDegrees(angle)))
 
+    def reset_pose_with_quest(self, pose: Pose2d) -> None:
+        self.reset_pose(pose)
+        self.questnav.set_pose(pose.transformBy(self.quest_to_robot.inverse()))
+
     def configure_pathplanner(self) -> None:
         """Configures all pathplanner settings."""
         AutoBuilder.configure(
             lambda: self.get_state().pose,
-            self.reset_pose,
+            # self.reset_pose,
+            self.reset_pose_with_quest,
             lambda: self.get_state().speeds,
             lambda speeds, feedforwards: self.set_control(
                 self.auto_request
@@ -629,13 +639,13 @@ class CommandSwerveDrivetrain(Subsystem, swerve.SwerveDrivetrain):
     def reset_odometry(self):
         """Reset robot odometry at the Subwoofer."""
         if DriverStation.getAlliance() == DriverStation.Alliance.kRed:
-            self.reset_pose(Pose2d(14.337, 4.020, Rotation2d.fromDegrees(180)))
+            self.reset_pose(Pose2d(14.337, 4.020, Rotation2d.fromDegrees(0)))
             self.set_operator_perspective_forward(Rotation2d.fromDegrees(180))
-            self.questnav.set_pose(Pose2d(14.337, 4.020, Rotation2d.fromDegrees(180)).transformBy(self.quest_to_robot))
+            self.questnav.set_pose(Pose2d(14.337, 4.020, Rotation2d.fromDegrees(0)).transformBy(self.quest_to_robot.inverse()))
         else:
-            self.reset_pose(Pose2d(3.273, 4.020, Rotation2d.fromDegrees(0)))
+            self.reset_pose(Pose2d(3.273, 4.020, Rotation2d.fromDegrees(180)))
             self.set_operator_perspective_forward(Rotation2d.fromDegrees(0))
-            self.questnav.set_pose(Pose2d(3.273, 4.020, Rotation2d.fromDegrees(0)).transformBy(self.quest_to_robot))
+            self.questnav.set_pose(Pose2d(3.273, 4.020, Rotation2d.fromDegrees(180)).transformBy(self.quest_to_robot.inverse()))
 
     def reset_clt(self) -> None:
         self.re_entered_clt = True
